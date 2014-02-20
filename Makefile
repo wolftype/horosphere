@@ -1,10 +1,10 @@
 #MAKEFILE FOR ALLOSPHERE PROJECTS WITH VERSOR 2.0
-
-CXX = clang++ -std=c++11 -arch x86_64 -O3 -ftemplate-depth-1200
+# LINUX or MAC
 
 ALLOPATH = $(HOME)/code/AlloSystem/
-VSRPATH = $(HOME)/code/vsr2.0/
+VSRPATH = $(HOME)/code/versor/
 include $(ALLOPATH)Makefile.common
+
 
 LDFLAGS += -L$(VSRPATH)/build/lib/ -L$(ALLOPATH)build/lib/ -Iinclude/ -I$(VSRPATH) -I$(VSRPATH)ext/gfx/ -I$(ALLOPATH)build/include/   
 LDFLAGS += -lvsr -lallocore -lalloGLV -lalloutil -lGamma -lGLV -llo
@@ -28,6 +28,13 @@ ALLOSPHERE = 0
 ifeq ($(ALLOSPHERE),1)
 CXXFLAGS += -D__allosphere__
 endif
+
+#ifeq ($(PLATFORM), linux)
+CXXFLAGS += -std=c++0x -ftemplate-depth-1200
+#else ifeq ($(PLATFORM), macosx)
+#CXX = clang++ -std=c++11 -arch x86_64 -O3 -ftemplate-depth-1200
+#endif
+
 
 dir:
 	@mkdir -p $(OBJ_DIR)
