@@ -4,7 +4,7 @@
 PORT = 22
 HOST = 192.168.0.15
 NAME = main
-DEST = code/users/pablo/build/bin/ #common folder on distributed computers
+DEST = ~/code/users/pablo/build/bin/ #common folder on distributed computers
 
 
 #LIBRARIES MUST BE IN /code/
@@ -80,7 +80,7 @@ deploy:
 
 #copy to many machines (based on hosts.txt) with username sphere
 copy:
-	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) :$(DEST)
+	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) $(DEST)
 
 #run on many machines
 many:
