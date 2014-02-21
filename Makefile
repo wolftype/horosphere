@@ -80,7 +80,7 @@ deploy:
 
 #copy to many machines (based on hosts.txt) with username sphere
 copy:
-	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) $(DEST)
+	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) :$(DEST)
 
 #run on many machines
 many:
