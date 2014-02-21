@@ -100,8 +100,6 @@ public:
   virtual bool onFrame();
   virtual void onDrawOmni(OmniStereo& omni);  
   
-  //  static void osend(const osc::Packet&, int port = 12001);
-  
   virtual std::string  vertexCode();
   virtual std::string  fragmentCode();
 
@@ -295,7 +293,7 @@ inline bool OmniApp::onFrame() {
         p.endMessage();            
   
 
-         //osend(p);  
+         SharedData::osend(p);  
       #endif
   }  
   
