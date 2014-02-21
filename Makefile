@@ -74,7 +74,7 @@ kill:
 deploy:
 	ssh -p $(PORT) $(HOST) "rm -f $(DEST)$(NAME)"
 	scp -P $(PORT) $(BIN_DIR)$(NAME) $(HOST):$(DEST)$
-	ssh -t -p $(PORT) $(HOST):$(DEST)$(NAME)
+	ssh -t -p $(PORT) $(HOST):$(DEST) $(NAME)
 
 #deployment to multiple machines from cuttlefish approach
 
