@@ -4,7 +4,7 @@
 PORT = 22
 HOST = 192.168.0.15
 NAME = main
-DEST = ~/code/user/pablo/build/bin/ #common folder on distributed computers
+DEST = ~/code/user/pablo/build/bin/#common folder on distributed computers
 
 
 #LIBRARIES MUST BE IN /code/
