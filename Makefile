@@ -4,7 +4,7 @@
 PORT = 22
 HOST = 192.168.0.15
 NAME = main
-DEST = code/user/pablo/build/bin/#common folder on distributed computers
+DEST = /tmp/#common folder on distributed computers
 
 
 #LIBRARIES MUST BE IN /code/
@@ -59,28 +59,31 @@ $(EXEC_TARGETS): dir FORCE
 	@echo Building $@ using $<
 	@echo $(CXX) $(CXXFLAGS) -H $@ -o $(BIN_DIR)$(*F) $(LDFLAGS2)
 	$(CXX) $(CXXFLAGS) $@ -o $(BIN_DIR)$(*F) $(LDFLAGS2)
-	@cd $(BIN_DIR) && ./$(*F)
+	#@cd $(BIN_DIR) && ./$(*F)
 
 #run locally
 run:
 	@cd $(BIN_DIR) && ./$(NAME)
 
-#kill on single machine 
+#SINGLE REMOTE MACHINE
+
+#kill on single remote machine 
 kill:
-	ssh -p $(PORT) $(HOST) "rm -f /tmp/$(NAME)"
+	ssh -p $(PORT) $(HOST) "rm -f $(DEST)$(NAME)"
 	ssh -p $(PORT) $(HOST) "pkill $(NAME)"
 
-#deploy to single machine
+#deploy to single remote machine
 deploy:
 	ssh -p $(PORT) $(HOST) "rm -f $(DEST)$(NAME)"
 	scp -P $(PORT) $(BIN_DIR)$(NAME) $(HOST):~/$(DEST)$
 	ssh -t -p $(PORT) $(HOST) "$(DEST)$(NAME)"
 
-#deployment to multiple machines from cuttlefish approach
+
+#MULTIPLE MACHINES
 
 #copy to many machines (based on hosts.txt) with username sphere
 copy:
-	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) ~/$(DEST)
+	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) $(DEST)
 
 #run on many machines
 many:
