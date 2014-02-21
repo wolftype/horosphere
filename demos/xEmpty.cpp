@@ -18,13 +18,10 @@ using std::endl;
 struct App : OmniApp {
 
 
- 
     //osc::Send osc;   //send data to audio
     //osc::Recv oscR;  //get from gui
     //
-    
 
- 
     /* TIME BASED VARIABLES */
     float time;
 
