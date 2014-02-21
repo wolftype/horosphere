@@ -294,7 +294,8 @@ inline bool OmniApp::onFrame() {
         p << nav().pos().x << nav().pos().y << nav().pos().z << nav().quat().x << nav().quat().y << nav().quat().z << nav().quat().w;
         p.endMessage();            
   
-        osend(p);  
+
+         //osend(p);  
       #endif
   }  
   
