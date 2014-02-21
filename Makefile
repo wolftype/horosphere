@@ -4,6 +4,7 @@
 PORT = 22
 HOST = 192.168.0.15
 NAME = main
+DEST = /code/users/pablo/build/bin/ #common folder on distributed computers
 
 
 #LIBRARIES MUST BE IN /code/
@@ -60,24 +61,33 @@ $(EXEC_TARGETS): dir FORCE
 	$(CXX) $(CXXFLAGS) $@ -o $(BIN_DIR)$(*F) $(LDFLAGS2)
 	@cd $(BIN_DIR) && ./$(*F)
 
+#run locally
 run:
 	@cd $(BIN_DIR) && ./$(NAME)
 
-#deployment from cuttlefish approach
-copy:
-	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) /tmp
-
-many:
-	parallel-ssh -h hosts.txt /tmp/$(NAME)
-
-many-kill:
-	parallel-ssh -h hosts.txt "pkill $(NAME)"
-
+#kill on single machine 
 kill:
 	ssh -p $(PORT) $(HOST) "rm -f /tmp/$(NAME)"
 	ssh -p $(PORT) $(HOST) "pkill $(NAME)"
 
+#deploy to single machine
 deploy:
 	ssh -p $(PORT) $(HOST) "rm -f /tmp/$(NAME)"
 	scp -P $(PORT) $(BIN_DIR)$(NAME) $(HOST):/tmp
 	ssh -t -p $(PORT) $(HOST) /tmp/$(NAME)
+
+#deployment to multiple machines from cuttlefish approach
+
+#copy to many machines (based on hosts.txt) with username sphere
+copy:
+	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) $(DEST)
+
+#run on many machines
+many:
+	parallel-ssh -h hosts.txt $(DEST)$(NAME)
+
+#kill on many machines
+many-kill:
+	parallel-ssh -h hosts.txt "pkill $(NAME)"
+
+
