@@ -85,6 +85,9 @@ deploy:
 copy:
 	parallel-scp -h hosts.txt -l sphere build/bin/$(NAME) $(DEST)
 
+disp:
+	parallel-ssh -h hosts.txt disp 
+
 #run on many machines
 many:
 	parallel-ssh -h hosts.txt $(DEST)$(NAME)
