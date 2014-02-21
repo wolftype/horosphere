@@ -1,12 +1,14 @@
-192.168.0.15  
-192.168.0.46
-192.168.0.47
-192.168.0.48
-192.168.0.49
-192.168.0.50
-192.168.0.51
-192.168.0.53
-192.168.0.54
-192.168.0.55
-192.168.0.56
-192.168.0.71
+gr01:22 sphere
+gr02:22 sphere
+gr03:22 sphere
+gr04:22 sphere
+gr05:22 sphere
+gr06:22 sphere
+gr07:22 sphere
+gr08:22 sphere
+gr09:22 sphere
+gr10:22 sphere
+gr11:22 sphere
+gr12:22 sphere
+gr13:22 sphere
+gr14:22 sphere
