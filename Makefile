@@ -4,7 +4,7 @@
 PORT = 22
 HOST = 192.168.0.15
 NAME = main
-DEST = ~/code/user/pablo/build/bin/#common folder on distributed computers
+DEST = code/user/pablo/build/bin/#common folder on distributed computers
 
 
 #LIBRARIES MUST BE IN /code/
@@ -73,7 +73,7 @@ kill:
 #deploy to single machine
 deploy:
 	ssh -p $(PORT) $(HOST) "rm -f $(DEST)$(NAME)"
-	scp -P $(PORT) $(BIN_DIR)$(NAME) $(HOST):$(DEST)$
+	scp -P $(PORT) $(BIN_DIR)$(NAME) $(HOST):~/$(DEST)$
 	ssh -t -p $(PORT) $(HOST) ".$(DEST)$(NAME)"
 
 #deployment to multiple machines from cuttlefish approach
