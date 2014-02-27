@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 2.0)
 
 project(HOROSPHERE)
 
+set(ALLOSPHERE 0 CACHE STRING "build for allosphere")
+
 #get linker info from AlloSystem make system, but do not make all examples
 add_subdirectory(../AlloSystem AlloSystem EXCLUDE_FROM_ALL )
 
@@ -46,6 +48,10 @@ if(USE_CLANG)
   SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
 else()
   SET(CMAKE_CXX_FLAGS "-std=c++0x -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+endif()
+
+if(ALLOSPHERE)
+  SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-D __allosphere__")
 endif()
 
 #the subdirectory of demos
