@@ -1,6 +1,6 @@
 //
-//  OmniAppRedux.h
-//  a graphics only omni app with gui for allovsr
+//  al_OmniAppGFX.h
+//  a graphics only omni app with gui (no audio)
 //
 //  Created by Pablo Colapinto on 4/26/13.
 //  Copyright (c) 2013 __MyCompanyName__. All rights reserved.
@@ -9,28 +9,19 @@
 #ifndef allovsr_OmniAppRedux_h
 #define allovsr_OmniAppRedux_h
 
+//ALLOCORE
 #include "allocore/al_Allocore.hpp"
 #include "allocore/io/al_Window.hpp"
 #include "allocore/protocol/al_OSC.hpp"
+
+//ALLOUTIL
 #include "alloutil/al_FPS.hpp"
 #include "alloutil/al_OmniStereo.hpp"
-#include "al_glv_gui.h"
 
+//ADD-ONS
+#include "al_glv_gui.h"
 #include "al_SharedData.h" 
 
-#define PORT_TO_DEVICE_SERVER (12000)
-#define PORT_FROM_DEVICE_SERVER (PORT_TO_DEVICE_SERVER+1)  
-
-#define PORT_FROM_APP (7770)
-#define PORT_TO_APP ( PORT_FROM_APP+1 )
-
-#ifdef __allosphere__
-#define DEVICE_SERVER_IP_ADDRESS "BOSSANOVA"
-#endif  
-
-#ifndef __allosphere__
-#define DEVICE_SERVER_IP_ADDRESS "localhost" 
-#endif
 
 using std::cout;
 using std::endl;
@@ -43,22 +34,19 @@ class OmniApp : public Window, public osc::PacketHandler, public FPS, public Omn
 
 public:
     
-  
   OmniApp(std::string name = "omniapp", bool slave=false);
   virtual ~OmniApp();
 
   void start();
   
   virtual void onDraw(Graphics& gl) {}
-  virtual void onAnimate(al_sec dt) {}   
+  virtual void onAnimate(al_sec dt) {} 
   
-  // virtual void onSound(gam::AudioIOData& io) {}
-  //   
+//  virtual void updateState(){}
+//  virtual void sendAudioData(){}  
+  
   virtual void onMessage(osc::Message& m);
-  
-  // const gam::AudioIO&    audioIO() const { return mAudioIO; }
-  // gam::AudioIO&      audioIO(){ return mAudioIO; } 
-  
+    
   const Lens&      lens() const { return mLens; }
   Lens&        lens() { return mLens; }
 
@@ -103,6 +91,11 @@ public:
   virtual std::string  vertexCode();
   virtual std::string  fragmentCode();
 
+  virtual bool onKeyDown(const Keyboard& k){ 
+     if (k.key() == 'v') glv.gui.toggle( glv::Property::Visible );
+     return true; 
+  }  
+
 protected:
 
   GLVGui glv;
@@ -114,14 +107,15 @@ protected:
   
   ShaderProgram mShader;
   
-  // control
   Nav mNav;
   NavInputControl mNavControl;
   
   StandardWindowKeyControls mStdControls;
+
+  /// SEND TO/FROM
   osc::Recv mOSCRecv;
   osc::Send mOSCSend;
-  
+
   std::string mName;
   std::string mHostName;
   
@@ -134,71 +128,94 @@ protected:
 
 inline OmniApp::OmniApp(std::string name, bool slave)
 :  mNavControl(mNav),
-  mOSCRecv(PORT_FROM_DEVICE_SERVER),
-  mOSCSend(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS),
-  bSlave(slave)
+   mNavSpeed(1),
+   mNavTurnSpeed(.02),
+   mName(name),
+
+   mOSCRecv(PORT_FROM_DEVICE_SERVER),
+   mOSCSend(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS),
+
+   bSlave(slave)
 {  
+
   bOmniEnable = true;
+
   mHostName = Socket::hostName();
-  mName = name;
-  
-  mNavSpeed = 1;
-  mNavTurnSpeed = 0.02;
+  printf("HOSTNAME %s\n",hostName().c_str());
   
   lens().near(0.01).far(40).eyeSep(0.03);
   nav().smooth(0.8);
   
   Window::append(mStdControls);
   initWindow();
-  initOmni();
   initGLV();
   
-  if (!bSlave) {
-    Window::append(mNavControl);          
-    oscRecv().bufferSize(32000);
-    oscRecv().handler(*this);
-    sendHandshake();
-  }
-
-    //PRINT CURRENT HOST    
-    printf("HOSTNAME %s\n",hostName().c_str());
-
-    //ALLOSPHERE TEST
-    //pass in _D __allosphere__ to compiler
-    //by using "make <FILENAME> ALLOSPHERE = 1"
-    #ifdef __allosphere__  
+  oscRecv().bufferSize(32000);
+  oscRecv().handler(*this);
+  
+  #ifdef __allosphere__  
+  
+    cout << "I BELIEVE I AM RUNNING IN THE ALLOSPHERE" << endl;         
     
-      cout << "I BELIEVE I AM RUNNING IN THE ALLOSPHERE" << endl;         
-      glv.gui.disable( glv::Property::Visible );   
-       
-    #endif     
+    initOmni();
+    
+    glv.gui.disable( glv::Property::Visible );   
+  
+    mOmni.mode( OmniStereo::ACTIVE ).stereo(true);     
+    omniEnable(true); 
+      
+    if (hostName() != "gr01") {
+        bSlave = true; 
+        printf("WE are GR CHILDREN\n");
+    } else { 
+        printf("I AM GR01********\n"); 
+        bSlave = false; 
+    }
+     
+  #endif     
 
+  #ifndef __allosphere__
 
-     #ifndef __allosphere__
+    cout << "I DO NOT BELIEVE THAT I AM RUNNING IN THE ALLOSPHERE" << endl;
+    cout << "(if you want me to think so, make me with ALLOSPHERE = 1) " << endl;
+    mOmni.mode( OmniStereo::ACTIVE ).stereo(false);     
+    omniEnable(false);
+    bSlave = false; 
+ 
+  #endif
 
-      cout << "I DO NOT BELIEVE THAT I AM RUNNING IN THE ALLOSPHERE\n(if you want me to think so, make me with ALLOSPHERE = 1) " << endl;
-      mOmni.mode( OmniStereo::ACTIVE ).stereo(false);     
-      omniEnable(false);
-      //osc = osc::Send( 7770, "localhost" );
-   
-     #endif
-
+    if (!bSlave) {
+      Window::append(mNavControl);          
+      sendHandshake();
+    }
 }
+
+
 
 inline OmniApp::~OmniApp() {
   if (!bSlave) sendDisconnect();
 }
 
 
+
+/*-----------------------------------------------------------------------------
+ *  GET CONFIGURATION FILES
+ *-----------------------------------------------------------------------------*/
 inline void OmniApp::initOmni(std::string path) {
+  
   if (path == "") {
+    
     FILE *pipe = popen("echo ~", "r");
+    
     if (pipe) {
+      
       char c;
-      while((c = getc(pipe)) != EOF) {
-  if (c == '\r' || c == '\n')
-          break;
-  path += c;
+      
+      while( (c = getc(pipe) ) != EOF) {
+          
+          if (c == '\r' || c == '\n') break;
+            
+          path += c;
       }
       pclose(pipe);
     }
@@ -207,6 +224,7 @@ inline void OmniApp::initOmni(std::string path) {
 
     //Reconfigure Projections
   mOmni.configure(path, mHostName);
+  
   if (mOmni.activeStereo()) {
     cout << "active stereo = TRUE" << endl;
     mOmni.mode(OmniStereo::ACTIVE).stereo(true);
@@ -215,6 +233,10 @@ inline void OmniApp::initOmni(std::string path) {
   }
 }
 
+
+/*-----------------------------------------------------------------------------
+ *  INITIALIZE WINDOW
+ *-----------------------------------------------------------------------------*/
 inline void OmniApp::initWindow( const Window::Dim& dims, const std::string title, double fps, Window::DisplayMode mode) {
   Window::dimensions(dims);
   Window::title(title);
@@ -222,26 +244,24 @@ inline void OmniApp::initWindow( const Window::Dim& dims, const std::string titl
   Window::displayMode(mode);
 }
 
+
+/*-----------------------------------------------------------------------------
+ *  INITIALIZE GLV GUI
+ *-----------------------------------------------------------------------------*/
 inline void OmniApp::initGLV(){
   glv.parentWindow(*this);
   glv.gui.colors().back.set(.3,.3,.3);  
   glv.gui(bOmniEnable, "omni_enable");
 }
 
-inline void OmniApp::sendHandshake(){
-  oscSend().send("/handshake", name(), oscRecv().port());
-}
 
-inline void OmniApp::sendDisconnect(){
-  oscSend().send("/disconnectApplication", name());
-}
 
 inline void OmniApp::start() {
   if (mOmni.activeStereo()) {
     Window::displayMode(Window::displayMode() | Window::STEREO_BUF);
   }
   
-  create();
+  create(); ///< Window's create
   
   if (mOmni.fullScreen()) {
     fullScreen(true);
@@ -273,15 +293,19 @@ inline bool OmniApp::onCreate() {
   return true;
 }
 
+
+/*-----------------------------------------------------------------------------
+ *  PER FRAME
+ *-----------------------------------------------------------------------------*/
 inline bool OmniApp::onFrame() {   
   
+  ///FRAME COUNTER
   FPS::onFrame();
 
+  ///Listen on port from device server
   while(oscRecv().recv()) {}
   
-  //////////////
-  //NAVIGATION//
-  //////////////
+  ///NAVIGATE
   if (!bSlave){
     nav().step();
            
@@ -292,30 +316,32 @@ inline bool OmniApp::onFrame() {
         p << nav().pos().x << nav().pos().y << nav().pos().z << nav().quat().x << nav().quat().y << nav().quat().z << nav().quat().w;
         p.endMessage();            
   
-
-         SharedData::osend(p);  
+        SharedData::osend(p, PORT_FROM_DEVICE_SERVER);  
       #endif
   }  
   
-
+  ///UPDATE STATE
   onAnimate(dt);
   
+  ///RENDER GRAPHICS
   Viewport vp(width(), height());
   
   if (bOmniEnable) {
-        //cout << "enabled" << endl; 
     mOmni.onFrame(*this, lens(), nav(), vp);
   } else {
     mOmni.onFrameFront(*this, lens(), nav(), vp);
+    
+    //ATTEMPT TO FIX RATIO
 // 		double fovy = lens().fovy();
 //		double aspect = vp.aspect();
 //		Vec3d ux, uy, uz; 
- //   nav().unitVectors(ux, uy, uz);
+//    nav().unitVectors(ux, uy, uz);
 		
 //    mOmni.gl.projection( Matrix4d::perspective(fovy, aspect, lens().near(), lens().far()) );
 //		mOmni.gl.modelView( Matrix4d::lookAt(ux, uy, uz, nav().pos()) );
  
   }
+
   return true;
 }
 
@@ -324,26 +350,43 @@ inline void OmniApp::onDrawOmni(OmniStereo& omni) {
   graphics().error("start onDraw");
   
   mShader.begin();
-  mOmni.uniforms(mShader);
   
-  onDraw(graphics());
+    mOmni.uniforms(mShader);  
+    onDraw(graphics());
   
   mShader.end();
 }
 
 
-inline void OmniApp::onMessage(osc::Message& m) {
- 
-    if (m.addressPattern() == "/nav"){
-        //std::cout << "nav" << std::endl;
-        //std::cout << m.typeTags() << std::endl;  
-        double x,y,z,qx,qy,qz,qw;
-        m >> x; m >> y; m >> z; m >> qx; m >> qy; m >> qz; m >> qw; 
-        //std::cout << vsr::Vec(x,y,z) << vsr::Quat(qx, qy, qz, qw) << endl;
-        nav().pos() = al::Vec3d(x,y,z);
-        nav().quat() = al::Quatd(qw, qx, qy, qz);  
-      }            
+/*-----------------------------------------------------------------------------
+ *  HANDSHAKE WITH DEVICE SERVER
+ *-----------------------------------------------------------------------------*/
+inline void OmniApp::sendHandshake(){
+  oscSend().send("/handshake", name(), oscRecv().port() );
+}
 
+
+/*-----------------------------------------------------------------------------
+ *  DISCONNECT
+ *-----------------------------------------------------------------------------*/
+inline void OmniApp::sendDisconnect(){
+  oscSend().send("/disconnectApplication", name());
+}
+
+
+/*-----------------------------------------------------------------------------
+ *  GET NAVIGATION MESSAGES
+ *-----------------------------------------------------------------------------*/
+inline void OmniApp::onMessage(osc::Message& m) {
+
+    if (bSlave){ 
+      if (m.addressPattern() == "/nav"){
+          double x,y,z,qx,qy,qz,qw;
+          m >> x; m >> y; m >> z; m >> qx; m >> qy; m >> qz; m >> qw; 
+          nav().pos() = al::Vec3d(x,y,z);
+          nav().quat() = al::Quatd(qw, qx, qy, qz);  
+        }            
+    }
 }
 
 

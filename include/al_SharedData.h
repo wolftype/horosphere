@@ -11,23 +11,40 @@
 
 #include "allocore/protocol/al_OSC.hpp"
 
+//SEND AUDIO TO 
+#define PORT_TO_DEVICE_SERVER (12000)
+//GET GUI INFO FROM
+#define PORT_FROM_DEVICE_SERVER (PORT_TO_DEVICE_SERVER+1)  
+
+#ifdef __allosphere__
+#define DEVICE_SERVER_IP_ADDRESS "BOSSANOVA"
+#define MAIN_RENDERING_MACHINE "gr01"
+#endif  
+
+#ifndef __allosphere__
+#define DEVICE_SERVER_IP_ADDRESS "localhost"
+#define MAIN_RENDERING_MACHINE "localhost" 
+#endif
+
 using namespace al;
 
 struct SharedData{
     
-    static void osend(const osc::Packet& m, int port = 12001){
-        osc::Send(port, "192.168.0.15").send(m);  //photon   
-	    osc::Send(port, "192.168.0.46").send(m);  //gr01   
-	    osc::Send(port, "192.168.0.47").send(m);  //gr04
- 	    osc::Send(port, "192.168.0.48").send(m);  //gr05
-	    osc::Send(port, "192.168.0.49").send(m);  //gr06
- 	    osc::Send(port, "192.168.0.50").send(m);  //gr07
-	    osc::Send(port, "192.168.0.51").send(m);  //gr08
- 	    osc::Send(port, "192.168.0.53").send(m);  //gr09
-	    osc::Send(port, "192.168.0.54").send(m);  //gr10
- 	    osc::Send(port, "192.168.0.55").send(m);  //gr11
-	    osc::Send(port, "192.168.0.56").send(m); //gr12 
-	    osc::Send(port, "192.168.0.71").send(m); //gr13
+    static void osend(const osc::Packet& m, int port){   
+	    osc::Send(port, "gr01").send(m);    
+	    osc::Send(port, "gr02").send(m); 
+ 	    osc::Send(port, "gr03").send(m); 
+	    osc::Send(port, "gr04").send(m); 
+ 	    osc::Send(port, "gr05").send(m); 
+	    osc::Send(port, "gr06").send(m); 
+ 	    osc::Send(port, "gr07").send(m); 
+	    osc::Send(port, "gr08").send(m); 
+ 	    osc::Send(port, "gr09").send(m); 
+	    osc::Send(port, "gr10").send(m); 
+	    osc::Send(port, "gr11").send(m); 
+	    osc::Send(port, "gr12").send(m); 
+	    osc::Send(port, "gr13").send(m); 
+
 }
 
 };
@@ -35,3 +52,17 @@ struct SharedData{
 
 
 #endif
+
+
+/* 192.168.0.15" */
+/* 192.168.0.46" */
+/* 192.168.0.47" */
+/* 192.168.0.48" */
+/* 192.168.0.49" */
+/* 192.168.0.50" */
+/* 192.168.0.51" */
+/* 192.168.0.53" */
+/* 192.168.0.54" */
+/* 192.168.0.55" */
+/* 192.168.0.56" */
+/* 192.168.0.71" */

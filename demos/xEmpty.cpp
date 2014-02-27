@@ -6,8 +6,6 @@
 #include "vsr/vsr_cga3D_op.h"
 #include "vsr/vsr_cga3D_draw.h"
 
-#include "al_glv_gui.h"
-
 using namespace al;
 using namespace vsr;
 using namespace vsr::cga3D; 
@@ -62,11 +60,11 @@ struct App : OmniApp {
 
     virtual void onMessage(osc::Message& m);    
 
-    virtual bool onKeyDown(const Keyboard& k){ 
+    /* virtual bool onKeyDown(const Keyboard& k){ */ 
     
-       if (k.key() == 'v') glv.gui.toggle( glv::Property::Visible );
-       return true; 
-    }  
+    /*    if (k.key() == 'v') glv.gui.toggle( glv::Property::Visible ); */
+    /*    return true; */ 
+    /* } */  
    
 };
 
