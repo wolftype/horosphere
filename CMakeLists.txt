@@ -38,10 +38,10 @@ link_directories(${AlloSystem_SOURCE_DIR}/build/lib)
 
 if(ALLOSPHERE)
 link_directories(/usr/lib/x86_64-linux-gnu/)
-endif()A
+endif()
 
 
-get_directory_property( LD LINK_DIRECTORIES)
+get_directory_property(LD LINK_DIRECTORIES)
 message("LINK_DIRECTORIES" ${LD})
 
 
