@@ -35,6 +35,7 @@ include_directories(${AlloSystem_SOURCE_DIR}/alloGLV/)
 #library search directories
 link_directories(${PROJECT_SOURCE_DIR}/../versor/build/lib/)
 link_directories(${PROJECT_SOURCE_DIR}/../versor/ext/glv/build/lib/)
+link_directories(${PROJECT_SOURCE_DIR}/../Gamma/build/lib/)
 link_directories(${AlloSystem_SOURCE_DIR}/build/lib)
 
 if(ALLOSPHERE)
