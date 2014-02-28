@@ -51,7 +51,7 @@ else()
 endif()
 
 if(ALLOSPHERE)
-  SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -D __allosphere__")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __allosphere__")
 endif()
 
 #the subdirectory of demos
