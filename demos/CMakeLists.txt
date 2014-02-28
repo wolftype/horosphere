@@ -25,7 +25,11 @@ foreach(demo ${DEMOS})
     set_target_properties(${target} PROPERTIES
     LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
   endif()
+  if(ALLOSPHERE)
+    set_target_properties(${target} PROPERTIES
+    LINK_FLAGS "-L/usr/lib/x86_64-linux-gnu/")
 
+  endif()
 
 endforeach(demo)
 
