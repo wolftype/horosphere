@@ -26,7 +26,7 @@ foreach(demo ${DEMOS})
     LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
   endif()
   if(ALLOSPHERE)
-    link_directories("/usr/lib/x86_64-linux-gnu/")
+    link_directories(/usr/lib/x86_64-linux-gnu/)
   endif()
 
 endforeach(demo)
