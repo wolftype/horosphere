@@ -27,7 +27,7 @@ foreach(demo ${DEMOS})
   endif()
   if(ALLOSPHERE)
     link_directories("/usr/lib/x86_64-linux-gnu/")
-  endif();
+  endif()
 
 endforeach(demo)
 
