@@ -6,6 +6,7 @@ project(HOROSPHERE)
 
 set(ALLOSPHERE 0 CACHE STRING "build for allosphere")
 
+
 #get linker info from AlloSystem make system, but do not make all examples
 add_subdirectory(../AlloSystem AlloSystem EXCLUDE_FROM_ALL )
 
