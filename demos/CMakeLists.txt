@@ -18,7 +18,7 @@ foreach(demo ${DEMOS})
 
   #ADD TO LIST AND LINK
   add_executable(${target} ${demo} )
-  target_link_libraries(${target} vsr GLV ${ALLOCORE_LINK_LIBRARIES} ${ALLOUTIL_LINK_LIBRARIES} alloutil alloGLV )
+  target_link_libraries(${target} vsr GLV ${ALLOCORE_LINK_LIBRARIES} ${ALLOUTIL_LINK_LIBRARIES} portaudio alloutil alloGLV )
  
   #DO THIS OR THERE WILL BE A SEG FAULT
   if(APPLE)
@@ -28,7 +28,6 @@ foreach(demo ${DEMOS})
   if(ALLOSPHERE)
     set_target_properties(${target} PROPERTIES
     LINK_FLAGS "-L/usr/lib/x86_64-linux-gnu/")
-
   endif()
 
 endforeach(demo)
