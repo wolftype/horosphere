@@ -38,9 +38,11 @@ link_directories(${AlloSystem_SOURCE_DIR}/build/lib)
 
 if(ALLOSPHERE)
 link_directories(/usr/lib/x86_64-linux-gnu/)
-endif()
+endif()A
 
-message("LINK_DIRECTORIES" ${LINK_DIRECTORIES})
+
+get_directory_property( LD LINK_DIRECTORIES)
+message("LINK_DIRECTORIES" ${LD})
 
 
 #use clang on apple computers
