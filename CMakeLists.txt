@@ -35,9 +35,12 @@ include_directories(${AlloSystem_SOURCE_DIR}/alloGLV/)
 link_directories(${PROJECT_SOURCE_DIR}/../versor/build/lib/)
 link_directories(${PROJECT_SOURCE_DIR}/../versor/ext/glv/build/lib/)
 link_directories(${AlloSystem_SOURCE_DIR}/build/lib)
-  if(ALLOSPHERE)
-    link_directories(/usr/lib/x86_64-linux-gnu/)
-  endif()
+
+if(ALLOSPHERE)
+link_directories(/usr/lib/x86_64-linux-gnu/)
+endif()
+
+message("LINK_DIRECTORIES" ${LINK_DIRECTORIES})
 
 
 #use clang on apple computers
