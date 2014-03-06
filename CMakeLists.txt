@@ -14,7 +14,7 @@ add_subdirectory(../AlloSystem AlloSystem)
 
 #Was necessary to set_target_property of ALLOCORE_LINK_LIBRARIES within alloutil
 #Would be nice to just grab AlloSystem Libraries (ALLOSYSTEM_LIBRARIES)
-get_target_property(ALLOCORE_LINK_LIBRARIES allocore ALLOCORE_LINK_LIBRARIES)
+get_target_property(ALLOCORE_LINK_LIBRARIES alloutil ALLOCORE_LINK_LIBRARIES)
 get_target_property(ALLOUTIL_LINK_LIBRARIES alloutil ALLOUTIL_LINK_LIBRARIES)
 
 #print out linker libs
