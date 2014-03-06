@@ -89,7 +89,7 @@ struct App : OmniApp {
  *-----------------------------------------------------------------------------*/
 void App::init(){
   tm.mode(GL::LL); 
-  kd.buildGui(glv); 
+  kd.buildGui(glv.gui); 
 }
 
 

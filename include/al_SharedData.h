@@ -62,7 +62,6 @@ struct SharedData{
 	    osc::Send(port, "192.168.91").send(m); 
 	    osc::Send(port, "192.168.92").send(m); 
 	    osc::Send(port, "192.168.93").send(m); 
-                               
 }
 
 };
