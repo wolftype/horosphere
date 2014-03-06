@@ -30,7 +30,7 @@ using namespace al;
 
 struct SharedData{
     
-    static void osend(const osc::Packet& m, int port){   
+    static void osend1G(const osc::Packet& m, int port){   
 	    osc::Send(port, "gr01").send(m);    
 	    osc::Send(port, "gr02").send(m); 
  	    osc::Send(port, "gr03").send(m); 
@@ -45,6 +45,24 @@ struct SharedData{
 	    osc::Send(port, "gr12").send(m); 
 	    osc::Send(port, "gr13").send(m); 
 
+ }
+
+  static void osend(const osc::Packet& m, int port){   
+	    osc::Send(port, "192.168.80").send(m);    
+	    osc::Send(port, "192.168.81").send(m); 
+ 	    osc::Send(port, "192.168.82").send(m); 
+	    osc::Send(port, "192.168.83").send(m); 
+ 	    osc::Send(port, "192.168.84").send(m); 
+	    osc::Send(port, "192.168.85").send(m); 
+ 	    osc::Send(port, "192.168.86").send(m); 
+	    osc::Send(port, "192.168.87").send(m); 
+ 	    osc::Send(port, "192.168.88").send(m); 
+	    osc::Send(port, "192.168.89").send(m); 
+	    osc::Send(port, "192.168.90").send(m); 
+	    osc::Send(port, "192.168.91").send(m); 
+	    osc::Send(port, "192.168.92").send(m); 
+	    osc::Send(port, "192.168.93").send(m); 
+                               
 }
 
 };

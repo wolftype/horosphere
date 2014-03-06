@@ -191,27 +191,27 @@ struct KnotData {
    
      //Built in Gui   
      template<class T>
-     void buildGui(T& glv){
+     void buildGui(T& gui){
 
-        glv.gui( P, "P", 0, 100)( Q, "Q", 0, 100); 
-        glv.gui( vel, "vel",0.001,100);
-        glv.gui( tube_size, "tube_size", 0, 10);
-        glv.gui( writhe, "writhe", 1,100); 
-        glv.gui( theta, "theta", 0, PI) ( phi, "phi", -PIOVERFOUR, PIOVERFOUR );  
-        glv.gui( rotVel, "rotVel", -10,10);
-            
-        glv.gui( energy_scale, "energy_scale",0,1000); 
-        glv.gui( bUseEnergies, "use_energies");
-            
-        glv.gui( bFlow, "flow"); 
-        glv.gui( bAutoMode, "mode"); 
-        glv.gui( bDrawWrithe, "draw_writhe"); 
-        glv.gui( bDrawRibbon, "draw_ribbon");
-        glv.gui( bDrawFibers, "draw_fibers");
-        glv.gui( bDrawVec, "draw_vec");
-        glv.gui( bDrawTube, "draw_tube"); 
-        glv.gui( bDrawPnt, "draw_pnt"); 
-        glv.gui( size, "size", .1, 100); 
+        gui( P, "P", 0, 100)( Q, "Q", 0, 100); 
+        gui( vel, "vel",0.001,100);
+        gui( tube_size, "tube_size", 0, 10);
+        gui( writhe, "writhe", 1,100); 
+        gui( theta, "theta", 0, PI) ( phi, "phi", -PIOVERFOUR, PIOVERFOUR );  
+        gui( rotVel, "rotVel", -10,10);
+        
+        gui( energy_scale, "energy_scale",0,1000); 
+        gui( bUseEnergies, "use_energies");
+        
+        gui( bFlow, "flow"); 
+        gui( bAutoMode, "mode"); 
+        gui( bDrawWrithe, "draw_writhe"); 
+        gui( bDrawRibbon, "draw_ribbon");
+        gui( bDrawFibers, "draw_fibers");
+        gui( bDrawVec, "draw_vec");
+        gui( bDrawTube, "draw_tube"); 
+        gui( bDrawPnt, "draw_pnt"); 
+        gui( size, "size", .1, 100); 
     
         //Defaults
         P = 3; Q = 2;

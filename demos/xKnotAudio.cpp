@@ -34,7 +34,7 @@ using namespace std;
               
 struct MyApp : public AudioApp { 
   
-  GLVGui glv2;  
+  Gui gui1, gui2;  
   vector< AudioProcess * > ap;
 
   KnotData kd; 
@@ -42,29 +42,33 @@ struct MyApp : public AudioApp {
 
   MyApp() : AudioApp() {
  
-    glv << glv2.gui;
-
-    glv2.gui.colors().back.set(.3,.3,.3);  
-    
     cout << "CHANNELS: " << mAudioIO.channelsOut()  << endl;
+
+
+   // glv.gui << gui2;
+
+   // glv2.gui.colors().back.set(.3,.3,.3);  
     
     ap.push_back( &mScheduler.add<WindSound>() ); 
     ap.back() -> mix = .065; 
-//    ap.push_back( &mScheduler.add<Harmonics>() );  
-//    ap.back() -> mix = .005; 
+    ap.push_back( &mScheduler.add<Harmonics>() );  
+    ap.back() -> mix = .005; 
     ap.push_back( &mScheduler.add<FMSynth>() );    
     ap.back() -> mix = .001; 
 
     for (int i = 0; i < ap.size(); ++i){   
-      ap[i] -> initGui(glv.gui);  
+      ap[i] -> initGui(gui1);  
     } 
       
     //knot interface  
-   // kd.buildGui(glv2);  
-       
-    glv2.gui.arrange(); 
-    
+    kd.buildGui(gui2); 
+    gui1.arrange(); 
+    gui2.arrange();   
+    //glv2.gui.arrange(); 
+   
+    glv.gui << gui1 << gui2; 
     //audio interface
+    glv.gui.arrangement("xx");
     glv.gui.arrange(); 
  
     bUseGui = 1; 
