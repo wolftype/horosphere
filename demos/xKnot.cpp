@@ -124,6 +124,8 @@ void App::updateState(){
   Rot r = Gen::rot( tb * kd.rotVel );  
   kd.vec = kd.vec.sp( r );
 
+  kd.bundleAndSend();
+
 }
 
 /*-----------------------------------------------------------------------------
