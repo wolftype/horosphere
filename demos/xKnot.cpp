@@ -153,6 +153,7 @@ void App::sendAudioData(){
 void App :: onMessage(osc::Message& m) {   
     if (bSlave){  
       OmniApp::onMessage(m);
+      cout <<"receiving message" << endl;
     }  
 }
 
