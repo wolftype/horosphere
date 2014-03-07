@@ -311,6 +311,7 @@ inline bool OmniApp::onFrame() {
            
       //SEND CAMERA POSITION AND ORIENTATION TO ALL OTHER COMPUTERS (if we're in the allosphere)
       #ifdef __allosphere__
+        cout << "sending packet" <<endl;
         osc::Packet p;
         p.beginMessage("/nav");
         p << nav().pos().x << nav().pos().y << nav().pos().z << nav().quat().x << nav().quat().y << nav().quat().z << nav().quat().w;
