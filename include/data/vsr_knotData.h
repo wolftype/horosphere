@@ -114,7 +114,8 @@ struct KnotData {
     //selective messaging from gui
     void onMessage( Message& m){
         
-      if (m.addressPattern() == "/knot/data"){ 
+      if (m.addressPattern() == "/knot/data"){
+          cout << "knot data received" << endl; 
           copyData(m);
       }
       else if (m.addressPattern() == "/P"){
