@@ -205,7 +205,7 @@ void App::step(){
     tm.add( Vertex(tk.pnt[i], gfx::Vec3f(0,0,1), gfx::Vec4f( 1 , 1-c, .5, 1 ) ) );  
   }
   
-     cout << "ITER**** " << iter << endl;  
+//     cout << "ITER**** " << iter << endl;  
   // TUBE CIRCLES
   for (int i = 0; i<iter;++i){
      int nextIdx = i < iter ? i + 1 : 0;
