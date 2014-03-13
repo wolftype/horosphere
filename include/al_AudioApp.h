@@ -25,15 +25,15 @@ using namespace std;
       
 using glv::GLV;
 
-struct AudioApp : public al::Window {//, public osc::PacketHandler  {    
+struct AudioApp : public al::Window, public osc::PacketHandler  {    
 
   GLVGui glv;
   bool bMute;
   float mMasterVolume;
 	
-	AudioApp(std::string name = "audioapp", bool slave=false)// :   
- // mOSCRecv(PORT_TO_DEVICE_SERVER),
-//	mOSCSend(PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE)    
+	AudioApp(std::string name = "audioapp", bool slave=false) :   
+  mOSCRecv(PORT_TO_DEVICE_SERVER),
+	mOSCSend(PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE)    
 	{   
 		
 		#ifdef __allosphere__
@@ -117,8 +117,8 @@ struct AudioApp : public al::Window {//, public osc::PacketHandler  {
 	/* osc::Recv&			oscRecv(){ return mOSCRecv; } */
 	/* osc::Send&			oscSend(){ return mOSCSend; } */     
 	  
-	/* osc::Recv mOSCRecv; */
-	/* osc::Send mOSCSend; */    
+	osc::Recv mOSCRecv;
+	osc::Send mOSCSend;    
 	//                           
 	gam::AudioIO mAudioIO; 
   gam::Scheduler mScheduler; 
