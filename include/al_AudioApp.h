@@ -47,9 +47,8 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
     initGLV();      
     initWindow();
  
-		
-	//	oscRecv().bufferSize(32000);
-	//	oscRecv().handler(*this);
+		oscRecv().bufferSize(32000);
+		oscRecv().handler(*this);
     		
 	}                  
 	
@@ -114,8 +113,8 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
      return true; 
   }  	
 	
-	/* osc::Recv&			oscRecv(){ return mOSCRecv; } */
-	/* osc::Send&			oscSend(){ return mOSCSend; } */     
+	osc::Recv&			oscRecv(){ return mOSCRecv; }
+	osc::Send&			oscSend(){ return mOSCSend; }     
 	  
 	osc::Recv mOSCRecv;
 	osc::Send mOSCSend;    
