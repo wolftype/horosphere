@@ -6,7 +6,7 @@ if [ $# == 2 ]; then
   ssh create@bossanova && ./tmp/$1
 else
   echo Deploying $1 To All Computers\' /tmp folder Listed in hosts.txt
-  parallel-scp -h hosts.txt build/bin/$1 /tmp/
+  parallel-scp -h util/hosts.txt build/bin/$1 /tmp/
   echo Launching $1 To All Said Computers
-  parallel-ssh -h hosts.txt "export DISPLAY=:0; /tmp/$1"
+  parallel-ssh -h util/hosts.txt "export DISPLAY=:0; /tmp/$1"
 fi

@@ -14,5 +14,5 @@ TARGET=${FILENAME}
 mkdir build
 cd build
 rm bin/${TARGET}
-cmake .. -DSRC=../$1 -DALLOSPHERE=1
+cmake .. -DSRC=../../$1 -DALLOSPHERE=1
 make

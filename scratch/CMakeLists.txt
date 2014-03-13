@@ -1,5 +1,0 @@
-#Glue . . .
-
-project( horosphere )
-
-
