@@ -10,6 +10,7 @@ echo Compiling $1 for ALLOSPHERE
 DIRECTORY=`echo $1 |cut -d'/' -f1`
 FILENAME=`echo $1 |cut -d'/' -f2 |cut -d'.' -f1 | sed -e "s|/|_|g"`
 TARGET=${FILENAME}
+echo target name $TARGET
 
 mkdir build
 cd build
