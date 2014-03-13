@@ -25,15 +25,15 @@ using namespace std;
       
 using glv::GLV;
 
-struct AudioApp : public al::Window, public osc::PacketHandler  {    
+struct AudioApp : public al::Window {//, public osc::PacketHandler  {    
 
   GLVGui glv;
   bool bMute;
   float mMasterVolume;
 	
-	AudioApp(std::string name = "audioapp", bool slave=false) :   
-  mOSCRecv(PORT_TO_DEVICE_SERVER),
-	mOSCSend(PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE)    
+	AudioApp(std::string name = "audioapp", bool slave=false)// :   
+ // mOSCRecv(PORT_TO_DEVICE_SERVER),
+//	mOSCSend(PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE)    
 	{   
 		
 		#ifdef __allosphere__
@@ -48,8 +48,8 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
     initWindow();
  
 		
-		oscRecv().bufferSize(32000);
-		oscRecv().handler(*this);
+	//	oscRecv().bufferSize(32000);
+	//	oscRecv().handler(*this);
     		
 	}                  
 	
@@ -84,7 +84,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    while(oscRecv().recv()) {}  
+    //while(oscRecv().recv()) {}  
     update();
     onDraw(); 
     
@@ -92,8 +92,8 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
   }
 	
 	void start(){   
-		mOSCRecv.timeout(.01);     
-		mOSCRecv.start();
+	//	mOSCRecv.timeout(.01);     
+	//	mOSCRecv.start();
 		mAudioIO.start();
     MainLoop::start();
 	} 
@@ -114,11 +114,11 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
      return true; 
   }  	
 	
-	osc::Recv&			oscRecv(){ return mOSCRecv; }
-	osc::Send&			oscSend(){ return mOSCSend; }     
+	/* osc::Recv&			oscRecv(){ return mOSCRecv; } */
+	/* osc::Send&			oscSend(){ return mOSCSend; } */     
 	  
-	osc::Recv mOSCRecv;
-	osc::Send mOSCSend;    
+	/* osc::Recv mOSCRecv; */
+	/* osc::Send mOSCSend; */    
 	//                           
 	gam::AudioIO mAudioIO; 
   gam::Scheduler mScheduler; 
