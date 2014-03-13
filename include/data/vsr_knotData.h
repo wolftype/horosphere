@@ -20,15 +20,15 @@
 #ifndef alloprojects_knotData_h
 #define alloprojects_knotData_h
 
-#include "vsr/vsr_cga3D_op.h"
+//#include "vsr/vsr_cga3D_op.h"
 
 #include "allocore/protocol/al_OSC.hpp"
 
 #include "al_SharedData.h"
 
 using namespace al::osc;
-using namespace vsr;
-using namespace vsr::cga3D;
+//using namespace vsr;
+//using namespace vsr::cga3D;
 
 struct KnotData {
 
@@ -47,13 +47,16 @@ struct KnotData {
   bool bAutoMode;
   bool bDrawRibbon, bDrawFibers, bDrawVec, bDrawTube, bDrawPnt;     
   bool bDrawWrithe, bUseEnergies, bFlow; 
+  
+  float pntX, pntY, pntZ;
+  float vecX, vecY, vecZ;
     
-  vsr::Pnt pnt, pnt2; //Orbit Positions  
-  vsr::Vec vec, tvec; //vector orientation for hopf fibers and target
+  //vsr::Pnt pnt, pnt2; //Orbit Positions  
+  //vsr::Vec vec, tvec; //vector orientation for hopf fibers and target
   
   KnotData() : P(3), Q(2), vel(.01), tube_size(1), writhe(3), 
   theta(0), phi(-PIOVERFOUR), rotVel(.1), energy_scale(20),
-  bAutoMode(0), vec(1,0,0), tvec(1,0,0), pnt(Ro::null(2,0,0)) {}
+  bAutoMode(0), pntX(1), pntY(0), pntZ(0), vecX(1), vecY(0), vecZ(0) {} //vec(1,0,0), tvec(1,0,0), pnt(Ro::null(2,0,0)) {}
    
    
   /*-----------------------------------------------------------------------------
@@ -65,7 +68,9 @@ struct KnotData {
         knot.beginBundle();
             knot.beginMessage("/knot/data");
             knot << P << Q << vel << tube_size << writhe;
-            knot << pnt[0] << pnt[1] << pnt[2] << pnt[3] << pnt[4];
+            knot << pntX << pntY << pntZ;
+            knot << vecX << vecY << vecZ;
+            //knot << pnt[0] << pnt[1] << pnt[2] << pnt[3] << pnt[4];
             knot << theta << phi << rotVel << energy_scale << size;  
             knot << int(bAutoMode) << int(bDrawRibbon) << int(bDrawFibers) << int(bDrawVec) << int(bDrawPnt); 
             knot << int(bUseEnergies) << int(bDrawWrithe) << int(bFlow) << int(bDrawTube);
@@ -91,7 +96,10 @@ struct KnotData {
     void copyData( Message& m ){
 
       m >> P >> Q >> vel >> tube_size >> writhe;
-      m >> pnt[0] >> pnt[1] >> pnt[2] >> pnt[3] >> pnt[4];
+      //m >> pnt[0] >> pnt[1] >> pnt[2] >> pnt[3] >> pnt[4];
+      m >> pntX >> pntY >> pntZ;
+      m >> vecX >> vecY >> vecZ;
+
       m >> theta >> phi >> rotVel >> energy_scale >> size; 
 
       int ibAutoMode, ibDrawRibbon, ibDrawFibers, ibDrawVec, ibDrawPnt;
@@ -151,7 +159,7 @@ struct KnotData {
       else if (m.addressPattern() == "/bDrawFibers"){
         int f;
         m >> f;
-           bDrawFibers = f;  
+        bDrawFibers = f;  
       }  
       else if (m.addressPattern() == "/bDrawWrithe"){
         int f;
@@ -216,8 +224,8 @@ struct KnotData {
     
         //Defaults
         P = 3; Q = 2;
-        pnt = vsr::Ro::null(1.5,0,0);
-        vec = vsr::Vec(0,1,0);  
+        //pnt = vsr::Ro::null(1.5,0,0);
+        //vec = vsr::Vec(0,1,0);  
         vel = .015;
         writhe = 10;  
         numcables = 2;

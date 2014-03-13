@@ -81,7 +81,7 @@ virtual void update(){
 }   
 
 void updateKnotParameters(){
-    kd.bundleAndSend1G();
+    kd.bundleAndSend();
 }
 
 virtual void onDraw() {   

@@ -5,6 +5,21 @@ cmake_policy(SET CMP0003 NEW)
 #message("CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 #message("CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
 
+
+#use clang on apple computers
+if(APPLE)
+option(USE_CLANG "use clang" ON)
+endif()
+
+if(USE_CLANG)
+  message("using clang compiler")
+  SET(CMAKE_CXX_COMPILER "clang++")
+  SET(CMAKE_C_COMPILER "clang")
+  SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+else()
+  SET(CMAKE_CXX_FLAGS "-std=c++0x -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+endif()
+
 #one file
 message("demo name: " ${SRC} )
 get_filename_component(target ${SRC} NAME_WE)

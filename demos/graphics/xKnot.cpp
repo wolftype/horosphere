@@ -46,12 +46,16 @@ struct App : OmniApp {
     
     Light light;
 
-    //DATA STORAGE OBJECTS (floats)
+    //DATA STORAGE OBJECTS to move around network (floats)
     KnotData kd;
     AudioData ad;
 
     //A Knot
-    TorusKnot tk;  
+    TorusKnot tk; 
+    
+    Pnt pnt; // <-- point along knot
+    Vec vec; // <-- Vector of hopf fiber
+     
 
     //MESHES
     gfx::Mesh tm;             // Main Torus Knot Mesh   
@@ -111,19 +115,30 @@ void App::onAnimate(al_sec dt){
  *-----------------------------------------------------------------------------*/
 void App::updateState(){
   
-  if (kd.bFlow)  kd.pnt = Ro::loc( kd.pnt.sp( tk.bst() ) );
-      
+  //Calculate Point Along Orbit
+  if (kd.bFlow)  pnt = Ro::loc( pnt.sp( tk.bst() ) );
+  kd.pntX = pnt[0];
+  kd.pntY = pnt[1];
+  kd.pntZ = pnt[2];
+  
+  //Calculate Hopf Fiber Orientation    
+  Vec tvec;
   if (kd.bAutoMode){  
-       kd.tvec = vsr::Vec(kd.pnt).unit();       
+    tvec = vsr::Vec(pnt).unit();       
     if (kd.bUseEnergies) kd.writhe = kd.energy / kd.energy_scale;     
   } else {
-    kd.tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
+    tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
   }
   
-  Biv tb = Gen::log( Gen::ratio(kd.tvec, kd.vec) ); 
+  Biv tb = Gen::log( Gen::ratio(tvec, vec) ); 
   Rot r = Gen::rot( tb * kd.rotVel );  
-  kd.vec = kd.vec.sp( r );
+  vec = vec.sp( r );
 
+  kd.vecX = vec[0];
+  kd.vecY = vec[1];
+  kd.vecZ = vec[2];
+
+  //Send Data
   kd.bundleAndSend();
 
 }
@@ -181,6 +196,9 @@ void App::step(){
   tube.clear(); 
 
   // SET KNOT PARAMETERS
+  vec = Vec(kd.vecX, kd.vecY, kd.vecZ);
+  pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
+
   tk.HF.vec() = kd.vec; 
   tk.P = kd.P;
   tk.Q = kd.Q;

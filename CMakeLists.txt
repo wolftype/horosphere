@@ -6,6 +6,7 @@ project(HOROSPHERE)
 
 set(ALLOSPHERE 0 CACHE STRING "build for allosphere")
 
+#set(BUILD_ALLOUTIL 1)
 set(BUILD_ALLOGLV 1)
 set(NO_EXAMPLES 1)
 
@@ -18,8 +19,8 @@ get_target_property(ALLOCORE_LINK_LIBRARIES allocore ALLOCORE_LINK_LIBRARIES)
 get_target_property(ALLOUTIL_LINK_LIBRARIES alloutil ALLOUTIL_LINK_LIBRARIES)
 
 #print out linker libs
-message("ALLOCORE_LINK_LIBRARIES: " ${ALLOCORE_LINK_LIBRARIES})
-message("ALLOUTIL_LINK_LIBRARIES: " ${ALLOUTIL_LINK_LIBRARIES})
+#message("ALLOCORE_LINK_LIBRARIES: " ${ALLOCORE_LINK_LIBRARIES})
+#message("ALLOUTIL_LINK_LIBRARIES: " ${ALLOUTIL_LINK_LIBRARIES})
 
 #local include for this particular project space
 include_directories(${PROJECT_SOURCE_DIR}/include/)
@@ -46,28 +47,14 @@ endif()
 
 
 get_directory_property(LD LINK_DIRECTORIES)
-message("LINK_DIRECTORIES" ${LD})
-
-
-#use clang on apple computers
-if(APPLE)
-option(USE_CLANG "use clang" ON)
-endif()
-
-if(USE_CLANG)
-  message("using clang compiler")
-  SET(CMAKE_CXX_COMPILER "clang++")
-  SET(CMAKE_C_COMPILER "clang")
-  SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
-else()
-  SET(CMAKE_CXX_FLAGS "-std=c++0x -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
-endif()
+#message("LINK_DIRECTORIES" ${LD})
 
 if(ALLOSPHERE)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __allosphere__")
 endif()
 
 #the subdirectory of demos
-add_subdirectory(demos)
-
+set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
+add_subdirectory(demos/audio)
+add_subdirectory(demos/graphics)
 message("now type 'make'")
