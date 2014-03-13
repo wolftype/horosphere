@@ -44,11 +44,6 @@ struct MyApp : public AudioApp {
  
     cout << "CHANNELS: " << mAudioIO.channelsOut()  << endl;
 
-
-   // glv.gui << gui2;
-
-   // glv2.gui.colors().back.set(.3,.3,.3);  
-    
     ap.push_back( &mScheduler.add<WindSound>() ); 
     ap.back() -> mix = .065; 
     ap.push_back( &mScheduler.add<Harmonics>() );  
@@ -64,6 +59,7 @@ struct MyApp : public AudioApp {
     kd.buildGui(gui2); 
     gui1.arrange(); 
     gui2.arrange();   
+    
     //glv2.gui.arrange(); 
    
     glv.gui << gui1 << gui2; 
@@ -85,13 +81,11 @@ virtual void update(){
 }   
 
 void updateKnotParameters(){
-    kd.bundleAndSend();
+    kd.bundleAndSend1G();
 }
 
-
-  
-virtual void onDraw(GLV& g) {   
- // if (bUseGui) updateKnotParameters();
+virtual void onDraw() {   
+ if (bUseGui) updateKnotParameters();
 }
 
  virtual void onSound(gam::AudioIOData& io) {

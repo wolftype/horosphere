@@ -85,7 +85,8 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     while(oscRecv().recv()) {}  
-    update(); 
+    update();
+    onDraw(); 
     
     return true;
   }
@@ -98,6 +99,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
 	} 
   
   virtual void update(){} 
+  virtual void onDraw(){}
 	
 	static void AppAudioCB(gam::AudioIOData&); 
 	

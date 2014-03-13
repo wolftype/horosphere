@@ -59,7 +59,7 @@ struct KnotData {
   /*-----------------------------------------------------------------------------
    *  MAKE OSC PACKET AND SEND  
    *-----------------------------------------------------------------------------*/
-    void bundleAndSend(){
+    void bundleAndSend( bool TEN_G = false ){
       osc::Packet knot;
   
         knot.beginBundle();
@@ -73,7 +73,8 @@ struct KnotData {
         knot.endBundle();   
         
         #ifdef __allosphere__
-        SharedData::osend( knot, PORT_FROM_DEVICE_SERVER ); //was port from app...
+        if (TEN_G) SharedData::osend( knot, PORT_FROM_DEVICE_SERVER ); //was port from app...
+        else SharedData::osend1G(knot, PORT_FROM_DEVICE_SERVER);
         #endif
 
         #ifndef __allosphere__
@@ -115,7 +116,6 @@ struct KnotData {
     void onMessage( Message& m){
         
       if (m.addressPattern() == "/knot/data"){
-          cout << "knot data received" << endl; 
           copyData(m);
       }
       else if (m.addressPattern() == "/P"){

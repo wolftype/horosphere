@@ -1,3 +1,4 @@
+#!/bin/bash
 
 echo Deploying $1 To All Computers in Listed hosts.txt
 
