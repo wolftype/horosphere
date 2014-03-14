@@ -17,5 +17,5 @@ echo Target is $TARGET
 mkdir build
 cd build
 rm bin/${TARGET}
-cmake .. -DSRC=../../$1
+cmake .. -DDIR=${DIRECTORY} -DSRC=../../$1
 make

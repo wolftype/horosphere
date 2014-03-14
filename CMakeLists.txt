@@ -55,6 +55,6 @@ endif()
 
 #the subdirectory of demos
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
-add_subdirectory(demos/audio)
-add_subdirectory(demos/graphics)
+
+add_subdirectory(${DIR})
 message("now type 'make'")

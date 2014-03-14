@@ -54,9 +54,8 @@ struct App : OmniApp {
     TorusKnot tk; 
     
     Pnt pnt; // <-- point along knot
-    Vec vec; // <-- Vector of hopf fiber
+    vsr::Vec vec; // <-- Vector of hopf fiber
      
-
     //MESHES
     gfx::Mesh tm;             // Main Torus Knot Mesh   
     gfx::Mesh tube;           // Tube Mesh     
@@ -66,8 +65,12 @@ struct App : OmniApp {
     //bSlave flag = true if machine is "receiver" machine
     App(bool bSlave = false) :  
       OmniApp("vortex",bSlave), 
-      tk(3,2,.01)
+      tk(3,2,.01),
+      kd(),
+      pnt(Ro::null(2,0,0)),
+      vec(0,1,0)
     {
+          
               
       init();
       
@@ -116,13 +119,17 @@ void App::onAnimate(al_sec dt){
 void App::updateState(){
   
   //Calculate Point Along Orbit
+  //pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
+  pnt.print();
+
   if (kd.bFlow)  pnt = Ro::loc( pnt.sp( tk.bst() ) );
+  
   kd.pntX = pnt[0];
   kd.pntY = pnt[1];
   kd.pntZ = pnt[2];
   
   //Calculate Hopf Fiber Orientation    
-  Vec tvec;
+  vsr::Vec tvec;
   if (kd.bAutoMode){  
     tvec = vsr::Vec(pnt).unit();       
     if (kd.bUseEnergies) kd.writhe = kd.energy / kd.energy_scale;     
@@ -152,8 +159,8 @@ void App::sendAudioData(){
       ad.freq = 330. + ( 110. * ( 10 * kd.diameter ) ); 
       ad.width = 10 + ( 8000. * kd.diameter );  
       ad.nrg = kd.energy / 100.;     /// Hovers around 1
-      ad.ftheta =  vsr::Vec(Op::pj( kd.vec, Biv::xz)).norm();  
-      ad.fphi =  vsr::Vec(Op::pj( kd.vec, Biv::xy)).norm();  
+      ad.ftheta =  vsr::Vec(Op::pj( vec, Biv::xz)).norm();  
+      ad.fphi =  vsr::Vec(Op::pj( vec, Biv::xy)).norm();  
       ad.fwrithe = kd.writhe/6.0;    
       ad.ratio = .01 * kd.P / kd.Q;
       ad.nftheta = 40 + std::fabs(kd.theta) * 40; 
@@ -196,10 +203,12 @@ void App::step(){
   tube.clear(); 
 
   // SET KNOT PARAMETERS
-  vec = Vec(kd.vecX, kd.vecY, kd.vecZ);
-  pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
+  vec = vsr::Vec(kd.vecX, kd.vecY, kd.vecZ);
+  //pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
 
-  tk.HF.vec() = kd.vec; 
+  //pnt.print();
+
+  tk.HF.vec() = vec; 
   tk.P = kd.P;
   tk.Q = kd.Q;
   tk.amt = kd.vel; 
@@ -207,7 +216,7 @@ void App::step(){
 
   // LOCAL STATICS
   static Pnt np;           // New Position  
-  np = kd.pnt;   
+  np = pnt;   
   
   static Bst bst;          // Boostor
   bst = tk.bst();
@@ -291,9 +300,9 @@ void App::onDraw(Graphics& g) {
     Draw( tk.HF.fiberB(), 1,0,1 ); 
   }
   
-  if (kd.bDrawVec) Draw( kd.vec, 1, 1, 0 ); 
+  if (kd.bDrawVec) Draw(vec, 1, 1, 0 ); 
 
-  if (kd.bDrawPnt) Draw(kd.pnt,1,0,0);  
+  if (kd.bDrawPnt) Draw(pnt,1,0,0);  
     
   if (kd.bDrawWrithe) {
     for(auto& i : wm ){
