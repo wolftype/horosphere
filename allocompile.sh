@@ -8,7 +8,7 @@ echo Compiling $1 for ALLOSPHERE
 
 
 DIRECTORY=`echo $1 |cut -d'/' -f1 -f2`
-FILENAME=`echo $1 |cut -d'/' -f2 |cut -d'.' -f1 | sed -e "s|/|_|g"`
+FILENAME=`echo $1 |cut -d'/' -f3 |cut -d'.' -f1 | sed -e "s|/|_|g"`
 TARGET=${FILENAME}
 echo Directory is $DIRECTORY
 echo Filename is $FILENAME
