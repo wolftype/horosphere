@@ -84,7 +84,7 @@ struct KnotData {
         return knot;
      }
      
-     void sendToAll(osc::Packet knot, bool TEN_G = false )   
+     void sendToAll(osc::Packet knot, bool TEN_G = false ) { 
         #ifdef __allosphere__
         if (TEN_G) SharedData::osend( knot, PORT_FROM_DEVICE_SERVER ); //was port from app...
         else SharedData::osend1G(knot, PORT_FROM_DEVICE_SERVER);
