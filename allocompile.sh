@@ -7,7 +7,7 @@ echo Compiling $1 for ALLOSPHERE
 #cmake .. -DSRC<argument> && make argument
 
 
-DIRECTORY=`echo $1 |cut -d'/' -f1`
+DIRECTORY=`echo $1 |cut -d'/' -f1 -f2`
 FILENAME=`echo $1 |cut -d'/' -f2 |cut -d'.' -f1 | sed -e "s|/|_|g"`
 TARGET=${FILENAME}
 echo Directory is $DIRECTORY
