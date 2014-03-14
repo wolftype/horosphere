@@ -169,7 +169,7 @@ inline OmniApp::OmniApp(std::string name, bool slave)
         printf("I AM GR01********\n"); 
 
         //master listens on different port
-        mOSCRecv = OSCRecv(PORT_FROM_DEVICE_SERVER);
+        mOSCRecv = osc::Recv(PORT_FROM_DEVICE_SERVER);
         bSlave = false; 
     }
      
