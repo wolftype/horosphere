@@ -86,7 +86,7 @@ void updateKnotParameters(){
 }
 
 virtual void onDraw() {   
-// if (bUseGui) updateKnotParameters();
+ if (bUseGui) updateKnotParameters();
 }
 
  virtual void onSound(gam::AudioIOData& io) {

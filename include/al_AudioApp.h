@@ -92,7 +92,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
 	
 	void start(){   
 	//	mOSCRecv.timeout(.01);     
-		mOSCRecv.start();
+	//	mOSCRecv.start();
 		mAudioIO.start();
     MainLoop::start();
 	} 
