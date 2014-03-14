@@ -132,7 +132,7 @@ inline OmniApp::OmniApp(std::string name, bool slave)
    mNavTurnSpeed(.02),
    mName(name),
 
-   mOSCRecv(PORT_FROM_DEVICE_SERVER),
+   mOSCRecv(PORT_FROM_MASTER_COMPUTER),
    mOSCSend(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS),
 
    bSlave(slave)
@@ -150,8 +150,6 @@ inline OmniApp::OmniApp(std::string name, bool slave)
   initWindow();
   initGLV();
   
-  oscRecv().bufferSize(32000);
-  oscRecv().handler(*this);
   
   #ifdef __allosphere__  
   
@@ -169,6 +167,9 @@ inline OmniApp::OmniApp(std::string name, bool slave)
         printf("WE are GR CHILDREN\n");
     } else { 
         printf("I AM GR01********\n"); 
+
+        //master listens on different port
+        mOSCRecv = OSCRecv(PORT_FROM_DEVICE_SERVER);
         bSlave = false; 
     }
      
@@ -183,6 +184,9 @@ inline OmniApp::OmniApp(std::string name, bool slave)
     bSlave = false; 
  
   #endif
+
+  oscRecv().bufferSize(32000);
+  oscRecv().handler(*this);
 
     if (!bSlave) {
       Window::append(mNavControl);          
