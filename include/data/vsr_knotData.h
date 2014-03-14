@@ -85,6 +85,7 @@ struct KnotData {
 
         #ifndef __allosphere__
         osc::Send(PORT_FROM_DEVICE_SERVER, "localhost").send(knot);
+        cout << "sending locally" << endl; 
         #endif
     
     }
