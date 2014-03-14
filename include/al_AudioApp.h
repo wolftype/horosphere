@@ -70,7 +70,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
   void initGLV(){
     glv.parentWindow(*this);
     glv.gui.colors().back.set(.3,.3,.3);
-     glv.gui.colors().border.set(1,0,0);
+    glv.gui.colors().border.set(1,0,0);
     glv.gui.enable( glv::DrawBorder );
    // glv.gui(bMute,"mute");
    // glv.gui(mMasterVolume,"master_volume");
