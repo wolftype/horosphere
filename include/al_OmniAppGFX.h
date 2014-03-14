@@ -165,13 +165,13 @@ inline OmniApp::OmniApp(std::string name, bool slave)
     if (hostName() != "gr01") {
         bSlave = true; 
         printf("WE are GR CHILDREN\n");
-        mOSCRecv = osc::Recv(PORT_FROM_MASTER_COMPUTER);
+        mOSCRecv.port() = PORT_FROM_MASTER_COMPUTER;
 
     } else { 
         printf("I AM GR01********\n"); 
 
         //master listens on different port
-        mOSCRecv = osc::Recv(PORT_FROM_DEVICE_SERVER);
+        mOSCRecv.port() = PORT_FROM_DEVICE_SERVER;
         bSlave = false; 
     }
      
