@@ -80,6 +80,7 @@ struct KnotData {
         #ifdef __allosphere__
         if (TEN_G) SharedData::osend( knot, PORT_FROM_DEVICE_SERVER ); //was port from app...
         else SharedData::osend1G(knot, PORT_FROM_DEVICE_SERVER);
+        cout << "sending in allo network on port: " << PORT_FROM_DEVICE_SERVER << endl;
         #endif
 
         #ifndef __allosphere__

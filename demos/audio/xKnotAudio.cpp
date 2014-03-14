@@ -82,7 +82,7 @@ virtual void update(){
 
 void updateKnotParameters(){
     kd.bundleAndSend();
-    cout <<"sending ... " << endl; 
+    //cout <<"sending ... " << endl; 
 
 }
 
