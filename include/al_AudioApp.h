@@ -83,7 +83,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    //while(oscRecv().recv()) {}  
+    while(oscRecv().recv()) {}  
     update();
     onDraw(); 
     
@@ -92,7 +92,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler  {
 	
 	void start(){   
 	//	mOSCRecv.timeout(.01);     
-	//	mOSCRecv.start();
+		mOSCRecv.start();
 		mAudioIO.start();
     MainLoop::start();
 	} 
