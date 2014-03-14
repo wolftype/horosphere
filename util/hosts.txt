@@ -1,0 +1,14 @@
+gr01:22 sphere
+gr02:22 sphere
+gr03:22 sphere
+gr04:22 sphere
+gr05:22 sphere
+gr06:22 sphere
+gr07:22 sphere
+gr08:22 sphere
+gr09:22 sphere
+gr10:22 sphere
+gr11:22 sphere
+gr12:22 sphere
+gr13:22 sphere
+gr14:22 sphere
