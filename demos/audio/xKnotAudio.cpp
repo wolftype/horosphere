@@ -81,7 +81,7 @@ virtual void update(){
 }   
 
 void updateKnotParameters(){
-    oscSend().send( kd.bundle() );
+    osc::Send( PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE ).send( kd.bundle() );
     //cout <<"sending ... " << endl; 
 }
 
