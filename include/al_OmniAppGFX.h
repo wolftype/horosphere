@@ -321,7 +321,7 @@ inline bool OmniApp::onFrame() {
         p << nav().pos().x << nav().pos().y << nav().pos().z << nav().quat().x << nav().quat().y << nav().quat().z << nav().quat().w;
         p.endMessage();            
   
-        SharedData::osend(p, PORT_FROM_DEVICE_SERVER);  
+        SharedData::osend(p, PORT_FROM_MASTER_COMPUTER);  
       #endif
   }  
   

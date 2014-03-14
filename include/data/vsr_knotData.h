@@ -98,9 +98,9 @@ struct KnotData {
      
      void sendToAll(osc::Packet knot, bool TEN_G = false ) { 
         #ifdef __allosphere__
-        if (TEN_G) SharedData::osend( knot, PORT_FROM_DEVICE_SERVER ); //was port from app...
-        else SharedData::osend1G(knot, PORT_FROM_DEVICE_SERVER);
-        cout << "sending in allo network on port: " << PORT_FROM_DEVICE_SERVER << endl;
+        if (TEN_G) SharedData::osend( knot, PORT_FROM_MASTER_COMPUTER ); //was port from app...
+        else SharedData::osend1G(knot, PORT_FROM_MASTER_COMPUTER);
+        cout << "sending in allo network on port: " << PORT_FROM_MASTER_COMPUTER << endl;
         #endif
 
         #ifndef __allosphere__
