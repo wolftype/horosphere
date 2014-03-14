@@ -83,6 +83,18 @@ struct KnotData {
 
         return knot;
      }
+
+     /* void sendToOne(osc::Packet knot, bool TEN_G = false){ */
+     /*   #ifdef __allosphere__ */
+    
+     /*   #endif */
+
+     /*    #ifndef __allosphere__ */
+     /*    osc::Send(PORT_FROM_DEVICE_SERVER, "localhost").send(knot); */
+     /*    cout << "sending locally" << endl; */ 
+     /*    #endif */
+
+     /* } */
      
      void sendToAll(osc::Packet knot, bool TEN_G = false ) { 
         #ifdef __allosphere__

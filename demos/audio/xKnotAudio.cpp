@@ -81,9 +81,8 @@ virtual void update(){
 }   
 
 void updateKnotParameters(){
-    kd.bundleAndSend();
+    oscSend().send( kd.bundle() );
     //cout <<"sending ... " << endl; 
-
 }
 
 virtual void onDraw() {   
