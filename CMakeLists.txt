@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.0)
 
 project(HOROSPHERE)
 
-set(ALLOSPHERE 0 CACHE STRING "build for allosphere")
+#set(ALLOSPHERE 0 CACHE STRING "build for allosphere")
 
 #set(BUILD_ALLOUTIL 1)
 set(BUILD_ALLOGLV 1)

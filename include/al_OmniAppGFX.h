@@ -61,8 +61,8 @@ public:
   const std::string&  name() const { return mName; }
   OmniApp&      name(const std::string& v){ mName=v; return *this; }
 
-  osc::Recv&      oscRecv(){ return mOSCRecv; }
-  osc::Send&      oscSend(){ return mOSCSend; }
+  osc::Recv&      oscRecv(){ return *mOSCRecv; }
+  osc::Send&      oscSend(){ return *mOSCSend; }
   
   OmniStereo&      omni() { return mOmni; }
   
@@ -113,8 +113,8 @@ protected:
   StandardWindowKeyControls mStdControls;
 
   /// SEND TO/FROM
-  osc::Recv mOSCRecv;
-  osc::Send mOSCSend;
+  osc::Recv * mOSCRecv;
+  osc::Send * mOSCSend;
 
   std::string mName;
   std::string mHostName;
@@ -133,11 +133,12 @@ inline OmniApp::OmniApp(std::string name, bool slave)
    mName(name),
 
   // mOSCRecv(PORT_FROM_MASTER_COMPUTER),
-   mOSCSend(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS),
+  // mOSCSend(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS),
 
    bSlave(slave)
 {  
 
+  mOSCSend = new osc::Send(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS);
   bOmniEnable = true;
 
   mHostName = Socket::hostName();
@@ -165,13 +166,13 @@ inline OmniApp::OmniApp(std::string name, bool slave)
     if (hostName() != "gr01") {
         bSlave = true; 
         printf("WE are GR CHILDREN\n");
-        mOSCRecv.port() = PORT_FROM_MASTER_COMPUTER;
+        mOSCRecv = new osc::Recv( PORT_FROM_MASTER_COMPUTER );
 
     } else { 
         printf("I AM GR01********\n"); 
 
         //master listens on different port
-        mOSCRecv.port() = PORT_FROM_DEVICE_SERVER;
+        mOSCRecv = new osc::Recv( PORT_FROM_DEVICE_SERVER );
         bSlave = false; 
     }
      
@@ -184,6 +185,8 @@ inline OmniApp::OmniApp(std::string name, bool slave)
     mOmni.mode( OmniStereo::ACTIVE ).stereo(false);     
     omniEnable(false);
     bSlave = false; 
+
+    mOSCRecv = new osc::Recv( PORT_FROM_DEVICE_SERVER );
  
   #endif
 
