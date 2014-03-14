@@ -120,7 +120,7 @@ void App::updateState(){
   
   //Calculate Point Along Orbit
   //pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
-  pnt.print();
+  //pnt.print();
 
   if (kd.bFlow)  pnt = Ro::loc( pnt.sp( tk.bst() ) );
   
@@ -204,7 +204,7 @@ void App::step(){
 
   // SET KNOT PARAMETERS
   vec = vsr::Vec(kd.vecX, kd.vecY, kd.vecZ);
-  //pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
+  pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
 
   //pnt.print();
 
