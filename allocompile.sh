@@ -14,8 +14,8 @@ echo Directory is $DIRECTORY
 echo Filename is $FILENAME
 echo Target is $TARGET
 
-#mkdir build
-#cd build
-#rm bin/${TARGET}
-#cmake .. -DDIR=${DIRECTORY} -DSRC=../../$1 -DALLOSPHERE=1
-#make
+mkdir build
+cd build
+rm bin/${TARGET}
+cmake .. -DDIR=${DIRECTORY} -DSRC=../../$1 -DALLOSPHERE=1
+make
