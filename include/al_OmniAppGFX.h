@@ -132,7 +132,7 @@ inline OmniApp::OmniApp(std::string name, bool slave)
    mNavTurnSpeed(.02),
    mName(name),
 
-   mOSCRecv(PORT_FROM_MASTER_COMPUTER),
+  // mOSCRecv(PORT_FROM_MASTER_COMPUTER),
    mOSCSend(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS),
 
    bSlave(slave)
@@ -165,6 +165,8 @@ inline OmniApp::OmniApp(std::string name, bool slave)
     if (hostName() != "gr01") {
         bSlave = true; 
         printf("WE are GR CHILDREN\n");
+        mOSCRecv = osc::Recv(PORT_FROM_MASTER_COMPUTER);
+
     } else { 
         printf("I AM GR01********\n"); 
 
