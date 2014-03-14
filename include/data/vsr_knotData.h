@@ -95,6 +95,8 @@ struct KnotData {
      *-----------------------------------------------------------------------------*/
     void copyData( Message& m ){
 
+      cout << "receiving and copying knot data" << endl;
+
       m >> P >> Q >> vel >> tube_size >> writhe;
       //m >> pnt[0] >> pnt[1] >> pnt[2] >> pnt[3] >> pnt[4];
       m >> pntX >> pntY >> pntZ;
