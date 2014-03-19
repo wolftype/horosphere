@@ -28,7 +28,10 @@
 #define MAIN_RENDERING_MACHINE "localhost" 
 #endif
 
+#include <iostream>
+
 using namespace al;
+using namespace std;
 
 struct SharedData{
     
@@ -46,7 +49,7 @@ struct SharedData{
 	    osc::Send(port, "gr11").send(m); 
 	    osc::Send(port, "gr12").send(m); 
 	    osc::Send(port, "gr13").send(m); 
-
+      osc::Send(port, "gr14").send(m); 
  }
 
   static void osend(const osc::Packet& m, int port){   
@@ -65,6 +68,49 @@ struct SharedData{
 	    osc::Send(port, "192.168.10.92").send(m); 
 	    osc::Send(port, "192.168.10.93").send(m); 
 }
+
+
+    static osc::Packet TestPacket(float f = 1.0){
+      osc::Packet test;
+        test.beginBundle();
+          test.beginMessage("/test");
+            test << f;
+          test.endMessage();
+        test.endBundle();
+      return test;
+    }
+
+    static void SendToAll(const osc::Packet& m, bool TEN_G = false ) { 
+       
+        #ifdef __allosphere__
+        if (TEN_G) SharedData::osend( m, PORT_FROM_MASTER_COMPUTER ); //was port from app...
+        else SharedData::osend1G(m, PORT_FROM_MASTER_COMPUTER);
+        cout << "sending in allo network on port: " << PORT_FROM_MASTER_COMPUTER << endl;
+        #endif
+
+        #ifndef __allosphere__
+        osc::Send(PORT_FROM_DEVICE_SERVER, "localhost").send(m);
+        cout << "sending locally" << endl; 
+        #endif
+    
+    }
+
+    static void SendToMain(const osc::Packet& m ){
+//        cout << "sending to main" << endl; 
+        osc::Send(PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE).send(m);
+    }
+
+    static void SendToServer(const osc::Packet& m ){
+        osc::Send(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS).send(m);
+    }
+
+
+    static void print(){
+      std::cout << "MAIN RENDERING MACHINE: " << MAIN_RENDERING_MACHINE << std::endl;
+      std::cout << "PORT_FROM_DEVICE_SERVER: " << PORT_FROM_DEVICE_SERVER << std::endl; 
+      std::cout << "PORT_FROM_MASTER_COMPUTER: " << PORT_FROM_MASTER_COMPUTER << std::endl; 
+
+    }
 
 };
 

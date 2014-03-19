@@ -41,7 +41,7 @@ link_directories(${PROJECT_SOURCE_DIR}/../versor/ext/glv/build/lib/)
 link_directories(${PROJECT_SOURCE_DIR}/../Gamma/build/lib/)
 link_directories(${AlloSystem_SOURCE_DIR}/build/lib)
 
-if(ALLOSPHERE)
+if(${BUILDING_FOR_ALLOSPHERE})
 link_directories(/usr/lib/x86_64-linux-gnu/)
 endif()
 
@@ -49,7 +49,7 @@ endif()
 get_directory_property(LD LINK_DIRECTORIES)
 #message("LINK_DIRECTORIES" ${LD})
 
-if(ALLOSPHERE)
+if(${BUILDING_FOR_ALLOSPHERE})
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __allosphere__")
 endif()
 
