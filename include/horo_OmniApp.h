@@ -135,6 +135,7 @@ inline OmniApp::OmniApp(std::string name, bool slave, bool distribute)
   //CAMERA
   lens().near(0.01).far(40).eyeSep(0.03);
   nav().smooth(0.8);
+  nav().pos().z = 5;
   
   //WINDOW
   Window::append(mStdControls);

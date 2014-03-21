@@ -125,21 +125,15 @@ void App::updateState(){
 
   if (kd.bFlow)  pnt = Ro::loc( pnt.sp( tk.bst() ) );
   
-  kd.pntX = pnt[0];
-  kd.pntY = pnt[1];
-  kd.pntZ = pnt[2];
-  
   //Calculate Hopf Fiber Orientation    
   vsr::Vec tvec;
   if (kd.bAutoMode){     
-   // cout << "auto" << endl; 
     tvec = vsr::Vec(pnt).unit();       
     if (kd.bUseEnergies) {
       kd.writhe = kd.energy / kd.energy_scale;  
     }
        
   } else {
-   // cout << "nope" << endl;
     tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
   }
 //test
@@ -148,6 +142,11 @@ void App::updateState(){
   Biv tb = Gen::log( Gen::ratio(tvec, vec) ); 
   Rot r = Gen::rot( tb * kd.rotVel );  
   vec = vec.sp( r );
+
+  //update data
+  kd.pntX = pnt[0];
+  kd.pntY = pnt[1];
+  kd.pntZ = pnt[2];
 
   kd.vecX = vec[0];
   kd.vecY = vec[1];
@@ -197,7 +196,14 @@ void App :: onMessage(osc::Message& m) {
  *-----------------------------------------------------------------------------*/
 void App::step(){
 
+  // SET KNOT PARAMETERS
+
   if (!bSlave ) updateState();
+  if( bSlave){
+   vec = vsr::Vec( kd.vecX, kd.vecY, kd.vecZ);
+   pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
+  }
+
  
   light();
 
@@ -210,9 +216,6 @@ void App::step(){
   wm.clear();
   tube.clear(); 
 
-  // SET KNOT PARAMETERS
-  vec = vsr::Vec( kd.vecX, kd.vecY, kd.vecZ);
-  pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
 
   tk.HF.vec() = vec; 
   tk.P = kd.P;

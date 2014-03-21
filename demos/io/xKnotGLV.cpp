@@ -47,7 +47,6 @@ struct MyApp : public al::Window, public OSCApp, public GLVApp {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     listen(); // listen for updates from tablet and other controllers 
-     
     update(); // send gui info to client
   
     onDraw(); 
