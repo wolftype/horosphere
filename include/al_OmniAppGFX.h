@@ -386,7 +386,6 @@ inline void OmniApp::sendDisconnect(){
 inline void OmniApp::onMessage(osc::Message& m) {
     if (bSlave){ 
       if (m.addressPattern() == "/nav"){
-          cout << "reciving nav " << endl; 
           double x,y,z,qx,qy,qz,qw;
           m >> x; m >> y; m >> z; m >> qx; m >> qy; m >> qz; m >> qw; 
           nav().pos() = al::Vec3d(x,y,z);

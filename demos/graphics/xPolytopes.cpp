@@ -51,10 +51,7 @@ struct MyApp : OmniApp {
       p =4; q = 3;
   }
 
-  virtual bool onFrame(){
-
-    OmniApp::onFrame();
-
+  virtual void init(){
       auto a = NEVec<3>::y;
       auto c = NEVec<3>::x;
       
@@ -86,6 +83,13 @@ struct MyApp : OmniApp {
       hull.initialFace(rootSystem);
       hull.altConvexPass(rootSystem);
       hull.closeHoles(amt);
+
+  }
+
+  virtual bool onFrame(){
+
+    OmniApp::onFrame();
+
 
 
     return true;
