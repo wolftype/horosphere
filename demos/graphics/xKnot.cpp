@@ -17,7 +17,8 @@
  */
 
 
-#include "al_OmniAppGFX.h"   
+//#include "al_OmniAppGFX.h"   
+#include "horo_OmniApp.h"
 #include "gam_GxSync.h"
 
 #include "vsr/vsr_cga3D_op.h"
@@ -246,7 +247,7 @@ void App::step(){
   kd.diameter = Ro::size( tk.cir[0], true );
     
   // Tube Mesh
-  tube = Shape::Skin( tk.cir, tk.cir.size(), 10 );
+  tube = Shape::Skin( tk.cir, tk.cir.size(), 3 );
    
   for (int i = 0; i<iter;++i){
   
