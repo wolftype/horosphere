@@ -110,6 +110,8 @@ struct Speakers {
 	
 	template<>
 	inline void Speakers<ALLO_SPEAKER_LAYOUT> :: init()   {
+
+    cout << "ALLOSPHERE SPEAKER LAYOUT" << endl;
 		 
 		gfx::Vec3f mv(-1,0,0);
 

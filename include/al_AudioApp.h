@@ -37,9 +37,9 @@ struct AudioApp : public al::Window, public osc::PacketHandler, public GLVApp  {
   virtual void init(){
   	#ifdef __allosphere__
 		initAudio("AF12 x5", 44100, 256, 0, 60);   
-
 		#endif
-		#ifndef __allosphere__
+		
+    #ifndef __allosphere__
 		initAudio(44100, 256);
 		#endif 
     

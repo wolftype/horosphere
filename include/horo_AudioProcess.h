@@ -115,7 +115,7 @@ struct AudioProcess : public gam::Process {
 	
 	//Spatial 
 	#ifdef __allosphere__
-	SpatialSource< ALLO_SPEAKER_LAYOUT > src;  
+	  SpatialSource< ALLO_SPEAKER_LAYOUT > src;  
 	#endif
 	#ifndef __allosphere__
     SpatialSource< 2 > src; 
@@ -146,6 +146,7 @@ struct AudioProcess : public gam::Process {
 		
 		set("/mix",mix); 
 	};
+
 	virtual void update() {
 		mix = get("/mix"); 
 		
@@ -155,7 +156,7 @@ struct AudioProcess : public gam::Process {
 		
 		src();  
 		
-		//cout << src << endl; 
+		cout << src << endl; 
 	};
 	
 	// double get(string s) const{
