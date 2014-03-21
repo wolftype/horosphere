@@ -17,8 +17,8 @@
  */
 
 
-#include "al_OmniAppGFX.h"   
-//#include "horo_OmniApp.h"
+//#include "al_OmniAppGFX.h"   
+#include "horo_OmniApp.h"
 #include "gam_GxSync.h"
 
 #include "vsr/vsr_cga3D_op.h"
@@ -276,9 +276,8 @@ void App::step(){
       Pnt pb = Ro::split( tp, false );
 
       wm[k].add(  pa );
-      wm[k+1].add( pb );//Vertex(pb, 1-c, 0, c );
-        //ribbon.add( pa); ribbon.cp.push_back( Vec(1-c, 0, c ) );
-        //ribbon.add( pb); ribbon.cp.push_back( Vec(1-c, 0, c ) );  
+      wm[k+1].add( pb );
+
      }
   }
 

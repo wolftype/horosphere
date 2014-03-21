@@ -319,13 +319,16 @@ inline bool OmniApp::onFrame() {
 }
 
 inline void OmniApp::onDrawOmni(OmniStereo& omni) {
-  
-  graphics().error("start onDraw");
-  
-  mShader.begin(); 
-    mOmni.uniforms(mShader);  
-    onDraw(graphics());
-  mShader.end();
+ 
+  if ( bSlave || !bDistribute) {
+    graphics().error("start onDraw");
+    
+    mShader.begin(); 
+      mOmni.uniforms(mShader);  
+      onDraw(graphics());
+    mShader.end();
+  }
+
 }
 
 /*-----------------------------------------------------------------------------
