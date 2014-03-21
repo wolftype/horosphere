@@ -94,7 +94,7 @@ struct SpatialSource {
 template<int N>
 inline ostream& operator << ( ostream& os, SpatialSource<N> & s){
 	for (int i = 0; i < s.speakers.num(); ++i ){
-		os << s[i] << " \n";
+		os << "mix at: " << i << " is " << s[i] << " \n";
 	} 
 	return os;
 }
@@ -290,6 +290,7 @@ struct WindSound : public AudioProcess {
 	}   
 	
 	void update(){  
+    cout << "wind" << endl; 
 		reson.width ( get("/width") );
 		reson.freq (  get("/freq") ); 
 		
