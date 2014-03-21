@@ -131,10 +131,12 @@ void App::updateState(){
   
   //Calculate Hopf Fiber Orientation    
   vsr::Vec tvec;
-  if (kd.bAutoMode){  
+  if (kd.bAutoMode){ 
+    cout << "auto" << endl; 
     tvec = vsr::Vec(pnt).unit();       
     if (kd.bUseEnergies) kd.writhe = kd.energy / kd.energy_scale;     
   } else {
+    cout << "nope" << endl;
     tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
   }
   
@@ -204,10 +206,8 @@ void App::step(){
   tube.clear(); 
 
   // SET KNOT PARAMETERS
-  vec = vsr::Vec(kd.vecX, kd.vecY, kd.vecZ);
+  vec = vsr::Vec( kd.vecX, kd.vecY, kd.vecZ);
   pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
-
-  //pnt.print();
 
   tk.HF.vec() = vec; 
   tk.P = kd.P;
