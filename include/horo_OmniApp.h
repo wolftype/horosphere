@@ -251,7 +251,8 @@ inline void OmniApp::start() {
     fullScreen(true);
     if (hostName() !="photon")cursorHide(true);
   }
-  
+ 
+  oscRecv().start(); 
   Main::get().start();
 }
 

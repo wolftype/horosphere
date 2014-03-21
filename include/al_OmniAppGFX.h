@@ -314,7 +314,7 @@ inline bool OmniApp::onFrame() {
   if (!bSlave){
     nav().step();
            
-      //SEND CAMERA POSITION AND ORIENTATION TO ALL OTHER COMPUTERS (if we're in the allosphere)
+      //SEND CAMERA POSITION AND ORIENTATION TO ALL OTHER COMPUTERS)
       #ifdef __allosphere__
         cout << "sending packet" <<endl;
         osc::Packet p;
@@ -384,10 +384,9 @@ inline void OmniApp::sendDisconnect(){
  *  GET NAVIGATION MESSAGES
  *-----------------------------------------------------------------------------*/
 inline void OmniApp::onMessage(osc::Message& m) {
-
-    cout << "reciving nav " << endl; 
     if (bSlave){ 
       if (m.addressPattern() == "/nav"){
+          cout << "reciving nav " << endl; 
           double x,y,z,qx,qy,qz,qw;
           m >> x; m >> y; m >> z; m >> qx; m >> qy; m >> qz; m >> qw; 
           nav().pos() = al::Vec3d(x,y,z);
