@@ -143,7 +143,7 @@ void App::updateState(){
     tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
   }
 //test
-  tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
+ // tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
 
   Biv tb = Gen::log( Gen::ratio(tvec, vec) ); 
   Rot r = Gen::rot( tb * kd.rotVel );  

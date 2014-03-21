@@ -48,7 +48,7 @@ struct KnotData {
     
   KnotData() : P(3), Q(2), vel(.01), tube_size(1), writhe(3), 
   theta(0), phi(-3.14/4.0), rotVel(.1), energy_scale(20),
-  bAutoMode(0), pntX(2), pntY(0), pntZ(0), vecX(0), vecY(1), vecZ(0) {} 
+  bAutoMode(true), pntX(2), pntY(0), pntZ(0), vecX(0), vecY(1), vecZ(0) {} 
    
    
   /*-----------------------------------------------------------------------------
