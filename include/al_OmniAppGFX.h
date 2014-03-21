@@ -275,7 +275,8 @@ inline void OmniApp::start() {
   if (!bSlave) { 
     if(oscSend().opened()) sendHandshake();
   }
-  
+ 
+  oscRecv().start(); 
   Main::get().start();
 }
 
