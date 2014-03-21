@@ -259,10 +259,12 @@ inline bool OmniApp::onCreate() {
   mOmni.onCreate();
   
   Shader vert, frag;
+  
   vert.source(OmniStereo::glsl() + vertexCode(), Shader::VERTEX).compile();
   vert.printLog();
   frag.source(fragmentCode(), Shader::FRAGMENT).compile();
   frag.printLog();
+
   mShader.attach(vert).attach(frag).link();
   mShader.printLog();
   mShader.begin();
