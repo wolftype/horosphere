@@ -17,8 +17,8 @@
  */
 
 
-//#include "al_OmniAppGFX.h"   
-#include "horo_OmniApp.h"
+#include "al_OmniAppGFX.h"   
+//#include "horo_OmniApp.h"
 #include "gam_GxSync.h"
 
 #include "vsr/vsr_cga3D_op.h"
