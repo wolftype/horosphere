@@ -73,7 +73,7 @@ struct Speakers {
 		
 		float sum;
 		for (int i = 0; i < N; ++i){
-			gfx::Vec3d dir = pos[i] - v;
+			gfx::Vec3f dir = pos[i] - v;
 			
 			float mag = dir.sq();
 			float id = 0;
@@ -115,11 +115,11 @@ struct Speakers {
 
 		//1 - 12 top ring 
 	    int ix = 0;  
-		gfx::Vec3f tv = gfx::Quat::spin( mv, gfx::Quat( PIOVERFOUR / 2.0, gfx::Vec3d(0,0,-1) ) );  
+		gfx::Vec3f tv = gfx::Quat::spin( mv, gfx::Quat( PIOVERFOUR / 2.0, gfx::Vec3f(0,0,-1) ) );  
 		cout << "TOP " << tv << endl; 
 		 for (int i = 0; i < 12; ++i){   
 			float t = 1.0 * ix / 12.0;
-			gfx::Quat q( PI * t, gfx::Vec3d(0,1,0));
+			gfx::Quat q( PI * t, gfx::Vec3f(0,1,0));
 			pos[i] = gfx::Quat::spin( tv, q ); 
 			cout << i << " " << pos[i] << endl;
 			ix++;
@@ -131,18 +131,18 @@ struct Speakers {
 		cout << "middle " << mv << endl; 
 		for (int i = 16; i < 46; ++i){  
 			float t = 1.0 * ix / 20.0;
-			gfx::Quat q( PI * t, gfx::Vec3d(0,1,0));
+			gfx::Quat q( PI * t, gfx::Vec3f(0,1,0));
 			pos[i] = gfx::Quat::spin( mv, q ); 
 			ix++;
 		}
 		
 		//49-60 bottom ring 
 		ix = 0;  
-		gfx::Vec3f bv = gfx::Quat::spin( mv, gfx::Quat( -PIOVERFOUR/2.0, gfx::Vec3d(0,0,-1) ) ); 
+		gfx::Vec3f bv = gfx::Quat::spin( mv, gfx::Quat( -PIOVERFOUR/2.0, gfx::Vec3f(0,0,-1) ) ); 
 			   cout << "bottom " << bv << endl; 
 		for (int i = 48; i < 60; ++i){  
 			double t = 1.0 * ix / 12.0;
-			gfx::Quat q( PI * t, gfx::Vec3d(0,1,0));
+			gfx::Quat q( PI * t, gfx::Vec3f(0,1,0));
 			pos[i] = gfx::Quat::spin( bv, q ); 
 			ix++;
 		}    	

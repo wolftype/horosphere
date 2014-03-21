@@ -131,15 +131,20 @@ void App::updateState(){
   
   //Calculate Hopf Fiber Orientation    
   vsr::Vec tvec;
-  if (kd.bAutoMode){ 
-    cout << "auto" << endl; 
+  if (kd.bAutoMode){     
+   // cout << "auto" << endl; 
     tvec = vsr::Vec(pnt).unit();       
-    if (kd.bUseEnergies) kd.writhe = kd.energy / kd.energy_scale;     
+    if (kd.bUseEnergies) {
+      kd.writhe = kd.energy / kd.energy_scale;  
+    }
+       
   } else {
-    cout << "nope" << endl;
+   // cout << "nope" << endl;
     tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
   }
-  
+//test
+  tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
+
   Biv tb = Gen::log( Gen::ratio(tvec, vec) ); 
   Rot r = Gen::rot( tb * kd.rotVel );  
   vec = vec.sp( r );
