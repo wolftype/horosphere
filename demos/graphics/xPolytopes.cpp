@@ -43,6 +43,7 @@ struct MyApp : OmniApp {
 
   MyApp() : OmniApp() {
     initGui();
+    init();
   }
 
   void initGui(){
