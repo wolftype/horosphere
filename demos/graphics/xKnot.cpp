@@ -176,9 +176,10 @@ void App :: onMessage(osc::Message& m) {
     
     if (bSlave){  
       OmniApp::onMessage(m);
-      if(bDistribute){
-        kd.onMessage(m);
-      }
+    }
+
+    if(bDistribute){
+      kd.onMessage(m);
     }
 }
 
