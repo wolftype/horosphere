@@ -49,7 +49,7 @@ struct MyApp : public al::Window, public OSCApp, public GLVApp {
     listen(); // listen for updates from tablet and other controllers 
      
     update(); // send gui info to client
-  i
+  
     onDraw(); 
 
     
