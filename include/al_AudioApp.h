@@ -47,7 +47,7 @@ struct AudioApp : public al::Window, public osc::PacketHandler, public GLVApp  {
  
 		oscRecv().bufferSize(32000);
 		oscRecv().handler(*this);
-//    oscRecv().timeout(.01);  
+    oscRecv().timeout(.01);  
   }
 
 	

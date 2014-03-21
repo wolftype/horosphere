@@ -54,14 +54,16 @@ struct MyApp : public AudioApp {
 
 virtual ~MyApp() {}
 
-// CALLED ONANIMATE
 virtual void update(){
+ // cout <<"update"<<endl;
   for (int i = 0; i < ap.size(); ++i ){
     ap[i] -> update();
   }
 }   
 
-virtual void onDraw() {}
+virtual void onDraw() {
+  update();  
+}
 
  virtual void onSound(gam::AudioIOData& io) {
   Scheduler& s = io.user<Scheduler>();
