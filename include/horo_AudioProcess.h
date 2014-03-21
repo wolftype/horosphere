@@ -156,7 +156,7 @@ struct AudioProcess : public gam::Process {
 		
 		src();  
 		
-		cout << src << endl; 
+	//	cout << src << endl; 
 	};
 	
 	// double get(string s) const{
@@ -290,7 +290,7 @@ struct WindSound : public AudioProcess {
 	}   
 	
 	void update(){  
-    cout << "wind" << endl; 
+   // cout << "wind" << endl; 
 		reson.width ( get("/width") );
 		reson.freq (  get("/freq") ); 
 		
