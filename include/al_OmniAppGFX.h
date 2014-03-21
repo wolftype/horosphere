@@ -384,6 +384,7 @@ inline void OmniApp::sendDisconnect(){
  *-----------------------------------------------------------------------------*/
 inline void OmniApp::onMessage(osc::Message& m) {
 
+    cout << "reciving nav " << endl; 
     if (bSlave){ 
       if (m.addressPattern() == "/nav"){
           double x,y,z,qx,qy,qz,qw;
