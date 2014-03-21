@@ -54,15 +54,16 @@ struct MyApp : public AudioApp {
 
 virtual ~MyApp() {}
 
+//called onframe
 virtual void update(){
- // cout <<"update"<<endl;
+  cout <<"update"<<endl;
   for (int i = 0; i < ap.size(); ++i ){
     ap[i] -> update();
   }
 }   
 
 virtual void onDraw() {
-  update();  
+//  update();  
 }
 
  virtual void onSound(gam::AudioIOData& io) {
