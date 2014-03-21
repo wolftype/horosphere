@@ -11,21 +11,28 @@
 
 #include "allocore/protocol/al_OSC.hpp"
 
-//SEND AUDIO TO 
-#define PORT_TO_DEVICE_SERVER (12000)
-//GET GUI INFO FROM
-#define PORT_FROM_DEVICE_SERVER (12001) 
-//SEND MASTER INFO TO
-#define PORT_FROM_MASTER_COMPUTER (12002)
 
 #ifdef __allosphere__
-#define DEVICE_SERVER_IP_ADDRESS "BOSSANOVA"
+#define SERVING_MACHINE "BOSSANOVA"
 #define MAIN_RENDERING_MACHINE "gr01"
+//GUI LISTENS ON THIS PORT
+#define PORT_FROM_INTERFACE (12000)
+//GET GUI INFO FROM (MASTER COMPUTER LISTENS ON THIS PORT)
+#define PORT_FROM_SERVER_COMPUTER (12001) 
+//SEND MASTER INFO (CLUSTER LISTTENS ON THIS PORT, as does AUDIO COMPUTER)
+#define PORT_FROM_CLIENT_COMPUTER (12002)
 #endif  
 
+//LOCAL HOST SEND/RECEIVE TO SAME PORT
 #ifndef __allosphere__
-#define DEVICE_SERVER_IP_ADDRESS "localhost"
+#define SERVING_MACHINE "localhost"
 #define MAIN_RENDERING_MACHINE "localhost" 
+//GUI LISTENS ON THIS PORT
+#define PORT_FROM_INTERFACE (12000)
+//GET GUI INFO FROM (MASTER COMPUTER LISTENS ON THIS PORT)
+#define PORT_FROM_SERVER_COMPUTER (12001) 
+//SEND MASTER INFO (CLUSTER LISTTENS ON THIS PORT, as does AUDIO COMPUTER)
+#define PORT_FROM_CLIENT_COMPUTER (12002)
 #endif
 
 #include <iostream>
@@ -83,32 +90,33 @@ struct SharedData{
     static void SendToAll(const osc::Packet& m, bool TEN_G = false ) { 
        
         #ifdef __allosphere__
-        if (TEN_G) SharedData::osend( m, PORT_FROM_MASTER_COMPUTER ); //was port from app...
-        else SharedData::osend1G(m, PORT_FROM_MASTER_COMPUTER);
-        cout << "sending in allo network on port: " << PORT_FROM_MASTER_COMPUTER << endl;
+        if (TEN_G) SharedData::osend( m, PORT_FROM_CLIENT_COMPUTER ); //was port from app...
+        else SharedData::osend1G(m, PORT_FROM_CLIENT_COMPUTER);
+        cout << "sending in allo network on port: " << PORT_FROM_CLIENT_COMPUTER << endl;
         #endif
 
         #ifndef __allosphere__
-        osc::Send(PORT_FROM_DEVICE_SERVER, "localhost").send(m);
+        osc::Send(PORT_FROM_SERVER_COMPUTER, "localhost").send(m);
         cout << "sending locally" << endl; 
         #endif
     
     }
 
-    static void SendToMain(const osc::Packet& m ){
+    static void SendToMainFromServer(const osc::Packet& m ){
 //        cout << "sending to main" << endl; 
-        osc::Send(PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE).send(m);
+        osc::Send(PORT_FROM_SERVER_COMPUTER, MAIN_RENDERING_MACHINE).send(m);
     }
 
-    static void SendToServer(const osc::Packet& m ){
-        osc::Send(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS).send(m);
+    static void SendToServerFromClient(const osc::Packet& m ){
+        osc::Send(PORT_FROM_CLIENT_COMPUTER, SERVING_MACHINE).send(m);
     }
 
 
     static void print(){
       std::cout << "MAIN RENDERING MACHINE: " << MAIN_RENDERING_MACHINE << std::endl;
-      std::cout << "PORT_FROM_DEVICE_SERVER: " << PORT_FROM_DEVICE_SERVER << std::endl; 
-      std::cout << "PORT_FROM_MASTER_COMPUTER: " << PORT_FROM_MASTER_COMPUTER << std::endl; 
+      std::cout << "PORT_FROM_INTERFACE: " << PORT_FROM_INTERFACE << std::endl; 
+      std::cout << "PORT_FROM_SERVER_COMPUTER: " << PORT_FROM_SERVER_COMPUTER << std::endl; 
+      std::cout << "PORT_FROM_CLIENT_COMPUTER: " << PORT_FROM_CLIENT_COMPUTER << std::endl; 
 
     }
 

@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  xOSCApp.cpp
+ *       Filename:  horo_window.h
  *
- *    Description:  osc send / receive test
+ *    Description:  window
  *
  *        Version:  1.0
- *        Created:  03/18/2014 13:20:07
+ *        Created:  03/20/2014 13:12:56
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -16,17 +16,7 @@
  * =====================================================================================
  */
 
-#include "horo_OSCApp.h"
 
-struct MyApp : public OSCApp {
-  virtual void onDraw(){
-    SharedData::SendToMain( SharedData::TestPacket() );
-  }
-};
+#include "allocore/al_Allocore.hpp" 
 
-MyApp app;
 
-int main(){
-  SharedData::print();
-  app.start();
-}

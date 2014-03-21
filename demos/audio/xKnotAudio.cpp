@@ -3,7 +3,7 @@
  *
  *       Filename:  xKnotAudio.cpp
  *
- *    Description:  Audio For Knot
+ *    Description:  Audio For Knot, listens to data from main
  *
  *        Version:  1.0
  *        Created:  02/26/2014 15:50:19
@@ -18,15 +18,12 @@
 
 
 #include "horo_AudioProcess.h"   
-
 #include "gam_GxSync.h"
-
 #include "al_AudioApp.h"         
 
 #include "al_SharedData.h"
 #include "data/vsr_knotData.h"
 #include "data/vsr_audioData.h"
-
 
 using namespace glv;
 using namespace gam;
@@ -34,11 +31,7 @@ using namespace std;
               
 struct MyApp : public AudioApp { 
   
-  Gui gui1, gui2;  
   vector< AudioProcess * > ap;
-
-  KnotData kd; 
-  bool bUseGui;
 
   MyApp() : AudioApp() {
  
@@ -52,22 +45,10 @@ struct MyApp : public AudioApp {
     ap.back() -> mix = .001; 
 
     for (int i = 0; i < ap.size(); ++i){   
-      ap[i] -> initGui(gui1);  
+      ap[i] -> initGui(glv.gui);  
     } 
       
-    //knot interface  
-    kd.buildGui(gui2); 
-    gui1.arrange(); 
-    gui2.arrange();   
-    
-    //glv2.gui.arrange(); 
-   
-    glv.gui << gui1 << gui2; 
-    //audio interface
-    glv.gui.arrangement("xx");
     glv.gui.arrange(); 
- 
-    bUseGui = 1; 
 
   }
 
@@ -80,14 +61,7 @@ virtual void update(){
   }
 }   
 
-void updateKnotParameters(){
-    osc::Send( PORT_FROM_DEVICE_SERVER, MAIN_RENDERING_MACHINE ).send( kd.bundle() );
-    cout <<"sending ... " << endl; 
-}
-
-virtual void onDraw() {   
- if (bUseGui) updateKnotParameters();
-}
+virtual void onDraw() {}
 
  virtual void onSound(gam::AudioIOData& io) {
   Scheduler& s = io.user<Scheduler>();
@@ -105,9 +79,6 @@ virtual void onDraw() {
 
 	  for (int i = 0; i < ap.size(); ++i ){ 
 		  if (ss == ap[i] -> name ) {
-        
-     // printf("%s\n", ts.c_str());
-
 		   ap[i] -> mVarMap[ts] -> val = f;
 		  }
    }       

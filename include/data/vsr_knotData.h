@@ -21,7 +21,6 @@
 #define alloprojects_knotData_h
 
 #include "allocore/protocol/al_OSC.hpp"
-
 #include "al_SharedData.h"
 
 using namespace al::osc;
@@ -48,7 +47,7 @@ struct KnotData {
   float vecX, vecY, vecZ;
     
   KnotData() : P(3), Q(2), vel(.01), tube_size(1), writhe(3), 
-  theta(0), phi(-PIOVERFOUR), rotVel(.1), energy_scale(20),
+  theta(0), phi(-3.14/4.0), rotVel(.1), energy_scale(20),
   bAutoMode(0), pntX(2), pntY(0), pntZ(0), vecX(0), vecY(1), vecZ(0) {} 
    
    
@@ -90,14 +89,14 @@ struct KnotData {
      
      void sendToAll(osc::Packet knot, bool TEN_G = false ) { 
         #ifdef __allosphere__
-        if (TEN_G) SharedData::osend( knot, PORT_FROM_MASTER_COMPUTER ); //was port from app...
-        else SharedData::osend1G(knot, PORT_FROM_MASTER_COMPUTER);
-        cout << "sending in allo network on port: " << PORT_FROM_MASTER_COMPUTER << endl;
+        if (TEN_G) SharedData::osend( knot, PORT_FROM_CLIENT_COMPUTER ); //was port from app...
+        else SharedData::osend1G(knot, PORT_FROM_CLIENT_COMPUTER);
+      //  cout << "sending data to allo network on port: " << PORT_FROM_CLIENT_COMPUTER << endl;
         #endif
 
         #ifndef __allosphere__
-        osc::Send(PORT_FROM_DEVICE_SERVER, "localhost").send(knot);
-        cout << "sending locally" << endl; 
+        osc::Send(PORT_FROM_SERVER_COMPUTER, "localhost").send(knot);
+      //  cout << "sending locally" << endl; 
         #endif
     
     }
@@ -109,7 +108,7 @@ struct KnotData {
      *-----------------------------------------------------------------------------*/
     void copyData( Message& m ){
 
-      cout << "receiving and copying knot data" << endl;
+    //  cout << "receiving and copying knot data" << endl;
 
       m >> P >> Q >> vel >> tube_size >> writhe;
       m >> pntX >> pntY >> pntZ;
@@ -221,7 +220,7 @@ struct KnotData {
         gui( vel, "vel",0.001,100);
         gui( tube_size, "tube_size", 0, 10);
         gui( writhe, "writhe", 1,100); 
-        gui( theta, "theta", 0, PI) ( phi, "phi", -PIOVERFOUR, PIOVERFOUR );  
+        gui( theta, "theta", 0, 3.14) ( phi, "phi", -3.14/4.0, 3.14/4.0 );  
         gui( rotVel, "rotVel", -10,10);
         
         gui( energy_scale, "energy_scale",0,1000); 
@@ -236,6 +235,8 @@ struct KnotData {
         gui( bDrawTube, "draw_tube"); 
         gui( bDrawPnt, "draw_pnt"); 
         gui( size, "size", .1, 100); 
+
+        gui.arrange();
     
         //Defaults
         P = 3; Q = 2;

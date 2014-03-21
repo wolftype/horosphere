@@ -99,13 +99,13 @@ struct AudioData{
       
     knot.endBundle(); 
      
-    #ifndef __allosphere__
-    osc::Send(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS).send(knot); 
-    #endif
+  //  #ifndef __allosphere__
+    osc::Send(PORT_FROM_CLIENT_COMPUTER, SERVING_MACHINE).send(knot); 
+  //  #endif
 
-    #ifdef __allosphere__
-    osc::Send(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS).send(knot);
-    #endif
+  //  #ifdef __allosphere__
+  //  osc::Send(PORT_TO_DEVICE_SERVER, DEVICE_SERVER_IP_ADDRESS).send(knot);
+  //  #endif
 
     }
 

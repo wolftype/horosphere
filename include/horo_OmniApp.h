@@ -1,13 +1,25 @@
-//
-//  al_OmniAppGFX.h
-//  a graphics only omni app with gui (no audio)
-//
-//  Created by Pablo Colapinto on 4/26/13.
-//  Copyright (c) 2013 __MyCompanyName__. All rights reserved.
-//
+/*
+ * =====================================================================================
+ *
+ *       Filename:  horo_OmniApp.h
+ *
+ *    Description:  omni app (gfx + osc) for allosphere
+ *
+ *        Version:  1.0
+ *        Created:  03/20/2014 15:58:17
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  original graham wakefiel, 
+ *         modded by pablo colapinto (), gmail -> wolftype
+ *   Organization:  
+ *
+ * =====================================================================================
+ */
 
-#ifndef allovsr_OmniAppRedux_h
-#define allovsr_OmniAppRedux_h
+
+#ifndef  horo_OmniApp_INC
+#define  horo_OmniApp_INC
 
 //ALLOCORE
 #include "allocore/al_Allocore.hpp"
@@ -19,18 +31,16 @@
 #include "alloutil/al_OmniStereo.hpp"
 
 //ADD-ONS
-#include "al_glv_gui.h"
-#include "al_SharedData.h" 
-
+#include "horo_OSCApp.h"
+#include "horo_GLVApp.h" 
 
 using std::cout;
 using std::endl;
 
-
 namespace al {
 
 
-class OmniApp : public Window, public osc::PacketHandler, public FPS, public OmniStereo::Drawable {
+class OmniApp : public Window, public OSCReceiver, public GLVApp, public FPS, public OmniStereo::Drawable {
 
 public:
     
@@ -57,9 +67,6 @@ public:
   const std::string&  name() const { return mName; }
   OmniApp&      name(const std::string& v){ mName=v; return *this; }
 
-  osc::Recv&      oscRecv(){ return *mOSCRecv; }
-  osc::Send&      oscSend(){ return mOSCSend; }
-  
   OmniStereo&      omni() { return mOmni; }
   
   const std::string&  hostName() const { return mHostName; }
@@ -75,11 +82,6 @@ public:
   
   void initOmni(std::string path = "");
 
-  void initGLV();
-  
-  void sendHandshake();
-  void sendDisconnect();
-  
   virtual bool onCreate();
   virtual bool onFrame();
   virtual void onDrawOmni(OmniStereo& omni);  
@@ -88,13 +90,11 @@ public:
   virtual std::string  fragmentCode();
 
   virtual bool onKeyDown(const Keyboard& k){ 
-     if (k.key() == 'v') glv.gui.toggle( glv::Property::Visible );
+     if (k.key() == 'v') toggle();
      return true; 
   }  
 
 protected:
-
-  GLVGui glv;
 
   OmniStereo mOmni;
     
@@ -107,10 +107,6 @@ protected:
   NavInputControl mNavControl;
   
   StandardWindowKeyControls mStdControls;
-
-  /// SEND TO/FROM
-  osc::Recv * mOSCRecv;
-  osc::Send mOSCSend;
 
   std::string mName;
   std::string mHostName;
@@ -127,25 +123,28 @@ inline OmniApp::OmniApp(std::string name, bool slave, bool distribute)
    mNavSpeed(1),
    mNavTurnSpeed(.02),
    mName(name),
-
-  // mOSCRecv(PORT_FROM_SERVER_COMPUTER),
-   mOSCSend(PORT_FROM_CLIENT_COMPUTER, SERVING_MACHINE),
-
    bSlave(slave),
-   bDistribute(distribute)
+   bDistribute(distribute),
+   GLVApp(this)
 {  
 
+  //HOST
   mHostName = Socket::hostName();
   printf("HOSTNAME %s\n",hostName().c_str());
   
+  //CAMERA
   lens().near(0.01).far(40).eyeSep(0.03);
   nav().smooth(0.8);
   
+  //WINDOW
   Window::append(mStdControls);
-  initWindow();
-  initGLV();
+  initWindow();  
   
-  
+  //GUI
+  glv.gui(bOmniEnable, "omni_enable");
+
+
+  //ALLO
   #ifdef __allosphere__  
   
     cout << "I BELIEVE I AM RUNNING IN THE ALLOSPHERE" << endl;         
@@ -161,17 +160,18 @@ inline OmniApp::OmniApp(std::string name, bool slave, bool distribute)
       
     if (hostName() != "gr01") {
         bSlave = true; 
-        mOSCRecv = new osc::Recv( PORT_FROM_CLIENT_COMPUTER );
+        OSCReceiver::init( PORT_FROM_CLIENT_COMPUTER );
         printf("WE are GR CHILDREN\n");
 
     } else { 
         printf("I AM GR01********\n"); 
-        mOSCRecv = new osc::Recv( PORT_FROM_SERVER_COMPUTER );
+        OSCReceiver::init( PORT_FROM_SERVER_COMPUTER );
         bSlave = false; 
     }
      
   #endif     
 
+  //DEBUG
   #ifndef __allosphere__
 
     cout << "I DO NOT BELIEVE THAT I AM RUNNING IN THE ALLOSPHERE" << endl;
@@ -180,27 +180,18 @@ inline OmniApp::OmniApp(std::string name, bool slave, bool distribute)
     omniEnable(false);
     bSlave = false; 
     bDistribute = false;
-    mOSCRecv = new osc::Recv( PORT_FROM_SERVER_COMPUTER );
+    OSCReceiver::init( PORT_FROM_SERVER_COMPUTER );
  
   #endif
 
-  oscRecv().bufferSize(32000);
-  oscRecv().handler(*this);
-  oscRecv().timeout(.01);
-
-    if (!bSlave) {
-      Window::append(mNavControl);          
-      sendHandshake();
-    }
+  //NAV CONTROL
+  if (!bSlave) {
+    Window::append(mNavControl);          
+  }
 }
 
 
-
-inline OmniApp::~OmniApp() {
-  if (!bSlave) sendDisconnect();
-}
-
-
+inline OmniApp::~OmniApp() {}
 
 /*-----------------------------------------------------------------------------
  *  GET CONFIGURATION FILES
@@ -249,17 +240,6 @@ inline void OmniApp::initWindow( const Window::Dim& dims, const std::string titl
 }
 
 
-/*-----------------------------------------------------------------------------
- *  INITIALIZE GLV GUI
- *-----------------------------------------------------------------------------*/
-inline void OmniApp::initGLV(){
-  glv.parentWindow(*this);
-  glv.gui.colors().back.set(.3,.3,.3);  
-  glv.gui(bOmniEnable, "omni_enable");
-}
-
-
-
 inline void OmniApp::start() {
   if (mOmni.activeStereo()) {
     Window::displayMode(Window::displayMode() | Window::STEREO_BUF);
@@ -270,10 +250,6 @@ inline void OmniApp::start() {
   if (mOmni.fullScreen()) {
     fullScreen(true);
     if (hostName() !="photon")cursorHide(true);
-  }
-  
-  if (!bSlave) { 
-    if(oscSend().opened()) sendHandshake();
   }
   
   Main::get().start();
@@ -287,8 +263,7 @@ inline bool OmniApp::onCreate() {
   vert.printLog();
   frag.source(fragmentCode(), Shader::FRAGMENT).compile();
   frag.printLog();
-  mShader.attach
-  (vert).attach(frag).link();
+  mShader.attach(vert).attach(frag).link();
   mShader.printLog();
   mShader.begin();
   mShader.uniform("lighting", 0.5);
@@ -307,22 +282,22 @@ inline bool OmniApp::onFrame() {
   FPS::onFrame();
 
   ///Listen on port from server or client
-  while(oscRecv().recv()) {}
-  
+  OSCReceiver::listen();
+    
   ///NAVIGATE
   if (!bSlave){
+
     nav().step();
-           
-      //SEND CAMERA POSITION AND ORIENTATION TO ALL OTHER COMPUTERS (if we're in the allosphere)
-      #ifdef __allosphere__
-        cout << "sending packet" <<endl;
-        osc::Packet p;
-        p.beginMessage("/nav");
-        p << nav().pos().x << nav().pos().y << nav().pos().z << nav().quat().x << nav().quat().y << nav().quat().z << nav().quat().w;
-        p.endMessage();            
-  
-        SharedData::osend(p, PORT_FROM_MASTER_COMPUTER);  
-      #endif
+    //SEND CAMERA POSITION AND ORIENTATION TO ALL OTHER COMPUTERS
+    #ifdef __allosphere__
+      osc::Packet p;
+      p.beginMessage("/nav");
+        p << nav().pos().x << nav().pos().y << nav().pos().z;
+        p << nav().quat().x << nav().quat().y << nav().quat().z << nav().quat().w;
+      p.endMessage();            
+
+      SharedData::osend(p, PORT_FROM_MASTER_COMPUTER);  
+    #endif
   }  
   
   ///UPDATE STATE
@@ -335,16 +310,6 @@ inline bool OmniApp::onFrame() {
     mOmni.onFrame(*this, lens(), nav(), vp);
   } else {
     mOmni.onFrameFront(*this, lens(), nav(), vp);
-    
-    //ATTEMPT TO FIX RATIO
-// 		double fovy = lens().fovy();
-//		double aspect = vp.aspect();
-//		Vec3d ux, uy, uz; 
-//    nav().unitVectors(ux, uy, uz);
-		
-//    mOmni.gl.projection( Matrix4d::perspective(fovy, aspect, lens().near(), lens().far()) );
-//		mOmni.gl.modelView( Matrix4d::lookAt(ux, uy, uz, nav().pos()) );
- 
   }
 
   return true;
@@ -354,33 +319,14 @@ inline void OmniApp::onDrawOmni(OmniStereo& omni) {
   
   graphics().error("start onDraw");
   
-  mShader.begin();
-  
+  mShader.begin(); 
     mOmni.uniforms(mShader);  
     onDraw(graphics());
-  
   mShader.end();
 }
 
-
 /*-----------------------------------------------------------------------------
- *  HANDSHAKE WITH DEVICE SERVER
- *-----------------------------------------------------------------------------*/
-inline void OmniApp::sendHandshake(){
-  oscSend().send("/handshake", name(), oscRecv().port() );
-}
-
-
-/*-----------------------------------------------------------------------------
- *  DISCONNECT
- *-----------------------------------------------------------------------------*/
-inline void OmniApp::sendDisconnect(){
-  oscSend().send("/disconnectApplication", name());
-}
-
-
-/*-----------------------------------------------------------------------------
- *  GET NAVIGATION MESSAGES
+ *  HANDLE NAVIGATION MESSAGES
  *-----------------------------------------------------------------------------*/
 inline void OmniApp::onMessage(osc::Message& m) {
 
@@ -395,8 +341,10 @@ inline void OmniApp::onMessage(osc::Message& m) {
 }
 
 
-//SHADER: 
 
+/*-----------------------------------------------------------------------------
+ *  SHADER CODE
+ *-----------------------------------------------------------------------------*/
 inline std::string  OmniApp::vertexCode() {
   return AL_STRINGIFY(
     varying vec4 color;
@@ -437,4 +385,4 @@ inline std::string OmniApp::fragmentCode() {
 }
 
 
-#endif
+#endif   /* ----- #ifndef horo_OmniApp_INC  ----- */
