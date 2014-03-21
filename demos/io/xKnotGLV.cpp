@@ -70,8 +70,8 @@ struct MyApp : public al::Window, public OSCApp, public GLVApp {
   virtual void onDraw() {   
   }
 
-  virtual void onMessage(){
-    kd.onMessage();
+  virtual void onMessage(osc::Message& m){
+    kd.onMessage(m);
   }
 
 };
