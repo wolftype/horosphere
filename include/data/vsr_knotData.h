@@ -171,39 +171,39 @@ struct KnotData {
         phi= f; 
       }
       else if (m.addressPattern() == "/bDrawFibers"){
-        int f;
+        float f;
         m >> f;
         bDrawFibers = f;  
       }  
       else if (m.addressPattern() == "/bDrawWrithe"){
-        int f;
+        float f;
         m >> f;
            bDrawWrithe = f;  
       }    
       else if (m.addressPattern() == "/bDrawTube"){
-        int f;
+        float f;
         m >> f;
            bDrawTube = f; 
       } 
       else if (m.addressPattern() == "/bAutoMode"){
-        int f;
+        float f;
         m >> f;
            bAutoMode = f; 
       } 
       else if (m.addressPattern() == "/bFlow"){
-        int f;
+        float f;
         m >> f;
            bFlow = f; 
       }    
       else if (m.addressPattern() == "/bUseEnergies"){
-        int f;
+        float f;
         m >> f;
            bUseEnergies = f; 
       }  
       else if (m.addressPattern() == "/energy_scale"){
         float f;
         m >> f;
-           energy_scale = f; 
+        energy_scale = f; 
       }    
       else if (m.addressPattern() == "/size"){
         float f;
