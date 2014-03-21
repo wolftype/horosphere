@@ -43,7 +43,7 @@ using namespace std;
 struct SharedData{
     
     static void osend1G(const osc::Packet& m, int port){   
-	    osc::Send(port, "gr01").send(m);    
+	   // osc::Send(port, "gr01").send(m);    
 	    osc::Send(port, "gr02").send(m); 
  	    osc::Send(port, "gr03").send(m); 
 	    osc::Send(port, "gr04").send(m); 
@@ -60,7 +60,7 @@ struct SharedData{
  }
 
   static void osend(const osc::Packet& m, int port){   
-	    osc::Send(port, "192.168.10.80").send(m);    
+	  //  osc::Send(port, "192.168.10.80").send(m);    
 	    osc::Send(port, "192.168.10.81").send(m); 
  	    osc::Send(port, "192.168.10.82").send(m); 
 	    osc::Send(port, "192.168.10.83").send(m); 

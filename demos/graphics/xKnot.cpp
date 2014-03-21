@@ -147,7 +147,7 @@ void App::updateState(){
   kd.vecZ = vec[2];
 
   //Send Data
-  kd.bundleAndSend();
+  kd.bundleAndSendToAll(true);
 
 }
 

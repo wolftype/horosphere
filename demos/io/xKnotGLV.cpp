@@ -49,14 +49,17 @@ struct MyApp : public al::Window, public OSCApp, public GLVApp {
     listen(); // listen for updates from tablet and other controllers 
      
     update(); // send gui info to client
+  i
     onDraw(); 
+
     
     return true;
   }
 
+
   virtual void update(){
-    kd.bundleAndSend();  
-  } 
+   if (bUseGui) SharedData::SendToMainFromServer( kd.bundle() );
+  }
 
   virtual void start(){
     OSCApp::start();
@@ -66,7 +69,6 @@ struct MyApp : public al::Window, public OSCApp, public GLVApp {
   virtual ~MyApp() {}
 
   virtual void onDraw() {   
-   if (bUseGui) SharedData::SendToMainFromServer( kd.bundle() );
   }
 
 };

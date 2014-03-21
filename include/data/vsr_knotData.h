@@ -54,7 +54,7 @@ struct KnotData {
   /*-----------------------------------------------------------------------------
    *  MAKE OSC PACKET AND SEND TO ALL MACHINES  
    *-----------------------------------------------------------------------------*/
-    void bundleAndSend( bool TEN_G = false ){
+    void bundleAndSendToAll( bool TEN_G = false ){
       sendToAll( bundle(), TEN_G );
     }
 
