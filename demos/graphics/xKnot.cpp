@@ -247,7 +247,7 @@ void App::step(){
   kd.diameter = Ro::size( tk.cir[0], true );
     
   // Tube Mesh
-  tube = Shape::Skin( tk.cir, tk.cir.size(), 3 );
+  tube = Shape::Skin( tk.cir, tk.cir.size(), 10 );
    
   for (int i = 0; i<iter;++i){
   
