@@ -21,7 +21,7 @@
 #include "GLV/glv_binding.h"
 #include "GLV/glv_util.h" 
 #include "GLV/glv_layout.h"
-#include "al_glv_gui.h"
+#include "horo_glv_gui.h"
 
 #include "allocore/al_Allocore.hpp"
 

@@ -18,7 +18,7 @@
 
 
 #include "horo_AudioProcess.h"   
-#include "gam_GxSync.h"
+#include "horo_GxSync.h"
 #include "al_AudioApp.h"         
 
 #include "al_SharedData.h"

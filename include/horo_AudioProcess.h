@@ -33,8 +33,7 @@
 #include "GLV/glv_binding.h"
 #include "GLV/glv_util.h"
 
-#include "al_glv_gui.h"   
-
+#include "horo_glv_gui.h"   
 
 // using namespace al;     
 using namespace gam;
@@ -61,8 +60,6 @@ struct AudioParam {
 	AudioParam ( double _min = 0.0, double _max = 1.0 ) :
 	val(0), min(_min), max(_max) {}
 
-//	AudioParam(bool b) : val(0), min(0), max(1), trigger(b){}
-	
 };    
 
 template<int N>
@@ -156,13 +153,8 @@ struct AudioProcess : public gam::Process {
 		
 		src();  
 		
-	//	cout << src << endl; 
 	};
 	
-	// double get(string s) const{
-	// 	return mVarMap[name+s] -> val;
-	// } 
-      
 	double get(string s){
 		return mVarMap[name+s] -> val;
 	}
@@ -223,13 +215,9 @@ struct FMSynth : public AudioProcess {
 	void setup(){ 
 		 
 		add("/c1", 40,800);
-	   // add("/c1ph");  
 		add("/c2", 40,800); 
-	   // add("/c2ph");   
 		add("/m1",1,400); 
 		add("/m2",1,400);
-	   // add("/mod1", 1, 800 );
-	   // add("/mod2", 1, 800 ); 
 		add("/lfreq",1,100);  
 		 
 		set("/c1",100);
@@ -246,11 +234,6 @@ struct FMSynth : public AudioProcess {
 		c2 = get("/c2"); 
 		m1 = get("/m1");
 		m2 = get("/m2");  
-		
-		//car1.phase( get("/c1ph"));
-		//car2.phase( get("/c2ph"));  
-	  //  mod1.freq( get("/mod1"));   
-	  //  mod2.freq( get("/mod2")); 
 		
 		lfo.freq( get("/lfreq"));
 		

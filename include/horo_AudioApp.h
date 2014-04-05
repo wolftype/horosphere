@@ -11,7 +11,7 @@
 
 #include "allocore/al_Allocore.hpp" 
 
-#include "al_SharedData.h" 
+#include "horo_SharedData.h" 
 #include "gam_GxSync.h" 
 
 #include "horo_GLVApp.h"

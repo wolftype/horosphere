@@ -18,7 +18,7 @@
 
 #include "allocore/al_Allocore.hpp"
 #include "allocore/protocol/al_OSC.hpp"
-#include "al_SharedData.h"
+#include "horo_SharedData.h"
 #include <iostream>
 
 using namespace std;
