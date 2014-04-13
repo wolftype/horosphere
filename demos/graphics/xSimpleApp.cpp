@@ -51,13 +51,10 @@ struct MyApp : App {
     /*-----------------------------------------------------------------------------
      *  Member Variables
      *-----------------------------------------------------------------------------*/
-    Circle circleXY, circleXZ;
-    float phaseA, phaseB;
+    Circle circleXY;
+    float phaseA;
 
     SawTooth * process;
-
-    //Saw<> sawA;
-    //Saw<> sawB;
     
     /*-----------------------------------------------------------------------------
      *  Constructor
@@ -77,13 +74,12 @@ struct MyApp : App {
      *-----------------------------------------------------------------------------*/
     void init(){
       circleXY = CXY(1);        // Circle in XY plane
-      circleXZ = CXZ(1);        // Circle in XZ plane
-      phaseA = phaseB = 1;      // Phases
+      phaseA = 1;      // Phases
 
       process = &mScheduler.add<SawTooth>();
 
       glv.gui(phaseA,"phaseA",0,100); // Gui control
-      glv.gui(phaseB,"phaseA",0,100);
+      
     }
     
     /*-----------------------------------------------------------------------------
@@ -115,7 +111,6 @@ struct MyApp : App {
     void onDraw(Graphics& g){
       
       Draw(circleXY.rot( Biv::xz * phaseA ),1,1,0);  //< Draw( object, red, green, blue ) 
-      Draw(circleXZ.rot( Biv::xy * phaseB ),0,1,1);
 
       process -> saw.freq(80 + 240 * phaseA); 
       
