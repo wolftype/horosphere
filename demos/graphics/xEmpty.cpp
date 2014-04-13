@@ -1,7 +1,7 @@
 //  Created by Pablo Colapinto on 2/26/13.
 
-#include "al_OmniAppGFX.h"   
-#include "gam_GxSync.h"
+#include "horo_OmniApp.h"   
+#include "horo_GxSync.h"
 
 #include "vsr/vsr_cga3D_op.h"
 #include "vsr/vsr_cga3D_draw.h"

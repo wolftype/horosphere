@@ -19,9 +19,9 @@
 
 #include "horo_AudioProcess.h"   
 #include "horo_GxSync.h"
-#include "al_AudioApp.h"         
+#include "horo_AudioApp.h"         
 
-#include "al_SharedData.h"
+#include "horo_SharedData.h"
 #include "data/vsr_knotData.h"
 #include "data/vsr_audioData.h"
 

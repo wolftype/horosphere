@@ -12,7 +12,7 @@
 #include "allocore/al_Allocore.hpp" 
 
 #include "horo_SharedData.h" 
-#include "gam_GxSync.h" 
+#include "horo_GxSync.h" 
 
 #include "horo_GLVApp.h"
 

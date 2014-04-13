@@ -3,7 +3,8 @@
  *
  *       Filename:  horo_OmniApp.h
  *
- *    Description:  omni app (gfx + osc) for allosphere
+ *    Description:  omni app (gfx + osc) for allosphere (no audio here -- for a version with 
+ *    audio see horo_App.h)
  *
  *        Version:  1.0
  *        Created:  03/20/2014 15:58:17

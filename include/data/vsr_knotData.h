@@ -21,7 +21,7 @@
 #define alloprojects_knotData_h
 
 #include "allocore/protocol/al_OSC.hpp"
-#include "al_SharedData.h"
+#include "horo_SharedData.h"
 
 using namespace al::osc;
 

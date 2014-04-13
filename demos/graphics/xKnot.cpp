@@ -19,7 +19,7 @@
 
 //#include "al_OmniAppGFX.h"   
 #include "horo_OmniApp.h"
-#include "gam_GxSync.h"
+#include "horo_GxSync.h"
 
 #include "vsr/vsr_cga3D_op.h"
 #include "vsr/vsr_cga3D_draw.h"
@@ -34,7 +34,7 @@
 #include "data/vsr_audioData.h"
 
 
-#include "al_glv_gui.h"
+#include "horo_glv_gui.h"
 
 using namespace al;
 using namespace vsr;
@@ -119,9 +119,6 @@ void App::onAnimate(al_sec dt){
  *-----------------------------------------------------------------------------*/
 void App::updateState(){
   
-  //Calculate Point Along Orbit
-  //pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
-  //pnt.print();
 
   if (kd.bFlow)  pnt = Ro::loc( pnt.sp( tk.bst() ) );
   
@@ -136,8 +133,6 @@ void App::updateState(){
   } else {
     tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
   }
-//test
- // tvec =  vsr::Vec::x.sp( Gen::rot(kd.theta, kd.phi) );
 
   Biv tb = Gen::log( Gen::ratio(tvec, vec) ); 
   Rot r = Gen::rot( tb * kd.rotVel );  
@@ -178,8 +173,13 @@ void App::sendAudioData(){
 }
 
 
+
+/*-----------------------------------------------------------------------------
+ *  Get Messages
+ *-----------------------------------------------------------------------------*/
 void App :: onMessage(osc::Message& m) {   
     
+    //cout << "message rec'ved" << endl; 
     if (bSlave){  
       OmniApp::onMessage(m);
     }
@@ -197,9 +197,9 @@ void App :: onMessage(osc::Message& m) {
 void App::step(){
 
   // SET KNOT PARAMETERS
+  if (!bSlave) updateState();
 
-  if (!bSlave ) updateState();
-  if( bSlave){
+  if(bSlave){
    vec = vsr::Vec( kd.vecX, kd.vecY, kd.vecZ);
    pnt = Ro::null( kd.pntX, kd.pntY, kd.pntZ);
   }
@@ -207,21 +207,34 @@ void App::step(){
  
   light();
 
-  // Clear State
-  tk.cir.clear();
-  tk.pnt.clear();
-    
-  // CLEAR MESHES
-  tm.clear();   
-  wm.clear();
-  tube.clear(); 
 
-
+  //Set Knot Parameters
   tk.HF.vec() = vec; 
   tk.P = kd.P;
   tk.Q = kd.Q;
   tk.amt = kd.vel; 
   int iter = tk.iter(); 
+
+  static int lastIter = iter;
+  bool bReallocMemory = false;
+  if(lastIter != iter){
+    bReallocMemory = true;
+  }
+  lastIter = iter;
+
+//  if (bReallocMemory){
+    // Clear Data
+    tk.cir.clear();
+    tk.pnt.clear();
+
+    /* tk.cir = vector<Cir>(iter); */
+    /* tk.pnt = vector<Pnt>(iter); */
+      
+    // CLEAR MESHES
+    tm.clear();   
+    wm.clear();
+    tube.clear(); 
+//  }
 
   // LOCAL STATICS
   static Pnt np;           // New Position  
@@ -256,7 +269,7 @@ void App::step(){
   kd.diameter = Ro::size( tk.cir[0], true );
     
   // Tube Mesh
-  tube = Shape::Skin( tk.cir, tk.cir.size(), 10 );
+  tube = Shape::Skin( tk.cir, tk.cir.size(), 5 );
    
   for (int i = 0; i<iter;++i){
   
@@ -275,17 +288,17 @@ void App::step(){
 
       for(int i = 0; i < iter; ++i){
     
-      double c = tk.energies[i]* kd.energy_scale; 
-      double t = 1.0 * i/iter;
-    
-      if (kd.bUseEnergies) t *= tk.energies[i] * kd.energy_scale;
- 
-      Par tp = Ro::par_cir( tk.cir[i], t * TWOPI * kd.writhe);  
-      Pnt pa = Ro::split( tp, true );
-      Pnt pb = Ro::split( tp, false );
+        double c = tk.energies[i]* kd.energy_scale; 
+        double t = 1.0 * i/iter;
+      
+        if (kd.bUseEnergies) t *= tk.energies[i] * kd.energy_scale;
+   
+        Par tp = Ro::par_cir( tk.cir[i], t * TWOPI * kd.writhe);  
+        Pnt pa = Ro::split( tp, true );
+        Pnt pb = Ro::split( tp, false );
 
-      wm[k].add(  pa );
-      wm[k+1].add( pb );
+        wm[k].add(  pa );
+        wm[k+1].add( pb );
 
      }
   }
