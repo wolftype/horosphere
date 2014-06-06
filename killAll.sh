@@ -1,3 +1,3 @@
-!#bin/bash
+#!/bin/bash
 
-parallel-ssh -h hosts.txt "pkill $1"
+parallel-ssh -h util/hosts.txt "pkill $1"
