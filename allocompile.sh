@@ -19,5 +19,5 @@ echo Target is $TARGET
 mkdir build
 cd build
 rm bin/${TARGET}
-cmake .. -DDIR=${DIRECTORY} -DSRC=../../$1 -DBUILDING_FOR_ALLOSPHERE=1
+cmake .. -DDIR=${DIRECTORY} -DSRC=${FILENAME} -DBUILDING_FOR_ALLOSPHERE=1
 make
