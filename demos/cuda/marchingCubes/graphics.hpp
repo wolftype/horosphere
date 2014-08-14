@@ -18,6 +18,7 @@
 
 #include <GL/glew.h>
 #include <cutil_gl_inline.h>
+//#include <helper_cuda_gl.h>
 #include <cuda_gl_interop.h>
 #include <rendercheck_gl.h>
 

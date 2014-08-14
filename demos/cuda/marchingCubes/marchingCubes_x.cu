@@ -67,7 +67,15 @@
 
 #include "marchingCubes_x.h"
 
+#ifdef __cudaLegacy__
 #include <cutil_inline.h>    // includes cuda.h and cuda_runtime_api.h
+#else
+#include <helper_cuda.h>
+#include <helper_functions.h>
+#endif
+//#include <helper_cuda.h>   // includes cuda.h and cuda_runtime_api.h
+//#include <helper_functions.h>
+
 #include <shrQATest.h>
 #include <cuda_runtime_api.h>
 #include <vector_functions.h>

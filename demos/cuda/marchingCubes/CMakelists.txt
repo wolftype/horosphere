@@ -9,6 +9,10 @@ message("cuda? " ${CUDA_FOUND})
 message(${CUDA_LIBRARIES})
 set(PATH_TO_CUDA_DEVEL /Developer/GPU\ Computing/)
 message(${PATH_TO_CUDA_DEVEL})
+if(${CUDALEGACY})
+  list(APPEND CUDA_NVCC_FLAGS -Xcompiler;"-D __cudaLegacy__")
+  message("cuda legacy")
+endif()  
 
 #compile cuda code into its own library
 cuda_include_directories(${PATH_TO_CUDA_DEVEL}/CUDALibraries/common/inc/)

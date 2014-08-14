@@ -14,12 +14,19 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#ifdef __cudaLegacy__          //legacy switch for cuda 4.2 and older (snow leopard)
 #include <cutil_inline.h>    // includes cuda.h and cuda_runtime_api.h
+#include "cutil_math.h"
+#else
+#include <helper_cuda.h> 
+#include <helper_functions.h>
+#include <helper_math.h>
+#endif
+
 #include <cuda_runtime_api.h>
 #include <thrust/device_vector.h>
 #include <thrust/scan.h>
-
-#include "cutil_math.h"
 
 #include "defines.h"
 #include "tables.h"
