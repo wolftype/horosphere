@@ -234,7 +234,8 @@ inline void OmniApp::initOmni(std::string path) {
 /*-----------------------------------------------------------------------------
  *  INITIALIZE WINDOW
  *-----------------------------------------------------------------------------*/
-inline void OmniApp::initWindow( const Window::Dim& dims, const std::string title, double fps, Window::DisplayMode mode) {
+inline void OmniApp::initWindow( const Window::Dim& dims, 
+                const std::string title, double fps, Window::DisplayMode mode) {
   Window::dimensions(dims);
   Window::title(title);
   Window::fps(fps);
@@ -271,7 +272,7 @@ inline bool OmniApp::onCreate() {
   mShader.attach(vert).attach(frag).link();
   mShader.printLog();
   mShader.begin();
-  mShader.uniform("lighting", 0.5);
+//  mShader.uniform("lighting", 0.5);
   mShader.end();
   
   return true;

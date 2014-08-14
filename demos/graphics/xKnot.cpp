@@ -236,17 +236,19 @@ void App::step(){
     tube.clear(); 
 //  }
 
+  float hyperradius = 1.0;
+
   // LOCAL STATICS
   static Pnt np;           // New Position  
-  np = pnt;   
+  np = Ro::dls( pnt, hyperradius);   
   
   static Bst bst;          // Boostor
   bst = tk.bst();
 
   // ORBIT POINTS
   for (int i = 0; i<iter+1;++i){
-      np = Ro::loc( np.sp( bst ) );
-      tk.pnt.push_back(np);
+      np = np.sp( bst );
+      tk.pnt.push_back( Ro::loc(np) );
   }
 
   //SET Knot Energy

@@ -1,0 +1,56 @@
+#CMAKE FILE FOR BUILDING CUDA DEMOS
+
+cmake_minimum_required(VERSION 2.0)
+cmake_policy(SET CMP0003 NEW)
+
+#find cuda
+find_package(CUDA REQUIRED)
+message("cuda? " ${CUDA_FOUND})
+message(${CUDA_LIBRARIES})
+
+
+#compile cuda code into its own library
+cuda_add_library(subcuda cutest.cu)
+target_link_libraries(subcuda ${CUDA_LIBRARIES})
+#set cuda compiler
+set(CUDA_HOST_COMPILER "gcc")
+
+
+#use clang on apple computers
+if(APPLE)
+option(USE_CLANG "use clang" ON)
+endif()
+if(USE_CLANG)
+  message("using clang compiler")
+  SET(CMAKE_CXX_COMPILER "clang++")
+  SET(CMAKE_C_COMPILER "clang")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+else()
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+endif()
+
+
+
+#one file
+message("demo name: " ${SRC} )
+get_filename_component(target ${SRC} NAME_WE)
+add_executable(${target} ${SRC} )
+target_link_libraries(${target} 
+  vsr 
+  GLV 
+  Gamma 
+  allocore 
+  alloutil 
+  alloGLV
+  subcuda
+  ${ALLOCORE_LINK_LIBRARIES} 
+  ${ALLOUTIL_LINK_LIBRARIES} 
+  ${ALLOCORE_LINK_LIBRARIES} 
+  ${CUDA_LIBRARIES}
+)
+
+#necessary for port audio on apple
+if(APPLE)
+  set_target_properties(${target} PROPERTIES
+  LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+endif()
