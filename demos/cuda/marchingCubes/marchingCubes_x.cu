@@ -68,15 +68,23 @@
 #include "marchingCubes_x.h"
 
 #ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)
+#include <shrQATest.h>
 #include <cutil_inline.h>    // includes cuda.h and cuda_runtime_api.h
+#define AL_CUDA_CHECK_ERRORS cutilSafeCall
+#define AL_CUDA_INIT        shrQAStart(*pArgc, pArgv); \
+                            cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ) 
+#define AL_CUDA_DEVICE_RESET cutilDeviceReset()
+
 #else
 #include <helper_cuda.h>
 #include <helper_functions.h>
+#define AL_CUDA_CHECK_ERRORS checkCudaErrors
+#define AL_CUDA_INIT findCudaGLDevice(*pArgc, pArgv)
+#define AL_CUDA_DEVICE_RESET cudaDeviceReset()
 #endif
 //#include <helper_cuda.h>   // includes cuda.h and cuda_runtime_api.h
 //#include <helper_functions.h>
 
-#include <shrQATest.h>
 #include <cuda_runtime_api.h>
 #include <vector_functions.h>
 
@@ -208,8 +216,8 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
 
         int size = gridSize.x*gridSize.y*gridSize.z*sizeof(uchar);
         uchar *volume = loadRawFile(path, size);
-        cutilSafeCall(cudaMalloc((void**) &d_volume, size));
-        cutilSafeCall(cudaMemcpy(d_volume, volume, size, cudaMemcpyHostToDevice) );
+        AL_CUDA_CHECK_ERRORS(cudaMalloc((void**) &d_volume, size));
+        AL_CUDA_CHECK_ERRORS(cudaMemcpy(d_volume, volume, size, cudaMemcpyHostToDevice) );
         free(volume);
 
       printf("binding volume data\n");
@@ -227,14 +235,14 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
         createVBO(&posVbo, maxVerts*sizeof(float)*4);
 
         printf("cutilSafeCall\n");
-        cutilSafeCall(cudaGraphicsGLRegisterBuffer(&cuda_posvbo_resource, posVbo, 
+        AL_CUDA_CHECK_ERRORS(cudaGraphicsGLRegisterBuffer(&cuda_posvbo_resource, posVbo, 
           cudaGraphicsMapFlagsWriteDiscard));
 
         printf("createnormalVBO\n");
         createVBO(&normalVbo, maxVerts*sizeof(float)*4);
 
         printf("cutilSafeCall\n");
-        cutilSafeCall(cudaGraphicsGLRegisterBuffer(&cuda_normalvbo_resource, normalVbo, 
+        AL_CUDA_CHECK_ERRORS(cudaGraphicsGLRegisterBuffer(&cuda_normalvbo_resource, normalVbo, 
           cudaGraphicsMapFlagsWriteDiscard));
 
         // allocate textures
@@ -244,32 +252,32 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
         // allocate device memory
         printf("allocate device memory\n");
         unsigned int memSize = sizeof(uint) * numVoxels;
-        cutilSafeCall(cudaMalloc((void**) &d_voxelVerts,            memSize));
-        cutilSafeCall(cudaMalloc((void**) &d_voxelVertsScan,        memSize));
-        cutilSafeCall(cudaMalloc((void**) &d_voxelOccupied,         memSize));
-        cutilSafeCall(cudaMalloc((void**) &d_voxelOccupiedScan,     memSize));
-        cutilSafeCall(cudaMalloc((void**) &d_compVoxelArray,   memSize));
+        AL_CUDA_CHECK_ERRORS(cudaMalloc((void**) &d_voxelVerts,            memSize));
+        AL_CUDA_CHECK_ERRORS(cudaMalloc((void**) &d_voxelVertsScan,        memSize));
+        AL_CUDA_CHECK_ERRORS(cudaMalloc((void**) &d_voxelOccupied,         memSize));
+        AL_CUDA_CHECK_ERRORS(cudaMalloc((void**) &d_voxelOccupiedScan,     memSize));
+        AL_CUDA_CHECK_ERRORS(cudaMalloc((void**) &d_compVoxelArray,   memSize));
     }
 
     
     void  MarchingCubesProgram::cleanup()
     {
-        cutilCheckError( cutDeleteTimer( timer ));
+       // cutilCheckError( cutDeleteTimer( timer ));
 
         deleteVBO(&posVbo,    &cuda_posvbo_resource);
         deleteVBO(&normalVbo, &cuda_normalvbo_resource);
 
-        cutilSafeCall(cudaFree(d_edgeTable));
-        cutilSafeCall(cudaFree(d_triTable));
-        cutilSafeCall(cudaFree(d_numVertsTable));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_edgeTable));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_triTable));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_numVertsTable));
 
-        cutilSafeCall(cudaFree(d_voxelVerts));
-        cutilSafeCall(cudaFree(d_voxelVertsScan));
-        cutilSafeCall(cudaFree(d_voxelOccupied));
-        cutilSafeCall(cudaFree(d_voxelOccupiedScan));
-        cutilSafeCall(cudaFree(d_compVoxelArray));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_voxelVerts));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_voxelVertsScan));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_voxelOccupied));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_voxelOccupiedScan));
+        AL_CUDA_CHECK_ERRORS(cudaFree(d_compVoxelArray));
 
-        if (d_volume) cutilSafeCall(cudaFree(d_volume));
+        if (d_volume) AL_CUDA_CHECK_ERRORS(cudaFree(d_volume));
     }
 
 
@@ -277,14 +285,16 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
     {
        printf("MarchingCubes ");
        
-       shrQAStart(*pArgc, pArgv); 
-       cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ); 
+       AL_CUDA_INIT;
+      // shrQAStart(*pArgc, pArgv); 
+      // cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ); //// is now findCudaGLDevice(*pArgc,pArgv)
+ 
        init();
-       cutilCheckError( cutCreateTimer( &timer));
+       // cutilCheckError( cutCreateTimer( &timer));  /// is now sdkCreateTimer
    }
 
     void  MarchingCubesProgram::start(){ shrQAStart(*pArgc, pArgv);}
-    void  MarchingCubesProgram::reset(){ cutilDeviceReset(); }
+    void  MarchingCubesProgram::reset(){ AL_CUDA_DEVICE_RESET; }
     void  MarchingCubesProgram::exit() { shrQAFinishExit(*pArgc, (const char **)pArgv, QA_PASSED); }
 
 
@@ -296,7 +306,7 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
     /* { */
     /*     uint bytes = nelements * size_element; */
     /*     T *h_buffer = (T *) malloc(bytes); */
-    /*     cutilSafeCall( cudaMemcpy(h_buffer, d_buffer, bytes, cudaMemcpyDeviceToHost) ); */
+    /*     AL_CUDA_CHECK_ERRORS( cudaMemcpy(h_buffer, d_buffer, bytes, cudaMemcpyDeviceToHost) ); */
     /*     for(int i=0; i<nelements; i++) { */
     /*         printf("%d: %u\n", i, h_buffer[i]); */
     /*     } */
@@ -307,7 +317,7 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
     /* template <class T> */
     /* void dumpFile(T *d_buffer, int nelements, int size_element, const char *filename) */
     /* { */
-    /*     cutilSafeCall( cudaMemcpy( (T *)g_CheckRender->imageData(), (T *)d_buffer, nelements*size_element, cudaMemcpyDeviceToHost) ); */
+    /*     AL_CUDA_CHECK_ERRORS( cudaMemcpy( (T *)g_CheckRender->imageData(), (T *)d_buffer, nelements*size_element, cudaMemcpyDeviceToHost) ); */
     /*     g_CheckRender->dumpBin((unsigned char *)g_CheckRender->imageData(), nelements*size_element, filename); */
     /* } */
 
@@ -348,10 +358,10 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
           // the scan result plus the last value in the input array
           {
               uint lastElement, lastScanElement;
-              cutilSafeCall(cudaMemcpy((void *) &lastElement, 
+              AL_CUDA_CHECK_ERRORS(cudaMemcpy((void *) &lastElement, 
                              (void *) (d_voxelOccupied + numVoxels-1), 
                              sizeof(uint), cudaMemcpyDeviceToHost));
-              cutilSafeCall(cudaMemcpy((void *) &lastScanElement, 
+              AL_CUDA_CHECK_ERRORS(cudaMemcpy((void *) &lastScanElement, 
                              (void *) (d_voxelOccupiedScan + numVoxels-1), 
                              sizeof(uint), cudaMemcpyDeviceToHost));
               activeVoxels = lastElement + lastScanElement;
@@ -380,10 +390,10 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
           // readback total number of vertices
           {
               uint lastElement, lastScanElement;
-              cutilSafeCall(cudaMemcpy((void *) &lastElement, 
+              AL_CUDA_CHECK_ERRORS(cudaMemcpy((void *) &lastElement, 
                              (void *) (d_voxelVerts + numVoxels-1), 
                              sizeof(uint), cudaMemcpyDeviceToHost));
-              cutilSafeCall(cudaMemcpy((void *) &lastScanElement, 
+              AL_CUDA_CHECK_ERRORS(cudaMemcpy((void *) &lastScanElement, 
                              (void *) (d_voxelVertsScan + numVoxels-1), 
                              sizeof(uint), cudaMemcpyDeviceToHost));
               totalVerts = lastElement + lastScanElement;
@@ -391,13 +401,13 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
 
           // generate triangles, writing to vertex buffers
           size_t num_bytes;
-            // DEPRECATED: cutilSafeCall(cudaGLMapBufferObject((void**)&d_pos, posVbo));
-            cutilSafeCall(cudaGraphicsMapResources(1, &cuda_posvbo_resource, 0));
-            cutilSafeCall(cudaGraphicsResourceGetMappedPointer((void**)&d_pos, &num_bytes, cuda_posvbo_resource));
+            // DEPRECATED: AL_CUDA_CHECK_ERRORS(cudaGLMapBufferObject((void**)&d_pos, posVbo));
+            AL_CUDA_CHECK_ERRORS(cudaGraphicsMapResources(1, &cuda_posvbo_resource, 0));
+            AL_CUDA_CHECK_ERRORS(cudaGraphicsResourceGetMappedPointer((void**)&d_pos, &num_bytes, cuda_posvbo_resource));
 
-            // DEPRECATED: cutilSafeCall(cudaGLMapBufferObject((void**)&d_normal, normalVbo));
-            cutilSafeCall(cudaGraphicsMapResources(1, &cuda_normalvbo_resource, 0));
-            cutilSafeCall(cudaGraphicsResourceGetMappedPointer((void**)&d_normal, &num_bytes, cuda_normalvbo_resource));
+            // DEPRECATED: AL_CUDA_CHECK_ERRORS(cudaGLMapBufferObject((void**)&d_normal, normalVbo));
+            AL_CUDA_CHECK_ERRORS(cudaGraphicsMapResources(1, &cuda_normalvbo_resource, 0));
+            AL_CUDA_CHECK_ERRORS(cudaGraphicsResourceGetMappedPointer((void**)&d_normal, &num_bytes, cuda_normalvbo_resource));
 
 #if SKIP_EMPTY_VOXELS
           dim3 grid2((int) ceil(activeVoxels / (float) NTHREADS), 1, 1);
@@ -424,8 +434,8 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
                                                  maxVerts);
 #endif
 
-          cutilSafeCall(cudaGraphicsUnmapResources(1, &cuda_normalvbo_resource, 0));
-          cutilSafeCall(cudaGraphicsUnmapResources(1, &cuda_posvbo_resource, 0));
+          AL_CUDA_CHECK_ERRORS(cudaGraphicsUnmapResources(1, &cuda_normalvbo_resource, 0));
+          AL_CUDA_CHECK_ERRORS(cudaGraphicsUnmapResources(1, &cuda_posvbo_resource, 0));
       }
 
 

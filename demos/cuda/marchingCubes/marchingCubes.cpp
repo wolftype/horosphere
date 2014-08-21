@@ -542,7 +542,7 @@ runGraphicsTest(int argc, char** argv)
         return;
     }
 
-    cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() );
+    cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ); 
 
     // register callbacks
     glutDisplayFunc(display);
