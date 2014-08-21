@@ -88,6 +88,7 @@
 //#include <helper_functions.h>
 
 #include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 #include <vector_functions.h>
 
 #include "graphics.hpp"
@@ -297,7 +298,7 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
 
   //  void  MarchingCubesProgram::start(){ shrQAStart(*pArgc, pArgv);}
     void  MarchingCubesProgram::reset(){ AL_CUDA_DEVICE_RESET; }
-    void  MarchingCubesProgram::exit() { AL_CUDA_EXIT; }
+    void  MarchingCubesProgram::exit() { }//AL_CUDA_EXIT; }
 
 
     //DEBUGGING      
