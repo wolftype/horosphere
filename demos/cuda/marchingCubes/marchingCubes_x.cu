@@ -71,10 +71,8 @@
 #include <cuda_runtime.h>
 #include <vector_functions.h>
 
-
 #include "graphics.hpp"
 #include "io.hpp"
-
 
 #ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)
 #include <shrQATest.h>

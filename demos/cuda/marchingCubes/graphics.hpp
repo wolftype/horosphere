@@ -18,7 +18,9 @@
 
 #include <GL/glew.h>
 
-//#include <cuda_runtime.h>
+#include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
+#include <rendercheck_gl.h>
 
 #ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)
 #include <cutil_inline.h>    // includes cuda.h and cuda_runtime_api.h
@@ -28,8 +30,7 @@
 #include <helper_cuda_gl.h>
 #endif
 
-#include <cuda_gl_interop.h>
-#include <rendercheck_gl.h>
+
 
 
 // device data
