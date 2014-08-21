@@ -25,6 +25,7 @@
 #ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)
 #include <cutil_gl_inline.h>
 #else
+#include <helper_cuda.h>
 #include <helper_cuda_gl.h>
 #endif
 
