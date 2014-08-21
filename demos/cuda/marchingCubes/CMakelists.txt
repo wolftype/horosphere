@@ -3,33 +3,47 @@
 cmake_minimum_required(VERSION 2.0)
 cmake_policy(SET CMP0003 NEW)
 
+
+
+
 #find cuda
 find_package(CUDA REQUIRED)
 message("cuda? " ${CUDA_FOUND})
 message(${CUDA_LIBRARIES})
+
+set(CUDA_HOST_COMPILER "gcc")
+
+
 if(${CUDALEGACY})
   set(PATH_TO_CUDA_DEVEL /Developer/GPU\ Computing/)
   list(APPEND CUDA_NVCC_FLAGS -Xcompiler;"-D __cudaLegacy__")
   cuda_include_directories(${PATH_TO_CUDA_DEVEL}/CUDALibraries/common/inc/)
   cuda_include_directories(${PATH_TO_CUDA_DEVEL}/shared/inc/)
+  cuda_add_library(subcuda marchingCubes_kernel.cu marchingCubes_x.cu)
+  target_link_libraries(subcuda ${CUDA_LIBRARIES} cutil_x86_64)
   message("cuda legacy")
 else()
   set(PATH_TO_CUDA_DEVEL /usr/local/cuda-6.0/samples/)
   cuda_include_directories(${PATH_TO_CUDA_DEVEL}/7_CUDALibraries)
   cuda_include_directories(${PATH_TO_CUDA_DEVEL}/common/inc/)
+  cuda_add_library(subcuda marchingCubes_kernel.cu marchingCubes_x.cu)
+  target_link_libraries(subcuda ${CUDA_LIBRARIES} )
   message(${PATH_TO_CUDA_DEVEL})
-endif()  
+endif()
 
 #compile cuda code into its own library
 
 #cuda_link_directories(${PATH_TO_CUDA_DEVEL}/C/lib/)
 
-cuda_add_library(subcuda marchingCubes_kernel.cu marchingCubes_x.cu)
+
+
+#set cuda compiler
+
+#cuda_link_directories(${PATH_TO_CUDA_DEVEL}/C/lib/)
 
 message(${PATH_TO_CUDA_DEVEL}/C/common/inc/)
-target_link_libraries(subcuda ${CUDA_LIBRARIES} cutil_x86_64)
-#set cuda compiler
-set(CUDA_HOST_COMPILER "gcc")
+
+message(${PATH_TO_CUDA_DEVEL}/C/common/inc/)
 
 
 #use clang on apple computers
