@@ -87,7 +87,7 @@
 #include <helper_cuda.h>
 #include <helper_functions.h>
 #define AL_CUDA_CHECK_ERRORS checkCudaErrors
-#define AL_CUDA_INIT findCudaGLDevice(*pArgc, pArgv)
+#define AL_CUDA_INIT findCudaGLDevice(*pArgc, (const char **)pArgv)
 #define AL_CUDA_DEVICE_RESET cudaDeviceReset()
 //#define AL_CUDA_EXIT 
 #endif
