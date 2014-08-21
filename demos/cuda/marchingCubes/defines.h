@@ -12,6 +12,18 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
+#ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)a
+#define AL_CUDA_CHECK_ERRORS cutilSafeCall
+#define AL_CUDA_INIT        shrQAStart(*pArgc, pArgv); \
+                            cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ) 
+#define AL_CUDA_DEVICE_RESET cutilDeviceReset()
+#define AL_CUDA_EXIT shrQAFinishExit(*pArgc, (const char **)pArgv, QA_PASSED)
+#else
+#define AL_CUDA_CHECK_ERRORS checkCudaErrors
+#define AL_CUDA_INIT findCudaGLDevice(*pArgc, (const char **)pArgv)
+#define AL_CUDA_DEVICE_RESET cudaDeviceReset()
+#endif
+
 typedef unsigned int uint;
 typedef unsigned char uchar;
 

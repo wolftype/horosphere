@@ -77,19 +77,11 @@
 #ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)
 #include <shrQATest.h>
 #include <cutil_inline.h>    // includes cuda.h and cuda_runtime_api.h
-#define AL_CUDA_CHECK_ERRORS cutilSafeCall
-#define AL_CUDA_INIT        shrQAStart(*pArgc, pArgv); \
-                            cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ) 
-#define AL_CUDA_DEVICE_RESET cutilDeviceReset()
-#define AL_CUDA_EXIT shrQAFinishExit(*pArgc, (const char **)pArgv, QA_PASSED)
+
 
 #else
 #include <helper_cuda.h>
 #include <helper_functions.h>
-#define AL_CUDA_CHECK_ERRORS checkCudaErrors
-#define AL_CUDA_INIT findCudaGLDevice(*pArgc, (const char **)pArgv)
-#define AL_CUDA_DEVICE_RESET cudaDeviceReset()
-//#define AL_CUDA_EXIT 
 #endif
 //#include <helper_cuda.h>   // includes cuda.h and cuda_runtime_api.h
 //#include <helper_functions.h>

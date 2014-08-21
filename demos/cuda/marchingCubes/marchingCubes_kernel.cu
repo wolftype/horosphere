@@ -42,25 +42,25 @@ texture<uchar, 1, cudaReadModeNormalizedFloat> volumeTex;
 extern "C"
 void allocateTextures(	uint **d_edgeTable, uint **d_triTable,  uint **d_numVertsTable )
 {
-    cutilSafeCall(cudaMalloc((void**) d_edgeTable, 256*sizeof(uint)));
-    cutilSafeCall(cudaMemcpy((void *)*d_edgeTable, (void *)edgeTable, 256*sizeof(uint), cudaMemcpyHostToDevice) );
+    AL_CHECK_ERRORS(cudaMalloc((void**) d_edgeTable, 256*sizeof(uint)));
+    AL_CHECK_ERRORS(cudaMemcpy((void *)*d_edgeTable, (void *)edgeTable, 256*sizeof(uint), cudaMemcpyHostToDevice) );
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindUnsigned);
-    cutilSafeCall(cudaBindTexture(0, edgeTex, *d_edgeTable, channelDesc) );
+    AL_CHECK_ERRORS(cudaBindTexture(0, edgeTex, *d_edgeTable, channelDesc) );
 
-    cutilSafeCall(cudaMalloc((void**) d_triTable, 256*16*sizeof(uint)));
-    cutilSafeCall(cudaMemcpy((void *)*d_triTable, (void *)triTable, 256*16*sizeof(uint), cudaMemcpyHostToDevice) );
-    cutilSafeCall(cudaBindTexture(0, triTex, *d_triTable, channelDesc) );
+    AL_CHECK_ERRORS(cudaMalloc((void**) d_triTable, 256*16*sizeof(uint)));
+    AL_CHECK_ERRORS(cudaMemcpy((void *)*d_triTable, (void *)triTable, 256*16*sizeof(uint), cudaMemcpyHostToDevice) );
+    AL_CHECK_ERRORS(cudaBindTexture(0, triTex, *d_triTable, channelDesc) );
 
-    cutilSafeCall(cudaMalloc((void**) d_numVertsTable, 256*sizeof(uint)));
-    cutilSafeCall(cudaMemcpy((void *)*d_numVertsTable, (void *)numVertsTable, 256*sizeof(uint), cudaMemcpyHostToDevice) );
-    cutilSafeCall(cudaBindTexture(0, numVertsTex, *d_numVertsTable, channelDesc) );
+    AL_CHECK_ERRORS(cudaMalloc((void**) d_numVertsTable, 256*sizeof(uint)));
+    AL_CHECK_ERRORS(cudaMemcpy((void *)*d_numVertsTable, (void *)numVertsTable, 256*sizeof(uint), cudaMemcpyHostToDevice) );
+    AL_CHECK_ERRORS(cudaBindTexture(0, numVertsTex, *d_numVertsTable, channelDesc) );
 }
 
 extern "C"
 void bindVolumeTexture(uchar *d_volume)
 {
     // bind to linear texture
-    cutilSafeCall(cudaBindTexture(0, volumeTex, d_volume, cudaCreateChannelDesc(8, 0, 0, 0, cudaChannelFormatKindUnsigned)));
+    AL_CHECK_ERRORS(cudaBindTexture(0, volumeTex, d_volume, cudaCreateChannelDesc(8, 0, 0, 0, cudaChannelFormatKindUnsigned)));
 }
 
 // an interesting field function
@@ -186,7 +186,7 @@ launch_classifyVoxel( dim3 grid, dim3 threads, uint* voxelVerts, uint *voxelOccu
     classifyVoxel<<<grid, threads>>>(voxelVerts, voxelOccupied, volume, 
                                      gridSize, gridSizeShift, gridSizeMask, 
                                      numVoxels, voxelSize, isoValue);
-    cutilCheckMsg("classifyVoxel failed");
+    //cutilCheckMsg("classifyVoxel failed");
 }
               
 
@@ -207,7 +207,7 @@ launch_compactVoxels(dim3 grid, dim3 threads, uint *compactedVoxelArray, uint *v
 {
     compactVoxels<<<grid, threads>>>(compactedVoxelArray, voxelOccupied, 
                                      voxelOccupiedScan, numVoxels);
-    cutilCheckMsg("compactVoxels failed");
+    //cutilCheckMsg("compactVoxels failed");
 }
 
 // compute interpolated vertex along an edge
@@ -364,7 +364,7 @@ launch_generateTriangles(dim3 grid, dim3 threads,
                                            gridSize, gridSizeShift, gridSizeMask, 
                                            voxelSize, isoValue, activeVoxels, 
                                            maxVerts);
-    cutilCheckMsg("generateTriangles failed");
+    //cutilCheckMsg("generateTriangles failed");
 }
 					
 
@@ -545,7 +545,7 @@ launch_generateTriangles2(dim3 grid, dim3 threads,
                                             gridSize, gridSizeShift, gridSizeMask, 
                                             voxelSize, isoValue, activeVoxels, 
                                             maxVerts);
-    cutilCheckMsg("generateTriangles2 failed");
+    //cutilCheckMsg("generateTriangles2 failed");
 }
 
 extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, unsigned int numElements)
