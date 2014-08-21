@@ -72,6 +72,9 @@
 #include <vector_functions.h>
 
 
+#include "graphics.hpp"
+#include "io.hpp"
+
 
 #ifdef __cudaLegacy__         //legacy switch for cuda 4.2 and older (snow leopard)
 #include <shrQATest.h>
@@ -83,8 +86,6 @@
 //#include <helper_cuda.h>   // includes cuda.h and cuda_runtime_api.h
 //#include <helper_functions.h>
 
-#include "graphics.hpp"
-#include "io.hpp"
 
 
 #define MAX_EPSILON_ERROR 5.0f
