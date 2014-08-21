@@ -74,6 +74,7 @@
 #define AL_CUDA_INIT        shrQAStart(*pArgc, pArgv); \
                             cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() ) 
 #define AL_CUDA_DEVICE_RESET cutilDeviceReset()
+#define AL_CUDA_EXIT shrQAFinishExit(*pArgc, (const char **)pArgv, QA_PASSED)
 
 #else
 #include <helper_cuda.h>
@@ -81,6 +82,7 @@
 #define AL_CUDA_CHECK_ERRORS checkCudaErrors
 #define AL_CUDA_INIT findCudaGLDevice(*pArgc, pArgv)
 #define AL_CUDA_DEVICE_RESET cudaDeviceReset()
+//#define AL_CUDA_EXIT 
 #endif
 //#include <helper_cuda.h>   // includes cuda.h and cuda_runtime_api.h
 //#include <helper_functions.h>
@@ -293,9 +295,9 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
        // cutilCheckError( cutCreateTimer( &timer));  /// is now sdkCreateTimer
    }
 
-    void  MarchingCubesProgram::start(){ shrQAStart(*pArgc, pArgv);}
+  //  void  MarchingCubesProgram::start(){ shrQAStart(*pArgc, pArgv);}
     void  MarchingCubesProgram::reset(){ AL_CUDA_DEVICE_RESET; }
-    void  MarchingCubesProgram::exit() { shrQAFinishExit(*pArgc, (const char **)pArgv, QA_PASSED); }
+    void  MarchingCubesProgram::exit() { AL_CUDA_EXIT; }
 
 
     //DEBUGGING      
@@ -375,7 +377,7 @@ extern "C" void ThrustScanWrapper(unsigned int* output, unsigned int* input, uns
 
           // compact voxel index array
           launch_compactVoxels(grid, threads, d_compVoxelArray, d_voxelOccupied, d_voxelOccupiedScan, numVoxels);
-          cutilCheckMsg("compactVoxels failed");
+          //cutilCheckMsg("compactVoxels failed");
 
 #endif // SKIP_EMPTY_VOXELS
 
