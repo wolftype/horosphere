@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  alv_interface.h
+ *       Filename:  horo_glv_gui.h
  *
  *    Description:  allosphere versor interface
  *

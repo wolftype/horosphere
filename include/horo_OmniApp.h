@@ -248,7 +248,7 @@ inline void OmniApp::start() {
     Window::displayMode(Window::displayMode() | Window::STEREO_BUF);
   }
   
-  create(); ///< Window's create
+  Window::create(); ///< Window's create
   
   if (mOmni.fullScreen()) {
     fullScreen(true);
@@ -385,7 +385,7 @@ inline std::string OmniApp::fragmentCode() {
       vec3 R = reflect(-L, N);
       float spec = pow(max(dot(R, E), 0.0), 0.9 + 1e-20);
       final_color += gl_LightSource[0].specular * spec;
-      gl_FragColor = color;//mix(color, final_color, lighting); //color;//
+      gl_FragColor = mix(color, final_color, .8); //color;//
     }
   );
 }

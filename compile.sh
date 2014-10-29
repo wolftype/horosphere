@@ -18,4 +18,4 @@ mkdir build
 cd build
 rm bin/${TARGET}
 cmake .. -DDIR=${DIRECTORY} -DSRC=${FILENAME} -DBUILDING_FOR_ALLOSPHERE=0 -DCUDALEGACY=1
-make
+make 

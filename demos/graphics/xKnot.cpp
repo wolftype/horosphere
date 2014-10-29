@@ -43,7 +43,7 @@ using namespace vsr::cga3D;
 using std::cout;
 using std::endl;
 
-struct App : OmniApp {
+struct KnotApp : OmniApp {
     
     Light light;
 
@@ -64,7 +64,7 @@ struct App : OmniApp {
     vector< vsr::Mesh > wm;   // Some number of writhe Meshes;
     
     //bSlave flag = true if machine is "receiver" machine
-    App(bool bSlave = false) :  
+    KnotApp(bool bSlave = false) :  
       OmniApp("vortex",bSlave), 
       tk(3,2,.01),
       kd(),
@@ -77,7 +77,7 @@ struct App : OmniApp {
       
     }     
 
-    virtual ~App() {}
+    virtual ~KnotApp() {}
 
     void init();
     void step();
@@ -95,7 +95,7 @@ struct App : OmniApp {
 /*-----------------------------------------------------------------------------
  *  INITIALIZATION
  *-----------------------------------------------------------------------------*/
-void App::init(){
+void KnotApp::init(){
   tm.mode(GL::LL); 
   kd.buildGui(glv.gui); 
 }
@@ -104,7 +104,7 @@ void App::init(){
 /*-----------------------------------------------------------------------------
  *  CALLED ONCE PER FRAME (Called by OmniApp::onFrame() )
  *-----------------------------------------------------------------------------*/
-void App::onAnimate(al_sec dt){
+void KnotApp::onAnimate(al_sec dt){
         
     if (!bSlave){     
       sendAudioData(); 
@@ -117,7 +117,7 @@ void App::onAnimate(al_sec dt){
 /*-----------------------------------------------------------------------------
  * UPDATE STATE (MASTER) //Only the MASTER computer does this
  *-----------------------------------------------------------------------------*/
-void App::updateState(){
+void KnotApp::updateState(){
   
 
   if (kd.bFlow)  pnt = Ro::loc( pnt.sp( tk.bst() ) );
@@ -155,7 +155,7 @@ void App::updateState(){
 /*-----------------------------------------------------------------------------
  *  Send Audio Data To Audio App
  *-----------------------------------------------------------------------------*/
-void App::sendAudioData(){ 
+void KnotApp::sendAudioData(){ 
 
       //Package and Send Audio Info
       ad.freq = 330. + ( 110. * ( 10 * kd.diameter ) ); 
@@ -177,7 +177,7 @@ void App::sendAudioData(){
 /*-----------------------------------------------------------------------------
  *  Get Messages
  *-----------------------------------------------------------------------------*/
-void App :: onMessage(osc::Message& m) {   
+void KnotApp :: onMessage(osc::Message& m) {   
     
     //cout << "message rec'ved" << endl; 
     if (bSlave){  
@@ -194,7 +194,7 @@ void App :: onMessage(osc::Message& m) {
 /*-----------------------------------------------------------------------------
  *  BUILD MESHES
  *-----------------------------------------------------------------------------*/
-void App::step(){
+void KnotApp::step(){
 
   // SET KNOT PARAMETERS
   if (!bSlave) updateState();
@@ -312,7 +312,7 @@ void App::step(){
 /*-----------------------------------------------------------------------------
  *  CALLED MANY TIMES PER FRAME
  *-----------------------------------------------------------------------------*/
-void App::onDraw(Graphics& g) {
+void KnotApp::onDraw(Graphics& g) {
 
   glPointSize(10);  
    
@@ -342,7 +342,7 @@ void App::onDraw(Graphics& g) {
  *  LAUNCH APP
  *-----------------------------------------------------------------------------*/
 int main(int argc, char * argv[]) {
-  App app; 
+  KnotApp app; 
   app.start();  
   return 0;
 }       
