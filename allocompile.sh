@@ -6,10 +6,7 @@ echo Compiling $1 for ALLOSPHERE
 #calls cd build 
 #cmake .. -DSRC<argument> && make argument
 
-
-#DIRECTORY=`echo $1 |cut -d'/' -f1 -f2`
 DIRECTORY=`dirname $1`
-#TARGET=`echo $1 |cut -d'/' -f3 |cut -d'.' -f1 | sed -e "s|/|_|g"`
 TARGET=`basename $1|cut -d'.' -f1 | sed -e "s|/|_|g"`
 FILENAME=${TARGET}.cpp
 echo Directory is $DIRECTORY

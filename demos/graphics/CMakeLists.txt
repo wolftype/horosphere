@@ -17,7 +17,7 @@ if(USE_CLANG)
   SET(CMAKE_C_COMPILER "clang")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
 else()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++ -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x  -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
 endif()
 
 #one file
