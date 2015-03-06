@@ -1,5 +1,5 @@
 #1/bin/bash
 
-./current/xKnotAudio
+./current/xKnotAudio &
 ./current/xKnotGLV
 
