@@ -16,11 +16,11 @@
  * =====================================================================================
  */
 
-#include "horo_OmniApp.h"   
-#include "horo_GxSync.h"
-
 #include "vsr/vsr_cga3D_op.h"
 #include "vsr/vsr_cga3D_draw.h"
+
+#include "horo_OmniApp.h"   
+#include "horo_GxSync.h"        
 
 #include "vsr_linkages.h"
 #include "vsr_chain_draw.h"

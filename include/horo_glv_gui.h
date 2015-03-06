@@ -33,7 +33,16 @@ namespace al{
         }
         glv::Gui gui;
     };
-    
+
+    //non-detachable version
+   struct GLVGui_ : public GLVBinding {
+
+      GLVGui_() : GLVBinding(), gui(){
+        *this << gui;
+        gui.colors().back.set(.3,.3,.3);
+      }
+      glv::Gui gui;
+   };
 }
     
 #endif   /* ----- #ifndef alv_interface_INC  ----- */

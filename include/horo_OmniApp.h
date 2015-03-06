@@ -143,7 +143,7 @@ inline OmniApp::OmniApp(std::string name, bool slave, bool distribute)
   initWindow();  
   
   //GUI
-  glv.gui(bOmniEnable, "omni_enable");
+  glv_.gui(bOmniEnable, "omni_enable");
 
 
   //ALLO
@@ -155,7 +155,7 @@ inline OmniApp::OmniApp(std::string name, bool slave, bool distribute)
     omniEnable(true);
     initOmni();
     
-    glv.gui.disable( glv::Property::Visible );   
+    glv_.gui.disable( glv::Property::Visible );   
   
     mOmni.mode( OmniStereo::ACTIVE ).stereo(true);     
     omniEnable(true); 

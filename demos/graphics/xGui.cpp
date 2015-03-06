@@ -1,7 +1,27 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  xGui.cpp
+ *
+ *    Description:  add a glv gui
+ *
+ *        Version:  1.0
+ *        Created:  11/10/2014 12:01:57
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  Pablo Colapinto (), gmail -> wolftype
+ *   Organization:  
+ *
+ * =====================================================================================
+ */
+
+
 //  Created by Pablo Colapinto on 2/26/13.
 
 #include "horo_OmniApp.h"   
 #include "horo_GxSync.h"
+#include "alloGLV/al_ControlGLV.hpp"
 
 #include "vsr/vsr_cga3D_op.h"
 #include "vsr/vsr_cga3D_draw.h"
