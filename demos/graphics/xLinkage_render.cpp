@@ -42,7 +42,7 @@ using std::endl;
 
 struct MyApp : OmniStereoGraphicsRenderer  { 
 
-    cuttlebone::Taker<State, 9000> taker;
+    cuttlebone::Taker<State> taker;
     State* state;
 
     //Local Structure (to be filled with sent state data)

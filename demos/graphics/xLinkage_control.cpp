@@ -35,7 +35,7 @@ using std::endl;
 
 struct MyApp : App {
 
-    cuttlebone::Maker<State,9000> maker;
+    cuttlebone::Maker<State> maker;
     State * state;
 
     //Local Structure (to be controlled by state data)

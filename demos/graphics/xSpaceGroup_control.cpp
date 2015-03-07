@@ -83,7 +83,7 @@ void drawState(State * state){
 
 struct MyApp : App {
 
-  cuttlebone::Maker<State,9000> maker;
+  cuttlebone::Maker<State> maker;
   State * state;
    
   //Some Variables
@@ -91,6 +91,8 @@ struct MyApp : App {
   bool bSetMouse=false;
 
   Point mouse = Ro::null(1,1,1);;
+
+  MyApp() : App(), maker("192.168.0.255"){}
 
   /*-----------------------------------------------------------------------------
    *  Setup Variables
@@ -147,7 +149,7 @@ using namespace al;
 
 struct RenderApp : OmniStereoGraphicsRenderer {
   
-  cuttlebone::Taker<State, 9000> taker;
+  cuttlebone::Taker<State> taker;
   State* state;
   
   RenderApp() {
