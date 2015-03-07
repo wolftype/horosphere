@@ -62,7 +62,6 @@ struct MyApp : OmniStereoGraphicsRenderer  {
     void init(){
       state = new State;
       memset(state, 0, sizeof(State));
-
     }
     
     /*-----------------------------------------------------------------------------
@@ -100,25 +99,27 @@ void MyApp::updateLocal(){
     local.bennett = vector<Bennett>(state->numx);
     if (state->bSubBennett) local.subBennett = vector<vector<Bennett>>(state->numx/2.0);
 
+    if (!local.bennett.empty()){
     local.bennett[0].set(state->theta,state->d1,state->d2);
     local.bennett[0]( state->rot );
+    }
     bool bSwitch =true; int it=0;
-    for (int i=1;i<state->numx;++i){
+    for (int i=1;i<local.bennett.size();++i){
       local.bennett[i]=local.bennett[i-1].linkAt(2,state->thetax,state->amtx1,state->amtx2);
 
       bSwitch = !bSwitch;
       if (bSwitch){ if (state->bSubBennett) {
-        local.subBennett[it] = vector<Bennett>(state->numy);
-        
-        local.subBennett[it][0] = local.bennett[i].linkAt(1,state->thetay,state->amty1,state->amty2); 
-        for (int j=1;j<state->numy;++j){
-          local.subBennett[it][j]=local.subBennett[it][j-1].linkAt(2,state->thetay,state->amty1,state->amty2);
-        }
+        if(local.subBennett.size() > it) { 
+		local.subBennett[it] = vector<Bennett>(state->numy);
+        	if (!local.subBennett[it].empty() ) local.subBennett[it][0] = local.bennett[i].linkAt(1,state->thetay,state->amty1,state->amty2); 
+        	for (int j=1;j<local.subBennett[it].size();++j){
+          		local.subBennett[it][j]=local.subBennett[it][j-1].linkAt(2,state->thetay,state->amty1,state->amty2);
+        	}
+	}	
         it++;
       }}
     }
 }
-
 /*-----------------------------------------------------------------------------
  *  CALLED MANY TIMES PER FRAME: Draw all objects 
  *-----------------------------------------------------------------------------*/
@@ -133,7 +134,7 @@ void MyApp::onDraw(Graphics& g) {
     gfx::GL::lightPos(1,1,1);
     gfx::GL::light();
 
-    for (int i=0;i<state->numx;++i){
+    for (int i=0;i<local.bennett.size();++i){
       Draw( (Chain)local.bennett[i], true, false, .5,.5,.5);
       DrawR( (Chain)local.bennett[i], .5,.5,.5);
     }
