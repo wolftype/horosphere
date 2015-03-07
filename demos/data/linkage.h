@@ -29,20 +29,25 @@
 //state sent from simulator to renderer
 struct State{
 
-  float time; 
+  float time=0; 
   al::Pose pose;
   gfx::Pose model;
 
-  float numiter;          //number of iterations to sweep single instance
-  float numx,numy;        //number of xdim nad ydim linkages
-  float d1,d2;            //root linkage lengths
-  float theta;            //skew of root linkage
-  float thetax,thetay;    //skew of subsequent linkage, in terms of pecentage of previous
-  float rot;              //phase of mechanism
-  float amtx1,amtx2;      //percentage along length of xcoord link a and b
-  float amty1,amty2;      //percentage along length of ycoord link a and b
-  float link;             //which link to link with
-  bool bSubBennett;
+  float numiter=1;          //number of iterations to sweep single instance
+  float numx=1;
+  float numy=1;        //number of xdim nad ydim linkages
+  float d1=1;
+  float d2=1;            //root linkage lengths
+  float theta=.5;            //skew of root linkage
+  float thetax=-1;
+  float thetay=-1;    //skew of subsequent linkage, in terms of pecentage of previous
+  float rot=0;              //phase of mechanism
+  float amtx1=.5;
+  float amtx2=.5;      //percentage along length of xcoord link a and b
+  float amty1=.5;
+  float amty2=.5;      //percentage along length of ycoord link a and b
+  float link=2;             //which link to link with
+  bool bSubBennett=0;
 
 };
 
