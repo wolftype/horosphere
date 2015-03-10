@@ -20,6 +20,9 @@ else()
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x  -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
 endif()
 
+#get rid of glut warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+
 #one file
 message("demo name: " ${SRC} )
 get_filename_component(target ${SRC} NAME_WE)

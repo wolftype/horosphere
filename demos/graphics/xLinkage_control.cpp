@@ -38,10 +38,14 @@ struct MyApp : App {
     cuttlebone::Maker<State> maker;
     State * state;
 
+    //MyApp() : App(), maker("192.168.10.255"){}
+    MyApp() : App(){}//, maker("192.168.10.255"){}
     //Local Structure (to be controlled by state data)
     Local local;
 
-    Frame frame; // camera controller 
+    Frame tframe, frame; // camera controller 
+    bool bCameraLock,bCameraLockAbsolute, bCameraReset;
+    float cameraDistance, cameraSpeed;
 
     void setup(){
  
@@ -64,6 +68,11 @@ struct MyApp : App {
       gui(state->amty2,"amty2",-1,1);
       gui(state->link,"link",0,3);
       gui(state->bSubBennett,"subbennett");
+      gui(bCameraLock,"CameraLock");
+      gui(bCameraLockAbsolute,"CameraLockAbsolute");
+      gui(bCameraReset,"CameraReset");
+      gui(cameraDistance,"cameraDistance",-100,100);
+      gui(cameraSpeed,"cameraSpeed",-100,100);
 
       state->numx=1; 
       state->link = 2;
@@ -103,34 +112,68 @@ void MyApp::onAnimate(){
 /*-----------------------------------------------------------------------------
  * UPDATE LOCAL PARAMETERS BASED ON SHARED STATE  
  *-----------------------------------------------------------------------------*/
+//void MyApp::updateLocal(){
+//    //clear
+//    local.bennett.clear(); local.subBennett.clear();
+//    //allocate
+//    local.bennett = vector<Bennett>(state->numx);
+//    if (state->bSubBennett) local.subBennett = vector<vector<Bennett>>( floor(state->numx/2.0) );
+//
+//    if (!local.bennett.empty()){
+//      local.bennett[0].set(state->theta,state->d1,state->d2);
+//      local.bennett[0]( state->rot );
+//      bool bSwitch =true; int it=0;
+//      for (int i=1;i<state->numx;++i){
+//        local.bennett[i]=local.bennett[i-1].linkAt(2,state->thetax,state->amtx1,state->amtx2);
+//
+//        bSwitch = !bSwitch;
+//        if (bSwitch){ if (state->bSubBennett) {
+//          local.subBennett[it] = vector<Bennett>(state->numy);
+//          
+//          local.subBennett[it][0] = local.bennett[i].linkAt(1,state->thetay,state->amty1,state->amty2); 
+//          for (int j=1;j<state->numy;++j){
+//            local.subBennett[it][j]=local.subBennett[it][j-1].linkAt(2,state->thetay,state->amty1,state->amty2);
+//          }
+//          it++;
+//        }}
+//
+//      }
+//    }
+//
+//
+//}
+/*-----------------------------------------------------------------------------
+ * UPDATE LOCAL PARAMETERS BASED ON SENT STATE  
+ *-----------------------------------------------------------------------------*/
 void MyApp::updateLocal(){
-    //clear
+    
     local.bennett.clear(); local.subBennett.clear();
-    //allocate
     local.bennett = vector<Bennett>(state->numx);
     if (state->bSubBennett) local.subBennett = vector<vector<Bennett>>(state->numx/2.0);
 
+    if (!local.bennett.empty()){
     local.bennett[0].set(state->theta,state->d1,state->d2);
     local.bennett[0]( state->rot );
+    }
     bool bSwitch =true; int it=0;
-    for (int i=1;i<state->numx;++i){
+    for (int i=1;i<local.bennett.size();++i){
       local.bennett[i]=local.bennett[i-1].linkAt(2,state->thetax,state->amtx1,state->amtx2);
 
       bSwitch = !bSwitch;
       if (bSwitch){ if (state->bSubBennett) {
-        local.subBennett[it] = vector<Bennett>(state->numy);
-        
-        local.subBennett[it][0] = local.bennett[i].linkAt(1,state->thetay,state->amty1,state->amty2); 
-        for (int j=1;j<state->numy;++j){
-          local.subBennett[it][j]=local.subBennett[it][j-1].linkAt(2,state->thetay,state->amty1,state->amty2);
-        }
+        if(local.subBennett.size() > it) { 
+		      local.subBennett[it] = vector<Bennett>(state->numy);
+        	if (!local.subBennett[it].empty() ) local.subBennett[it][0] = local.bennett[i].linkAt(1,state->thetay,state->amty1,state->amty2); 
+        	for (int j=1;j<local.subBennett[it].size();++j){
+          		local.subBennett[it][j]=local.subBennett[it][j-1].linkAt(2,state->thetay,state->amty1,state->amty2);
+        	}
+	}	
         it++;
       }}
-
     }
-
-
 }
+
+
 
 /*-----------------------------------------------------------------------------
  *  CALLED MANY TIMES PER FRAME: Draw all objects 
@@ -140,22 +183,72 @@ void MyApp::onDraw() {
     gfx::GL::lightPos(1,1,1);
     gfx::GL::light();
 
-    for (int i=0;i<state->numx;++i){
-      Draw( (Chain)local.bennett[i], true, false, .5,.5,.5);
-      DrawR( (Chain)local.bennett[i], .5,.5,.5);
+
+    //draw and find average plane for orientation
+    Point center;
+    for (auto& i : local.bennett){
+      Draw( (Chain)i, true, false, .5,.5,.5);
+      DrawR( (Chain)i, .5,.5,.5);
+      center += i[0].pos() / local.bennett.size();
     }
 
     for (auto& i : local.subBennett){ 
       for (auto& j: i) {
         Draw( (Chain)j, true, false, .5,.5,.5);
         DrawR( (Chain)j, .5,.5,.5);
+        //center += i[0].pos();
       } 
     }
+    center = Ro::dls(center,1);
+    Draw(center,1,0,0,.5);
+
+    Plane plane;
+    if (local.bennett.size()>5){
+      Point pa = local.bennett[0][0].pos();
+      Point pb = local.bennett[ floor(local.bennett.size() / 2.0) ][1].pos();
+      Point pc = local.bennett[4][3].pos();
+      plane = pa ^ pb ^ pc ^ Inf(1);
+      plane = plane.unit();
+      Draw(plane, 0,1,0);
+    }
+
+
+      auto orientation = (Vec( plane.dual() ) <= Vec::z )[0];
+      cout << orientation << " " << plane.wt()  << endl;
+      if ( fabs( plane.wt()) > 0 ){
+       bool bDir = orientation > 0;
+       cout << bDir << " DIR " << endl;
+       tframe.pos() = Ro::null(center).trs( plane.dual() * (bDir ? cameraDistance : -cameraDistance) ); 
+       tframe.orient( center, true );
+      }
+  
+    if (bCameraLockAbsolute){
+      frame = tframe;
+      scene.camera.set( frame.pos(), frame.quat() );
+    } else if (bCameraLock){
+      frame.relMotor( tframe ).print();
+      frame.relTwist( tframe, cameraSpeed);
+      scene.camera.set( frame.pos(), frame.quat() );
+    } else if (bCameraReset){
+      scene.camera.reset( 0,0,10 );
+      Draw(tframe);
+    }
+
+//    frame.mot().print();
+    scene.camera.print();
+
+//    Point tpa = local.bennett[0][0].pos();
+//    Point tpb = local.bennett[0][1].pos();
+//    Point tpc = local.bennett[0][2].pos();
+//    Point tpd = local.bennett[0][3].pos();
+//
+//    Plane tplane = tpa^tpb^tpc^Inf(1);
+//    Draw(tplane,1,0,0);
 }
 
 
 /*-----------------------------------------------------------------------------
- *  Get Messages (e.g. from iPad)
+ *  Get Messages (e.g. from DeviceServer)
  *-----------------------------------------------------------------------------*/
 /* void MyApp :: onMessage(osc::Message& m) { */   
 /* } */
