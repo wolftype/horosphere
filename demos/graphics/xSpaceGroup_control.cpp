@@ -65,9 +65,9 @@ void drawState(State * state){
     }
     Draw(pg.a,1,0,0); Draw(pg.b,0,1,0); Draw(pg.c,0,0,1);
     
-    auto res = pg( s.point ^ s.point.trs(.2,0,.1) );
-    auto res2 = pg( s.point ^ s.point.trs(0,.5,.2) );
-    auto res3 = pg( s.point ^ s.point.trs(0,0,1) );
+    auto res = pg( s.point ^ s.point.trs(1,0,2) );
+    auto res2 = pg( s.point ^ s.point.trs(0,3.5,.2) );
+    auto res3 = pg( s.point ^ s.point.trs(0,0,3) );
 
     //auto res3 = pg( Ro::round( Ro::dls(mouse,.2), Biv(.1,.2,.3).runit() ) ); // mouse.trs(0,.5,.2) );
     
@@ -82,9 +82,13 @@ void drawState(State * state){
       auto c =  Ro::split(res2[i], true);
       auto d =  Ro::split(res3[i], true);
 
+      glColor3f(1,1,0);
       Glyph::Triangle(a,b,c);
+      glColor3f(0,1,1);
       Glyph::Triangle(a,b,d);
+      glColor3f(1,0,1);
       Glyph::Triangle(b,c,d);
+      glColor3f(1,.5,.5);
       Glyph::Triangle(b,a,d);
 
     }
