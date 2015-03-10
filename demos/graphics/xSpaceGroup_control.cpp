@@ -49,7 +49,10 @@ struct State{
 
 void drawState(State * state){
 
+
+
      State& s = *state;
+     if (s.p < 7 && s.q < 5){
      PointGroup3D<Vec> pg(s.p,s.q,s.pbar,s.qbar,s.pqbar);
 
    // if (pg.ops.size()>2){
@@ -64,6 +67,7 @@ void drawState(State * state){
     
     auto res = pg( s.point ^ s.point.trs(.2,0,.1) );
     auto res2 = pg( s.point ^ s.point.trs(0,.5,.2) );
+    auto res3 = pg( s.point ^ s.point.trs(0,0,1) );
 
     //auto res3 = pg( Ro::round( Ro::dls(mouse,.2), Biv(.1,.2,.3).runit() ) ); // mouse.trs(0,.5,.2) );
     
@@ -73,7 +77,17 @@ void drawState(State * state){
      Draw(res[i],(float)i/res.size(),0,1-(float)i/res.size());
      Draw(res2[i],(float)i/res.size(),1,1-(float)i/res.size());
     // Draw(res3[i],(float)i/res.size(),1,1-(float)i/res.size());
-      Glyph::Triangle( Ro::split(res[i], true).null(), Ro::split(res[i],false).null(), Ro::split(res2[i],true).null() );
+      auto a =  Ro::split(res[i], true);
+      auto b =  Ro::split(res[i], false);
+      auto c =  Ro::split(res2[i], true);
+      auto d =  Ro::split(res3[i], true);
+
+      Glyph::Triangle(a,b,c);
+      Glyph::Triangle(a,b,d);
+      Glyph::Triangle(b,c,d);
+      Glyph::Triangle(b,a,d);
+
+    }
     }
    // cout << pg.ops.size() << " " << pg.sops.size() << endl;
 
