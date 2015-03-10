@@ -66,12 +66,14 @@ void drawState(State * state){
     auto res2 = pg( s.point ^ s.point.trs(0,.5,.2) );
 
     //auto res3 = pg( Ro::round( Ro::dls(mouse,.2), Biv(.1,.2,.3).runit() ) ); // mouse.trs(0,.5,.2) );
+    
 
 
    for (int i=0;i<res.size();++i) {
      Draw(res[i],(float)i/res.size(),0,1-(float)i/res.size());
      Draw(res2[i],(float)i/res.size(),1,1-(float)i/res.size());
     // Draw(res3[i],(float)i/res.size(),1,1-(float)i/res.size());
+      Glyph::Triangle( Ro::split(res[i], true).null(), Ro::split(res[i],false).null(), Ro::split(res2[i],true).null() );
     }
    // cout << pg.ops.size() << " " << pg.sops.size() << endl;
 
@@ -92,7 +94,7 @@ struct MyApp : App {
 
   Point mouse = Ro::null(1,1,1);;
 
-  MyApp() : App(), maker("192.168.0.255"){}
+  MyApp() : App(), maker("192.168.10.255"){}
 
   /*-----------------------------------------------------------------------------
    *  Setup Variables
