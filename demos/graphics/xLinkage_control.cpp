@@ -39,7 +39,7 @@ struct MyApp : App {
     State * state;
 
     //MyApp() : App(), maker("192.168.10.255"){}
-    MyApp() : App(){}//, maker("192.168.10.255"){}
+    MyApp() : App(), maker("192.168.10.255"){}
     //Local Structure (to be controlled by state data)
     Local local;
 
