@@ -21,13 +21,13 @@
 #include "horo_OmniApp.h"
 #include "horo_GxSync.h"
 
-#include "vsr/vsr_cga3D_op.h"
-#include "vsr/vsr_cga3D_draw.h"
-#include "vsr/vsr_knot.h"
+#include "vsr/space/vsr_cga3D_op.h"
+#include "vsr/draw/vsr_cga3D_draw.h"
+#include "vsr/form/vsr_knot.h"
 
 //GRAPHICS
 #include "gfx/gfx_mesh.h"
-#include "vsr/vsr_shapes.h"
+#include "vsr/form/vsr_shapes.h"
 
 //Data Containers
 #include "data/vsr_knotData.h"
@@ -38,7 +38,7 @@
 
 using namespace al;
 using namespace vsr;
-using namespace vsr::cga3D; 
+using namespace vsr::cga; 
 
 using std::cout;
 using std::endl;
