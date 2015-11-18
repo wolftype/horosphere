@@ -1,0 +1,1 @@
+[{"webServerPort":"8080","outputType":"OSC","webSocketPort":"8081","oscInputPort":"8083","oscOutputPort":"7770","oscOutputIP":"127.0.0.1","shouldMonitor":false,"shouldAppendID":false,"directory":"/Users/create/code/user/pablo/interfaces","name":"Server1"}]

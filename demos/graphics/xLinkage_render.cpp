@@ -17,15 +17,16 @@
  */
 
 
-#include "vsr/vsr_cga3D_op.h"
-#include "vsr/vsr_cga3D_draw.h"
 
-#include "horo_GLVApp.h" 
+//#include "horo_GLVApp.h" 
 #include "horo_OSCApp.h"
 #include "horo_GxSync.h"
 
-#include "vsr_linkages.h"
-#include "vsr_chain_draw.h"
+#include "vsr/space/vsr_cga3D_op.h"
+#include "vsr/draw/vsr_cga3D_draw.h"
+
+#include "vsr/form/vsr_linkages.h"
+#include "vsr/draw/vsr_chain_draw.h"
 
 #include "gfx/gfx_mesh.h"
 
@@ -35,7 +36,7 @@
 #include "alloutil/al_OmniStereoGraphicsRenderer.hpp"
 
 using namespace vsr;
-using namespace vsr::cga3D; 
+using namespace vsr::cga; 
 
 using std::cout;
 using std::endl;
@@ -110,7 +111,7 @@ void MyApp::updateLocal(){
       bSwitch = !bSwitch;
       if (bSwitch){ if (state->bSubBennett) {
         if(local.subBennett.size() > it) { 
-		local.subBennett[it] = vector<Bennett>(state->numy);
+		      local.subBennett[it] = vector<Bennett>(state->numy);
         	if (!local.subBennett[it].empty() ) local.subBennett[it][0] = local.bennett[i].linkAt(1,state->thetay,state->amty1,state->amty2); 
         	for (int j=1;j<local.subBennett[it].size();++j){
           		local.subBennett[it][j]=local.subBennett[it][j-1].linkAt(2,state->thetay,state->amty1,state->amty2);

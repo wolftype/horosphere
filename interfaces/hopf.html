@@ -1,0 +1,36 @@
+<html>
+<head>
+  <script src='interface.js'></script>
+</head>
+
+<body>
+  <script>
+    
+
+  // KNOBS THETA, PHI, WRITHE, VEL
+	theta = new Interface.Knob({ 
+		bounds:[0,.55,.1], label: "theta",
+		target:"OSC", key:"/theta"    	
+	}) 
+	
+	phi = new Interface.Knob({ 
+		bounds:[.2,.55,.1], label: "phi",
+		target:"OSC", key:"/phi"    	
+	})
+		
+  size = new Interface.Slider({ 
+			bounds:[.85,0,.05,.2], label: "s",
+			min:1,
+			max:5,
+			isVertical:true,
+			target:"OSC", key:"/size"
+	 })
+
+   Interface.OSC.receive = function(address, typetags, parameters) {
+      window.alert(address + typetags + parameters);
+    }
+
+
+  </script>
+</body>
+</html>

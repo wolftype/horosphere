@@ -4,8 +4,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(HOROSPHERE)
 
-#set(ALLOSPHERE 0 CACHE STRING "build for allosphere")
-#set(BUILD_ALLOUTIL 1)
 set(BUILD_ALLOGLV 1)
 set(NO_EXAMPLES 1)
 
@@ -17,16 +15,12 @@ add_subdirectory(../AlloSystem AlloSystem)
 get_target_property(ALLOCORE_LINK_LIBRARIES allocore ALLOCORE_LINK_LIBRARIES)
 get_target_property(ALLOUTIL_LINK_LIBRARIES alloutil ALLOUTIL_LINK_LIBRARIES)
 
-#print out linker libs
-#message("ALLOCORE_LINK_LIBRARIES: " ${ALLOCORE_LINK_LIBRARIES})
-#message("ALLOUTIL_LINK_LIBRARIES: " ${ALLOUTIL_LINK_LIBRARIES})
-
 #local include for this particular project space
 include_directories(/usr/local/include/)
 include_directories(${PROJECT_SOURCE_DIR}/include/)
 include_directories(${PROJECT_SOURCE_DIR}/demos/)
-include_directories(${PROJECT_SOURCE_DIR}/../versor/)
-include_directories(${PROJECT_SOURCE_DIR}/../versor/vsr/)
+include_directories(${PROJECT_SOURCE_DIR}/../versor/include/)
+include_directories(${PROJECT_SOURCE_DIR}/../versor/include/vsr/)
 include_directories(${PROJECT_SOURCE_DIR}/../GLV/)
 include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/)
 include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/gfx/)
@@ -40,20 +34,18 @@ include_directories(${AlloSystem_SOURCE_DIR}/alloGLV/)
 
 #library search directories
 link_directories(/usr/local/lib/)
-link_directories(${PROJECT_SOURCE_DIR}/../versor/build/lib/)
+link_directories(${PROJECT_SOURCE_DIR}/../versor/build/)
+link_directories(${PROJECT_SOURCE_DIR}/../versor/build/ext/gfx/)
 link_directories(${PROJECT_SOURCE_DIR}/../GLV/build/lib/)
 link_directories(${PROJECT_SOURCE_DIR}/../Gamma/build/lib/)
 link_directories(${AlloSystem_SOURCE_DIR}/build/lib)
 
 if(${BUILDING_FOR_ALLOSPHERE})
 link_directories(/usr/lib/x86_64-linux-gnu/)
-else()
-#include_directories($ENV{HOME}/code/libcxx/include)#/usr/local/include/libcxx/)#$
-#link_directories($ENV{HOME}/code/libcxx/lib)#/usr/local/lib/libcxx/) #
 endif()
 
 
-get_directory_property(LD LINK_DIRECTORIES)
+#get_directory_property(LD LINK_DIRECTORIES)
 #message("LINK_DIRECTORIES" ${LD})
 
 if(${BUILDING_FOR_ALLOSPHERE})

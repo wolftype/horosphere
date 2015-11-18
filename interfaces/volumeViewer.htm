@@ -1,0 +1,162 @@
+<html>
+<head>
+  <script src='interface.js'></script>
+</head>
+<body>
+  <script>
+    // NOTE: The Interface.js server outputs all OSC messages to port 8082. See the README for more information
+    var spin_x = .05, spin_y = .6,
+        rotate_x = .6, rotate_y = .3
+        
+    panel = new Interface.Panel({ useRelativeSizesAndPositions: true });
+    panel.background = 'black'
+    
+    zSlider = new Interface.Slider({
+      bounds:[ .05, .05, .35, .9 ],
+      //isVertical:false,
+      min:-2, max:4,
+      label:'forward / back',
+      target:"OSC", key:'/z',
+    })
+    
+    levelSlider = new Interface.Slider({
+      bounds:[ .6, .15, .35, .1],
+      isVertical:false,
+      min:0, max:.5,
+      label:'minimum distance',
+      target:"OSC", key:'/minLevel',
+    })
+    
+    
+    // colorLabel = new Interface.Label({
+    //   bounds:[ .5, .35, .1, .1],
+    //   value:'color',
+    //   vAlign:'middle',
+    //   font:'bold 24px Helvetica',
+    //   hAlign:'center'
+    // })
+    
+    hueSlider = new Interface.Slider({
+      bounds:[ .6, .65, .35, .1],
+      isVertical:false,
+      min:0, max:1,
+      label:'hue base',
+      target:"OSC", key:'/hue',
+    })
+    
+    distanceMultSlider = new Interface.Slider({
+      bounds:[ .6, .75, .35, .1],
+      isVertical:false,
+      min:0, max:1,
+      value: 1,
+      label:'saturation',
+      target:"OSC", key:'/saturation',
+    })
+    
+    valueSlider = new Interface.Slider({
+      bounds:[ .6, .85, .35, .1],
+      isVertical:false,
+      min:0, max:1,
+      value: 1,
+      label:'value',
+      target:"OSC", key:'/value',
+    })
+    
+    blobLabel = new Interface.Label({
+      bounds:[ .625, .05, .1, .1],
+      value:'blob level',
+      vAlign:'middle',
+      //font:'bold 32px Helvetica',
+      hAlign:'right'
+    })
+    
+    blobDecrease = new Interface.Button({
+      bounds:[ .75, .05, .1, .1],
+      mode:'contact',
+      label:'-',
+      //font:'bold 36px Helvetica',
+      target:"OSC", key:'/blobDecrease',
+    })
+    
+    blobIncrease = new Interface.Button({
+      bounds:[ .85, .05, .1, .1 ],
+      mode:'contact',
+      label:'+',
+      font:'bold 24px Helvetica',
+      target:"OSC", key:'/blobIncrease',
+    })
+    /*
+    blobRange = new Interface.Range({
+      bounds:[ .55, .475, .4, .1],
+      isVertical:false,
+      min:0, max:1,
+      label:'blob range',
+      onvaluechange : function() {
+        Interface.OSC.send( '/blobRange', 'ff', [ this.values[0], this.values[1] ] )
+      }
+      //target:"OSC", key:'/blobRange',
+    })
+    */
+    
+    spinX = new Interface.Slider({
+      bounds:[ spin_x, spin_y, .35, .1 ],
+      isVertical:false,
+      min:0, max:.1,
+      label:'x-axis spin speed',
+      target:"OSC", key:'/spinX',
+    })
+    spinY = new Interface.Slider({
+      bounds:[ spin_x, spin_y + .1, .35, .1 ],
+      isVertical:false,
+      min:0, max:.1,
+      label:'y-axis spin speed',
+      target:"OSC", key:'/spinY',
+    })
+    spinZ = new Interface.Slider({
+      bounds:[ spin_x, spin_y + .2, .35, .1 ],
+      isVertical:false,
+      min:0, max:.1,
+      label:'z-axis spin speed',
+      target:"OSC", key:'/spinZ',
+    })
+    spinBtn = new Interface.Button({
+      bounds:[ spin_x + .2, spin_y + .3, .15, .1 ],
+      mode:'toggle',
+      value:0,
+      label:'toggle spin',
+      target:"OSC", key:'/shouldSpin',
+    })
+    
+    rotateX = new Interface.Slider({
+      bounds:[rotate_x,rotate_y,.35,.1],
+      isVertical:false,
+      min:0, max:Math.PI * 2,
+      label:'x-axis rotation',
+      target:"OSC", key:'/rotateX',
+    })
+    rotateY = new Interface.Slider({
+      bounds:[rotate_x,rotate_y + .1,.35,.1],
+      isVertical:false,
+      min:0, max:Math.PI * 2,
+      label:'y-axis rotation',
+      target:"OSC", key:'/rotateY',
+    })
+    rotateZ = new Interface.Slider({
+      bounds:[ rotate_x,rotate_y + .2,.35,.1 ],
+      isVertical:false,
+      min:0, max:Math.PI * 2,
+      label:'z-axis rotation',
+      target:"OSC", key:'/rotateZ',
+    })
+
+    panel.add(
+      //spinX, spinY, spinZ, spinBtn,
+      rotateX, rotateY, rotateZ,    
+      zSlider, levelSlider,
+      blobDecrease, blobIncrease, blobLabel,
+      hueSlider, distanceMultSlider, valueSlider
+    );
+    
+  </script>
+</body>
+</html>

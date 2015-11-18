@@ -21,8 +21,10 @@
 #define  al_glv_gui_INC
 
 
-#include "vsr/vsr_gui.h"
+//#include "vsr/vsr_gui.h"
+
 #include "alloGLV/al_ControlGLV.hpp"
+#include "gfx/util/glv_gui.h"
 
 namespace al{
     //A GLV Object with built in GUI for easy prototyping

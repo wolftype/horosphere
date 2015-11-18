@@ -27,7 +27,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 message("demo name: " ${SRC} )
 get_filename_component(target ${SRC} NAME_WE)
 add_executable(${target} ${SRC} )
-target_link_libraries(${target} vsr GLV Gamma allocore alloutil alloGLV ${ALLOCORE_LINK_LIBRARIES} ${ALLOUTIL_LINK_LIBRARIES} ${ALLOCORE_LINK_LIBRARIES} )
+target_link_libraries(${target} vsr vsrGfx gfx GLV Gamma allocore alloutil alloGLV ${ALLOCORE_LINK_LIBRARIES} ${ALLOUTIL_LINK_LIBRARIES} ${ALLOCORE_LINK_LIBRARIES} )
 if(APPLE)
   set_target_properties(${target} PROPERTIES
   LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")

@@ -20,10 +20,10 @@
 #define  linkage_INC
 
 
-#include "allocore/io/al_App.hpp"
+#include "allocore/spatial/al_Pose.hpp"
 #include "Cuttlebone/Cuttlebone.hpp"  
 
-#include "vsr/vsr_linkages.h"
+#include "vsr/form/vsr_linkages.h"
 #include "gfx/gfx_scene.h"
 
 //state sent from simulator to renderer
@@ -54,8 +54,8 @@ struct State{
 //shared by simulator and renderer to build up local structures
 struct Local{
 
-  vector<vsr::Bennett> bennett;
-  vector<vector<vsr::Bennett>> subBennett;
+  vector<vsr::cga::Bennett> bennett;
+  vector<vector<vsr::cga::Bennett>> subBennett;
 
 };
 

@@ -1,0 +1,227 @@
+<html>
+<head>
+  <script src='interface.js'></script>
+</head>
+
+<body>
+  <script>  
+
+    // NOTE: The Interface.js server outputs all OSC messages to port 8082. See the README for more information
+    
+    panel = new Interface.Panel({ 
+		useRelativeSizesAndPositions: true, 
+		stroke:"red",
+		fill:"blue"  	
+   });
+    
+    // send a message to the address '/P'
+    P = new Interface.Slider({
+      bounds:[0,.15,.5,.15],
+		label: 'P',
+		max: 10,
+      isVertical:false,
+      target:"OSC", key:'/P',
+		// stroke:"red",
+		// fill:"lightblue", 
+		// background:"darkred"  
+    })     
+
+    // send a message to the address '/Q'
+    Q = new Interface.Slider({
+      bounds:[0,.3,.5,.15],
+ 		label: 'Q',  
+		max: 10,
+      isVertical:false,
+      target:"OSC", key:'/Q',
+    })  
+
+    // KNOBS THETA, PHI, WRITHE, VEL
+	theta = new Interface.Knob({ 
+		bounds:[0,.5,.1], label: "theta",
+		target:"OSC", key:"/theta"    	
+	}) 
+	
+	phi = new Interface.Knob({ 
+		bounds:[.2,.5,.1], label: "phi",
+		target:"OSC", key:"/phi"    	
+	})
+		
+    size = new Interface.Knob({ 
+			bounds:[.4,.5,.1], label: "size", size:20, 
+			min:1,
+			max:5,
+			target:"OSC", key:"/size"
+	 }) 
+	
+    writhe = new Interface.Knob({ 
+			bounds:[.75,.1,.1], label: "writhe", size:20, 
+			max:100,
+			target:"OSC", key:"/writhe"
+	 })
+	
+	tubesize = new Interface.Knob({ 
+			bounds:[.75,0,.1], label: "tubesize", size:20, 
+			max:10,
+			target:"OSC", key:"/tube_size"
+	 })	
+
+	vel = new Interface.Knob({ 
+		bounds:[.6,.5,.1], 
+		label: "velocity",
+		max:.1,
+		target:"OSC", key:"/vel"    	
+	})            
+	
+	// BUTTONS, FIBERS, TUBE, WRITHE
+    bDrawFibers = new Interface.Button({
+		bounds:[.5,0,.1,.2],
+		label:"FIBERS",
+		mode:"toggle",
+		target:'OSC', key:'/bDrawFibers'	
+	}) 
+ 
+	
+	
+    bDrawTube = new Interface.Button({
+		bounds:[.6,0,.1,.2],
+		label:"TUBE",
+		mode:"toggle",
+		target:'OSC', key:'/bDrawTube'	
+	})
+  
+ 
+	
+	bDrawWrithe = new Interface.Button({
+		bounds:[.9,0,.1,.2],
+		label:"WRITHE",
+		mode:"toggle",
+		target:'OSC', key:'/bDrawWrithe'	
+	})
+    bAutoMode = new Interface.Button({
+		bounds:[.5,.2,.5,.1],
+		label:"AUTO",
+		fontsize:45,
+		mode:"toggle",
+		target:'OSC', key:'/bAutoMode'	
+	})	
+    bFlow = new Interface.Button({
+		bounds:[.5,.3,.5,.1],
+		label:"FLOW",
+		mode:"toggle",
+		target:'OSC', key:'/bFlow'	
+	})	
+    bUseEnergies = new Interface.Button({
+		bounds:[.5,.4,.25,.1],
+		label:"ENERGY",
+		mode:"toggle",
+		target:'OSC', key:'/bUseEnergies'	
+	})
+	//     bReset = new Interface.Button({
+	// 	bounds:[.5,.4,.25,.1],
+	// 	label:"ENERGY",
+	// 	mode:"toggle",
+	// 	target:'OSC', key:'/bUseEnergies'	
+	// })  
+	 
+    energy_scale = new Interface.Slider({
+		bounds:[.75,.4,.25,.1],
+		label:"e_scale", 
+		max: 1000,
+	    isVertical:true, 
+		mode:"toggle",
+		target:'OSC', key:'/energy_scale'	
+	})	
+	   
+
+    menu = new Interface.Menu({ 
+	  bounds:[0,0,.5,.15],
+	  stroke:"#666", 
+	  label: 'ratio',
+	  options:['PQ ratio','3:2','4:3','5:3','10:1'],
+	  target: "OSC", key:'/ratio',
+		onvaluechange : function(){  
+			if (this.value == '3:2'){
+		  		P.setValue(3) 
+		  		Q.setValue(2) 
+			}
+			if (this.value == '4:3'){
+				P.setValue(4) 
+				Q.setValue(3)
+			} 
+			if (this.value == '5:3'){
+				P.setValue(5) 
+				Q.setValue(3)
+			} 
+			if (this.value == '10:1'){
+				P.setValue(10) 
+				Q.setValue(1)
+			}  
+			P.sendTargetMessage()
+			Q.sendTargetMessage()
+		}  
+	}); 
+	
+    appname = new Interface.Label({    
+	  bounds:[0,.8,1,.3],
+	  value:'TWISTOR VORTEX',
+	  style:'bold',
+	  font:'Monaco',
+	  size: 45,
+	
+	})  
+   
+   
+
+	var pitch = new Interface.Slider({
+	  label: 'pitch',  
+	  bounds:[.8,.5,.05,.3],
+	  target:"OSC", key:"/pitch"
+	});
+	var roll = new Interface.Slider({
+	  label: 'roll',  
+	  bounds:[.85,.5,.05,.3],
+	 target:"OSC", key:"/roll"   
+	});
+	var yaw = new Interface.Slider({
+	  label: 'yaw',  
+	  bounds:[.9,.5,.05,.3],
+	 target:"OSC", key:"/yaw"   
+	});
+	
+	var orientation = new Interface.Orientation({
+	  onvaluechange : function(_pitch, _roll, _yaw, _heading) {
+	    pitch.setValue(_pitch);
+	    roll.setValue(_roll);
+	    yaw.setValue(_yaw); 
+	    Interface.OSC.send("/pitch","f",_pitch);
+	    Interface.OSC.send("/yaw","f",_yaw);
+	    Interface.OSC.send("/roll","f",_roll);   
+	  }
+	}); 
+ 
+
+    panel.add( vel, P, Q, menu, writhe, theta, phi, bDrawTube, bDrawFibers, bAutoMode, bFlow, bUseEnergies, bDrawWrithe, energy_scale, appname, pitch, yaw, roll )//P, Q, vel, menu);
+    panel.add(tubesize, size)
+	panel.background =  "#7F7171"
+
+    
+	for (var i = 0; i < panel.children.length; i++) {
+	     panel.children[i].fill = "#FF8C00" 
+	      panel.children[i].stroke = "darkred"
+	 	panel.children[i].font = "bold 25px monaco"
+		//panel.children[i].background = "#1C252E"
+		
+	} 
+	
+	P.font = "bold 60px monaco"
+    Q.font = "bold 60px monaco"    
+	panel.refresh()
+
+    Interface.OSC.receive = function(address, typetags, parameters) {
+      window.alert(address + typetags + parameters);
+    }
+        
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<html>
+<head>
+  <script src='interface.js'></script>
+</head>
+
+<body>
+  <script>
+
+ var a = new Interface.Panel({ 
+		useRelativeSizesAndPositions: true,    
+});
+var orientation = new Interface.Orientation({
+  onvaluechange : function(_pitch, _roll, _yaw, _heading) {
+    pitch.setValue(_pitch);
+    roll.setValue(_roll);
+    yaw.setValue(_yaw);        
+  }
+}).start();
+var pitch = new Interface.Slider({  
+  name: 'pitch',
+  label: 'pitch',  
+  bounds:[.05,.05,.2,.9] 
+});
+var roll = new Interface.Slider({   
+  name: 'yaw',
+  label: 'roll',  
+  bounds:[.25,.05,.2,.9] 
+});
+var yaw = new Interface.Slider({   
+  name: 'roll',
+  label: 'yaw',  
+  bounds:[.45,.05,.2,.9] 
+});
+
+a.background = 'black';
+a.add(pitch, roll, yaw);
+
+
+  </script>
+</body>
+</html>

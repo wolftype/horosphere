@@ -14,29 +14,30 @@
 //al::pose
 #include "allocore/spatial/al_Pose.hpp"
 //vsr::frame
-#include "vsr/vsr_cga3D_frame.h"
+#include "vsr/form/vsr_cga3D_frame.h"
 //gfx::pose
 #include "gfx/gfx_scene.h"
 
 namespace vsr2al {
 
-    using vsr::Rot;
-    using vsr::Frame;
+    using vsr::cga::Rot;
+    using vsr::cga::Frame;
+
     
-    al::Quatd Rot2Quat(const vsr::Rot& r){
+    al::Quatd Rot2Quat(const vsr::cga::Rot& r){
         return al::Quatd(r[0], -r[3], r[2], r[1]);
     }
 
-    vsr::Rot Quat2Rot(const al::Quatd& q){
-        return vsr::Rot(q[0], -q[3], q[2], q[1]);
+    vsr::cga::Rot Quat2Rot(const al::Quatd& q){
+        return vsr::cga::Rot(q[0], -q[3], q[2], q[1]);
     }
 
-    al::Vec3d V2V(const vsr::Vec& v){
+    al::Vec3d V2V(const vsr::cga::Vec& v){
         return al::Vec3d(v[0], v[1], v[2]);
     }
 
-    vsr::Vec V2V(const al::Vec3d& v){
-        return vsr::Vec(v[0], v[1], v[2]);
+    vsr::cga::Vec V2V(const al::Vec3d& v){
+        return vsr::cga::Vec(v[0], v[1], v[2]);
     }
     
     al::Pose Frame2Pose(const Frame& f){
@@ -44,7 +45,7 @@ namespace vsr2al {
     }
 
     Frame Pose2Frame(const al::Pose& p){
-        return Frame( vsr::Ro::null( p.pos()[0], p.pos()[1], p.pos()[2] ), Quat2Rot( p.quat() ) );
+        return Frame( vsr::cga::Round::null( p.pos()[0], p.pos()[1], p.pos()[2] ), Quat2Rot( p.quat() ) );
     }
 
 }

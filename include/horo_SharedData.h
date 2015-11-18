@@ -1,4 +1,5 @@
-//
+//  DEPRECATED!
+
 //  Manages sending osc signals to all computers in allosphere network 
 //  alloprojects
 //
