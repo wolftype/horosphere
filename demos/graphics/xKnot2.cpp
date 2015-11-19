@@ -341,7 +341,7 @@ struct RenderApp : OmniRenderBone<State>{
 int main (int argc, char *argv[]){
 
    if (argc > 1) {
-     if (argv[1] == "allo"){
+     if (!strncmp(argv[1],"allo",4)){
       printf("AlloDemo\n");
       ControlApp app("192.168.10.255");
       app.start();
