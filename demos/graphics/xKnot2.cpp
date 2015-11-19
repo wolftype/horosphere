@@ -57,9 +57,9 @@ struct State{
   bool bDrawWrithe, bUseEnergies, bFlow; 
   
   vsr::cga::Vec vec;                               //<-- Hopf Vec
-  Point pnt = Construct::point(3,0,0);   //<-- Point Along Orbit
+  Point pnt = Construct::point(3,0,0);  	   //<-- Point Along Orbit
 
-  float ecc;                             //<-- hyperbolicness of orbit (wt of points)
+  float ecc;                                       //<-- hyperbolicness of orbit (wt of points)
 
 };
 
@@ -204,6 +204,8 @@ struct Local{
  *-----------------------------------------------------------------------------*/
 struct ControlApp : ControlBone<State> {
  
+
+
   //Mouse Position
   Point mouse;
 
@@ -213,6 +215,10 @@ struct ControlApp : ControlBone<State> {
   //Some Variables
   bool bReset = false;
   float amt = 0;
+
+  // Construct with broadcast ip
+  ControlApp(const char * ip) : ControlBone<State>(ip) {}
+
 
   /*-----------------------------------------------------------------------------
    *  Setup Variables
@@ -335,8 +341,16 @@ struct RenderApp : OmniRenderBone<State>{
 int main (int argc, char *argv[]){
 
    if (argc > 1) {
-     ControlApp app;
-     app.start();
+     if (argv[1] == "allo"){
+      printf("AlloDemo\n");
+      ControlApp app("192.168.10.255");
+      app.start();
+     } else {
+      printf("%s \t", argv[1] );
+      printf("LocalDemo\n");
+       ControlApp app("127.0.0.1");
+       app.start();
+     }
    } else {
      RenderApp app;
      app.start();

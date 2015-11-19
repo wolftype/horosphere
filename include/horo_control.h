@@ -34,7 +34,7 @@ struct ControlBone : App, public OSCReceiver {
   cuttlebone::Maker<TState> maker;
   TState * state;
 
-  ControlBone(){};//, maker("192.168.10.255"){}  
+  ControlBone(const char * ip = "127.0.0.1") : maker(ip){} //"192.168.10.255" 
 
   void start(){
     
