@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  xEmpty.cpp
+ *       Filename:  xCrystal.cpp
  *
- *    Description:  both a renderer and a controller, based on arg flag
+ *    Description:  3D crystallographic space group visualizer
  *
  *        Version:  1.0
- *        Created:  05/22/2015 18:04:36
+ *        Created:  02/29/2016 16:09:24
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -31,6 +31,10 @@ struct State{
   gfx::Pose model;
   gfx::Pose camera;
   Point point;
+
+  // add more state here
+
+  
   
 };
 

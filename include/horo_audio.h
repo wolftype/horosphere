@@ -20,6 +20,7 @@
 
 //#include "horo_AudioApp.h"
 #include "vsr/vsr_app.h"
+
 #include "Cuttlebone/Cuttlebone.hpp"
 #include "allocore/protocol/al_OSC.hpp"
 
@@ -41,6 +42,7 @@ struct AudioBone : App, public OSCReceiver {
 
   bool bMute;
   float mMasterVolume;
+  
 	gam::AudioIO mAudioIO; 
   gam::Scheduler mScheduler; 
 		  
@@ -93,12 +95,13 @@ struct AudioBone : App, public OSCReceiver {
 		int audioInputs, int audioOutputs
 	);
   
- 	static void AudioCB(gam::AudioIOData&); 
+// 	static void AudioCB(gam::AudioIOData&); 
+  
  	virtual void onSound(gam::AudioIOData& io) {}   	
 };
 
-	  	
-inline void AudioBone::initAudio(
+template<typename TSTATE>	  	
+inline void AudioBone<TSTATE>::initAudio(
 	double audioRate, int audioBlockSize
 ) {
 	
@@ -110,7 +113,8 @@ inline void AudioBone::initAudio(
     gam::Sync::master().spu( mAudioIO.fps() );
 }
 
-inline void AudioBone::initAudio( 
+template<typename TSTATE>	  	
+inline void AudioBone<TSTATE>::initAudio( 
 	std::string devicename,
 	double audioRate, int audioBlockSize,
 	int audioInputs, int audioOutputs
@@ -126,11 +130,12 @@ inline void AudioBone::initAudio(
 	initAudio(audioRate, audioBlockSize);
 }
 
-inline void AudioBone::AudioCB(gam::AudioIOData& io){
-	AudioApp& app = io.user<AudioApp>();
-	io.frame(0);
-	app.onSound(io);
-}        
+//template<typename TSTATE>	  	
+//inline void AudioBone<TSTATE>::AudioCB(gam::AudioIOData& io){
+//	AudioApp& app = io.user<AudioApp>();
+//	io.frame(0);
+//	app.onSound(io);
+//}        
 
 
 #endif

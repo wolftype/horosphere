@@ -37,13 +37,18 @@ using namespace vsr::cga;
  *  SHARED DATA
  *-----------------------------------------------------------------------------*/
 struct State{
+  
   float time;
-  gfx::Pose model;
-  gfx::Pose camera;
+
+  gfx::Pose model;  
+  gfx::Pose camera; 
+  
   Point point;
 
-  float P, Q, theta, phi, vel, rotvel, tube_size, writhe;
-
+  float P, Q;
+  float theta, phi;
+  float vel, rotvel;
+  float tube_size, writhe;
   float energy, energy_scale; 
   
   float size;
@@ -57,7 +62,7 @@ struct State{
   bool bDrawWrithe, bUseEnergies, bFlow; 
   
   vsr::cga::Vec vec;                               //<-- Hopf Vec
-  Point pnt = Construct::point(3,0,0);  	   //<-- Point Along Orbit
+  Point pnt = Construct::point(3,0,0);  	         //<-- Point Along Orbit
 
   float ecc;                                       //<-- hyperbolicness of orbit (wt of points)
 
@@ -299,11 +304,13 @@ struct ControlApp : ControlBone<State> {
 
 
 /*-----------------------------------------------------------------------------
- *  RENDER BONE
+ *  RENDERING APPLICATION THAT RUNS ON GR02-GR14
  *-----------------------------------------------------------------------------*/
 struct RenderApp : OmniRenderBone<State>{
 
+
    Local local;
+   
   /*-----------------------------------------------------------------------------
    *  Draw Loop Called Multiple Times Per Frame
    *-----------------------------------------------------------------------------*/

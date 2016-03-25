@@ -42,6 +42,7 @@ struct GLVApp {
   void set(al::Window * w ) {
     win = w;
     initGLV();
+    
   }
 
  virtual void initGLV(){
@@ -50,10 +51,10 @@ struct GLVApp {
     glv.gui.colors().border.set(1,0,0);
     glv.gui.enable( glv::DrawBorder );
 
-    glv_.bindTo(*win);
-    glv_.gui.colors().back.set(.3,.3,.3);
-    glv_.gui.colors().border.set(1,0,0);
-    glv_.gui.enable( glv::DrawBorder );
+ //   glv_.bindTo(*win);
+ //   glv_.gui.colors().back.set(.3,.3,.3);
+ //   glv_.gui.colors().border.set(1,0,0);
+ //   glv_.gui.enable( glv::DrawBorder );
   }
 
   void toggle(){

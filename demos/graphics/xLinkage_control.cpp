@@ -18,9 +18,9 @@
 
 
 
-#include "vsr/vsr_cga3D_app.h"
-#include "vsr_linkages.h"
-#include "vsr_chain_draw.h"
+#include "vsr/vsr_app.h"
+#include "vsr/form/vsr_linkages.h"
+#include "vsr/draw/vsr_chain_draw.h"
 
 #include "horo_vsr.hpp"
 
@@ -28,7 +28,7 @@
 #include "Cuttlebone/Cuttlebone.hpp" 
  
 using namespace vsr;
-using namespace vsr::cga3D; 
+using namespace vsr::cga; 
 
 using std::cout;
 using std::endl;
@@ -199,7 +199,7 @@ void MyApp::onDraw() {
         //center += i[0].pos();
       } 
     }
-    center = Ro::dls(center,1);
+    center = Round::dls(center,1);
     Draw(center,1,0,0,.5);
 
     Plane plane;
@@ -218,7 +218,7 @@ void MyApp::onDraw() {
       if ( fabs( plane.wt()) > 0 ){
        bool bDir = orientation > 0;
        cout << bDir << " DIR " << endl;
-       tframe.pos() = Ro::null(center).trs( plane.dual() * (bDir ? cameraDistance : -cameraDistance) ); 
+       tframe.pos() = Round::null(center).trs( plane.dual() * (bDir ? cameraDistance : -cameraDistance) ); 
        tframe.orient( center, true );
       }
   

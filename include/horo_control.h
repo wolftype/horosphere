@@ -25,6 +25,7 @@
 #include "vsr_app.h"
 #include "Cuttlebone/Cuttlebone.hpp"
 #include "allocore/protocol/al_OSC.hpp"
+
 //ADD-ONS
 #include "horo_OSCApp.h"
 

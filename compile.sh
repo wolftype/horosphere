@@ -1,9 +1,12 @@
 #!/bin/bash
 
-echo Compiling $1 
 
-#calls cd build 
-#cmake .. -DSRC<argument> && make argument
+# FLAGS:
+# -a | --allosphere : build for allosphere
+# -q | --quiet : make quietly (VERBOSE=0)
+# 
+
+echo Compiling $1 
 
 DIRECTORY=`dirname $1`
 TARGET=`basename $1|cut -d'.' -f1 | sed -e "s|/|_|g"`
@@ -13,8 +16,44 @@ echo Filename is $FILENAME
 echo Target is $TARGET
 
 
+#DEFAULTS
+BUILDING_FOR_ALLOSPHERE=0
+CUDALEGACY=1
+MAKE_VERBOSE=1
+RUN_TARGET=0
+RUN_CMAKE=0
+
+for i
+  do
+    case $i in
+    -a | --allosphere)
+      BUILDING_FOR_ALLOSPHERE=1
+    ;;
+    -q | --quiet)
+      MAKE_VERBOSE=0
+    ;;
+    -r | --run)
+      RUN_TARGET=1
+    ;;
+    -c | --cmake)
+      RUN_CMAKE=1
+    ;;
+    esac
+done
+
+
+
 mkdir build
 cd build
 rm bin/${TARGET}
-cmake .. -DDIR=${DIRECTORY} -DSRC=${FILENAME} -DBUILDING_FOR_ALLOSPHERE=0 -DCUDALEGACY=1
-make CPPFLAGS=-DCTL_MAKER  
+
+if [ $RUN_CMAKE = 1 ]; then
+  #echo "RUNNING CMAKE"
+  cmake .. -DDIR=${DIRECTORY} -DSRC=${FILENAME} -DBUILDING_FOR_ALLOSPHERE=$BUILDING_FOR_ALLOSPHERE -DCUDALEGACY=$CUDALEGACY
+fi
+
+make VERBOSE=$MAKE_VERBOSE CPPFLAGS=-DCTL_MAKER  
+if [ $RUN_TARGET = 1 ]; then
+  ./bin/$TARGET
+fi
+

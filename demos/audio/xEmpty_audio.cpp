@@ -18,6 +18,8 @@
 
 #include "data/xEmpty.h" //<-- must include vsr gfx first so glew is included before gl
 
+#include "horo_audio.h"
+
 using namespace al;
 
 struct MyApp : AudioBone<State>{
@@ -25,7 +27,7 @@ struct MyApp : AudioBone<State>{
   /*-----------------------------------------------------------------------------
    *  Draw Loop Called Multiple Times Per Frame
    *-----------------------------------------------------------------------------*/
-   void onDraw(Graphics& g){
+   void onDraw(){//Graphics& g){
    }
 
    /*-----------------------------------------------------------------------------
@@ -35,6 +37,8 @@ struct MyApp : AudioBone<State>{
       auto& s = *(this->state);
       cout << s.time << endl;
    }
+
+   void setup(){}
 
 };  
 

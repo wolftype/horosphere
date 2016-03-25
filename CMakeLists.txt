@@ -15,6 +15,11 @@ add_subdirectory(../AlloSystem AlloSystem)
 get_target_property(ALLOCORE_LINK_LIBRARIES allocore ALLOCORE_LINK_LIBRARIES)
 get_target_property(ALLOUTIL_LINK_LIBRARIES alloutil ALLOUTIL_LINK_LIBRARIES)
 
+#would be nice to just grab AlloSystem Include Directories (ALLOSYSTEM_INCLUDE_DIR)
+include_directories(${AlloSystem_SOURCE_DIR}/allocore/)
+include_directories(${AlloSystem_SOURCE_DIR}/alloutil/)
+include_directories(${AlloSystem_SOURCE_DIR}/alloGLV/)
+
 #local include for this particular project space
 include_directories(/usr/local/include/)
 include_directories(${PROJECT_SOURCE_DIR}/include/)
@@ -22,15 +27,14 @@ include_directories(${PROJECT_SOURCE_DIR}/demos/)
 include_directories(${PROJECT_SOURCE_DIR}/../versor/include/)
 include_directories(${PROJECT_SOURCE_DIR}/../versor/include/vsr/)
 include_directories(${PROJECT_SOURCE_DIR}/../GLV/)
+
+#change to point to gfx?
 include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/)
 include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/gfx/)
 include_directories(${PROJECT_SOURCE_DIR}/../Gamma/)
 include_directories(${PROJECT_SOURCE_DIR}/../cuttlebone/)
 
-#would be nice to just grab AlloSystem Include Directories (ALLOSYSTEM_INCLUDE_DIR)
-include_directories(${AlloSystem_SOURCE_DIR}/allocore/)
-include_directories(${AlloSystem_SOURCE_DIR}/alloutil/)
-include_directories(${AlloSystem_SOURCE_DIR}/alloGLV/)
+
 
 #library search directories
 link_directories(/usr/local/lib/)
@@ -50,10 +54,13 @@ endif()
 
 if(${BUILDING_FOR_ALLOSPHERE})
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __allosphere__")
+else()
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_OSX") #hack due to trouble with al_OpenGL.hpp 
 endif()
 
 #the subdirectory of demos
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
+#ADDS CMAKEFILELISTS FROM demos/graphics or demos/audio etc
 add_subdirectory(${DIR})
 message("now type 'make'")
