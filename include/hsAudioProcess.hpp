@@ -109,8 +109,8 @@ struct FMSynth : public AudioProcess {
 			car2.freq( c2 + m2 * f );
 
 			float s = ( car1() + car2() );
-			io.out(0) += s * src[0] * mMix;
-			io.out(1) += s * src[1] * mMix;
+			io.out(channel) += s * src[0] * mMix;
+			//io.out(1) += s * src[1] * mMix;
 		}
 	}
 };

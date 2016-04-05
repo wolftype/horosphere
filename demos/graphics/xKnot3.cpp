@@ -222,7 +222,9 @@ template<> template<> void Param<bool>::specify(Knot& k){
 template<> template<> void Param<float>::specify(Knot& k){
   mData = {
     {"P",&k.mState.P,1,10},
-    {"Q",&k.mState.Q,1,10}
+    {"Q",&k.mState.Q,1,10},
+    {"theta",&k.mState.theta,1,10},
+    {"phi",&k.mState.phi,1,10}
   };
 }
 }
