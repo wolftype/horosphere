@@ -6,30 +6,33 @@
 <body>
   <script>
 
- var a = new Interface.Panel({ 
-		useRelativeSizesAndPositions: true,    
+ var a = new Interface.Panel({
+		useRelativeSizesAndPositions: true,
 });
 var orientation = new Interface.Orientation({
   onvaluechange : function(_pitch, _roll, _yaw, _heading) {
     pitch.setValue(_pitch);
     roll.setValue(_roll);
-    yaw.setValue(_yaw);        
+    yaw.setValue(_yaw);
   }
 }).start();
-var pitch = new Interface.Slider({  
+var pitch = new Interface.Slider({
   name: 'pitch',
-  label: 'pitch',  
-  bounds:[.05,.05,.2,.9] 
+  label: 'pitch',
+  bounds:[.05,.05,.2,.9],
+  target:"OSC", key:'/pitch',
 });
-var roll = new Interface.Slider({   
+var roll = new Interface.Slider({
   name: 'yaw',
-  label: 'roll',  
-  bounds:[.25,.05,.2,.9] 
+  label: 'roll',
+  bounds:[.25,.05,.2,.9],
+  target:"OSC", key:'/roll',
 });
-var yaw = new Interface.Slider({   
+var yaw = new Interface.Slider({
   name: 'roll',
-  label: 'yaw',  
-  bounds:[.45,.05,.2,.9] 
+  label: 'yaw',
+  bounds:[.45,.05,.2,.9],
+  target:"OSC", key:'/yaw',
 });
 
 a.background = 'black';

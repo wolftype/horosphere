@@ -16,39 +16,46 @@
  * =====================================================================================
  */
 
-#include "data/xEmpty.h" //<-- must include vsr gfx first so glew is included before gl
+#include "vsr/vsr_app.h"
+#include "hsAudio.hpp"
+#include "hsAudioProcess.hpp"
+#include "hsGui.hpp"
 
-#include "horo_audio.h"
+using namespace hs;
 
-using namespace al;
+struct MyApp : App {
 
-struct MyApp : AudioBone<State>{
+  GuiMap gm;
+  Audio aud;
 
-  /*-----------------------------------------------------------------------------
-   *  Draw Loop Called Multiple Times Per Frame
-   *-----------------------------------------------------------------------------*/
-   void onDraw(){//Graphics& g){
-   }
+  void setup(){
+    bindGLV();
 
-   /*-----------------------------------------------------------------------------
-    *  Physics Called Once per Frame (do something with state)
-    *-----------------------------------------------------------------------------*/
-   void onAnimate(al_sec dt){
-      auto& s = *(this->state);
-      cout << s.time << endl;
-   }
+    auto& fm = aud.mScheduler.add<FMSynth>();
+    auto& ws = aud.mScheduler.add<WindSound>();
+    auto& hs = aud.mScheduler.add<Harmonics>();
 
-   void setup(){}
+    gm.bind<AudioParam>(fm,gui);
+    gm.bind<AudioParam>(ws,gui);
+    gm.bind<AudioParam>(hs,gui);
+  }
 
-};  
+  void onDraw(){
 
+  }
 
+};
 
 /*-----------------------------------------------------------------------------
  *  MAIN LOOP
  *-----------------------------------------------------------------------------*/
 int main(){
+
   MyApp app;
+  app.aud.start();
   app.start();
+
+  while(true){}
+
   return 0;
 }

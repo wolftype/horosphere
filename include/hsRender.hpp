@@ -1,6 +1,8 @@
 #ifndef HS_RENDER_INCLUDED
 #define HS_RENDER_INCLUDED
 
+#include "gfx/gfx_gl.h"
+
 #include "Cuttlebone/Cuttlebone.hpp"
 #include "alloutil/al_OmniStereoGraphicsRenderer.hpp"
 #include "horo_vsr.hpp"
@@ -33,11 +35,11 @@ namespace hs {
       /*-----------------------------------------------------------------------------
        *  Draw Loop Called Multiple Times Per Frame
        *-----------------------------------------------------------------------------*/
-       virtual void onDraw(Graphics& g){
+       virtual void onDraw(al::Graphics& g){
          auto& s = mParam.mState.mScene;
          //MODEL pose to axis angle
          glPushMatrix();
-           Vec4<> tr = s.model.quat().axan();
+           gfx::Vec4<> tr = s.model.quat().axan();
            glRotatef ( tr[3], tr[0], tr[1], tr[2]  );
 
            mParam.onDraw();
