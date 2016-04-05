@@ -280,8 +280,11 @@ struct ControlApp : hs::Simulator<Knot> {
     hs->cdelay = .01 * kd.P / kd.Q;
 
     fm->lfreq = kd.energy / 100.;     /// Hovers around 1
-    fm->c1 = 400 + std::fabs(kd.theta) * 40;
-    fm->c2 = 400 + std::fabs(kd.phi) * 40;
+
+    auto ttheta = kd.bAutoMode ? fabs((Op::pj(kd.vec, Biv::xz) <= cga::Vec::x)[0]) : kd.theta;
+    auto tphi = kd.bAutoMode ? fabs((Op::pj(kd.vec, Biv::yz) <= cga::Vec::z)[0]) : kd.theta;
+    fm->c1 = 400 + std::fabs(ttheta) * 40;
+    fm->c2 = 400 + std::fabs(tphi) * 40;
   }
 
 };
