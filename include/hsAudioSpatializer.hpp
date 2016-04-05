@@ -26,15 +26,16 @@
 using gfx::Vec3f;
 using gfx::Quat;
 
-
-#define DESKTOP_LAYOUT 0
-#define NUM_DESKTOP_SPEAKERS 2
-
-#define ALLO_LAYOUT 1
-#define NUM_ALLO_SPEAKERS 60
-
-
 namespace hs {
+
+  #define DESKTOP_SPEAKER_LAYOUT 0
+  #define NUM_DESKTOP_SPEAKERS 2
+
+  #define ALLO_SPEAKER_LAYOUT 1
+  #define NUM_ALLO_SPEAKERS 60
+
+
+
 
   /// Layout of Spatialized Speakers, templated on LAYOUT and NUMBER
   template<int L, int N >
@@ -42,27 +43,48 @@ namespace hs {
 
   	SpeakerLayout(float r = 3) { calcRolloff(r); init(); }
 
-    /// Initialize Geometry
-    void init();
+    /// Initialize Geometry (DEFAULTS TO DESKTOP)
+    void init(){
 
-    /// A Group of channels
-    struct Channel {
-      vector<int> idx;
+      cout << "INIT DESKTOP SPEAKER LAYOUT" << endl;
+
+  		pos[0] = gfx::Vec3f(-1,0,0);
+  		pos[1] = gfx::Vec3f(1,0,0);
+  	}
+
+    /// Audio Mix at position
+    struct Mix {
+
+      SpeakerLayout * sl;
+
+      int numChannels(){ return N; }
+
+      Mix (){
+        sl = new SpeakerLayout();//add rolloff?
+        channel.reserve(N);
+      }
+
+      /// mix in each channel
+      vector<float> channel;//= vector<float> channel(N);//[N];
+    	gfx::Vec3f pos;
+
+    	float operator[] (int idx) const{
+    		return channel[idx];
+    	}
+
+      Mix& operator()(){
+        return sl -> mix(*this);
+      }
     };
-
-    static vector<Channel> Group;
 
     /// Positions of Speakers
     gfx::Vec3f pos[N];
     float RollOff;
 
-
-
     /// Calculate DBAP at v
-  	vector<float>  mix( gfx::Vec3f v );
+    Mix& mix( Mix& m );
     /// Calculate ROLLOFF
   	void calcRolloff( float dec) { RollOff = pow(10., -dec/20.0); }
-
     /// Number of Channels
   	int num() { return N; }
 
@@ -81,49 +103,38 @@ namespace hs {
 
   };
 
+  /// fill N floats at f with DBAP at v
 	template<int L, int N>
-	inline vector<float> SpeakerLayout<L,N> :: mix  (gfx::Vec3f v) {
-
-		vector<float> m;
+	inline typename SpeakerLayout<L,N>::Mix& SpeakerLayout<L,N> :: mix  ( SpeakerLayout<L,N>::Mix& mx ) {
 
 		float sum;
 		for (int i = 0; i < N; ++i){
-			gfx::Vec3f dir = pos[i] - v;
+			gfx::Vec3f dir = pos[i] - mx.pos;
 
 			float mag = dir.sq();
 			float id = 0;
 			float dist;
-			if (!mag == 0 ){
+			if (!(mag == 0) ){
 				id =1.0 / mag;
 				dist = 1.0/sqrt(mag);
 			}
-			m.push_back( dist );
+			mx.channel[i]= dist;
 			sum += id;
 		}
 
 		float k = RollOff / sqrt(sum);
 
 		for (int i = 0; i < N; ++i){
-			m[i] *= k;
+			mx.channel[i] *= k;
 		}
 
-		return m;
+    return mx;
 
-	}
-
-  /// Desktop Speaker Layout
-	template<int L>
-	inline void Speakers<L,2> :: init(){
-
-    cout << "INIT DESKTOP SPEAKER LAYOUT" << endl;
-
-		pos[0] = gfx::Vec3f(-1,0,0);
-		pos[1] = gfx::Vec3f(1,0,0);
 	}
 
   /// ALLOSPHERE SPEAKER LAYOUT note: subwoofer is [47]
 	template<>
-	inline void SpeakerLayout<ALLO_SPEAKER_LAYOUT> :: init()   {
+	inline void SpeakerLayout<ALLO_SPEAKER_LAYOUT, NUM_ALLO_SPEAKERS> :: init()   {
 
     cout << "INIT ALLOSPHERE SPEAKER LAYOUT" << endl;
 
@@ -165,41 +176,12 @@ namespace hs {
 
 	}
 
+  using DesktopSpeakers = SpeakerLayout<DESKTOP_SPEAKER_LAYOUT, NUM_DESKTOP_SPEAKERS>;
+  using AlloSpeakers = SpeakerLayout<ALLO_SPEAKER_LAYOUT, NUM_ALLO_SPEAKERS>;
+  using DesktopMix = SpeakerLayout<DESKTOP_SPEAKER_LAYOUT, NUM_DESKTOP_SPEAKERS>::Mix;
+  using AlloMix = SpeakerLayout<ALLO_SPEAKER_LAYOUT, NUM_ALLO_SPEAKERS>::Mix;
 
-  template<int N>
-  struct AudioSource;
+} //hs::
 
-  template< int N >
-  ostream& operator << (ostream& os, SpatialSource<N>& s);
-
-  /// Audio Source
-  template< int N >
-  struct AudioSource {
-
-    vector<float> f;
-  	Speakers< N > speakers;
-  	gfx::Vec3f pos;
-
-  	int num() { return N; }
-
-  	void operator() (){
-  		f = speakers.mix( pos );
-  	}
-
-  	float operator[] (int idx) const{
-  		return f[idx];
-  	}
-
-  	template<int S>
-  	friend ostream& operator << ( ostream& os, SpatialSource<S> &s);
-  };
-
-  template<int N>
-  inline ostream& operator << ( ostream& os, SpatialSource<N> & s){
-  	for (int i = 0; i < s.speakers.num(); ++i ){
-  		os << "mix at: " << i << " is " << s[i] << " \n";
-  	}
-  	return os;
-  }
 
 #endif

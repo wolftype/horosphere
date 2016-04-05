@@ -27,11 +27,14 @@
 
 //ADD-ONS
 #include "horo_OSCApp.h"
-#include "horo_GxSync.h" 
+#include "horo_GxSync.h"
 
 #include "Gamma/Gamma.h"
 #include "Gamma/AudioIO.h"
 #include "Gamma/Scheduler.h"
+
+
+
 
 
 template<class TState>
@@ -42,26 +45,26 @@ struct AudioBone : App, public OSCReceiver {
 
   bool bMute;
   float mMasterVolume;
-  
-	gam::AudioIO mAudioIO; 
-  gam::Scheduler mScheduler; 
-		  
 
-  AudioBone(){}; 
+	gam::AudioIO mAudioIO;
+  gam::Scheduler mScheduler;
+
+
+  AudioBone(){};
 
   void start(){
-    
+
     state = new TState;
-    memset(state, 0, sizeof(TState)); 
+    memset(state, 0, sizeof(TState));
     taker.start();
-    
+
   	#ifdef __allosphere__
-		initAudio("AF12 x5", 44100, 256, 0, 60);   
+		initAudio("ECHO X6", 44100, 256, 0, 60);
 		#endif
-		
+
     #ifndef __allosphere__
 		initAudio(44100, 256);
-		#endif 
+		#endif
 
     //OSC
     OSCReceiver::init(8082);
@@ -74,7 +77,7 @@ struct AudioBone : App, public OSCReceiver {
 
   void onFrame(){
     App::onFrame();
-    int popCount = taker.get(*state); 
+    int popCount = taker.get(*state);
     OSCReceiver::listen();
   }
 
@@ -88,33 +91,33 @@ struct AudioBone : App, public OSCReceiver {
   }
 
   void initAudio( double audioRate=44100, int audioBlockSize=256 );
-	
+
 	void initAudio(
-		std::string devicename, 
+		std::string devicename,
     double audioRate, int audioBlockSize,
 		int audioInputs, int audioOutputs
 	);
-  
-// 	static void AudioCB(gam::AudioIOData&); 
-  
- 	virtual void onSound(gam::AudioIOData& io) {}   	
+
+// 	static void AudioCB(gam::AudioIOData&);
+
+ 	virtual void onSound(gam::AudioIOData& io) {}
 };
 
-template<typename TSTATE>	  	
+template<typename TSTATE>
 inline void AudioBone<TSTATE>::initAudio(
 	double audioRate, int audioBlockSize
 ) {
-	
-    mAudioIO.callback = mScheduler.audioCB;
+
+    mAudioIO.callback = gam::Scheduler::audioCB<gam::AudioIOData>;
 	  mAudioIO.user(&mScheduler);
-    
+
 	  mAudioIO.framesPerSecond(audioRate);
 	  mAudioIO.framesPerBuffer(audioBlockSize);
     gam::Sync::master().spu( mAudioIO.fps() );
 }
 
-template<typename TSTATE>	  	
-inline void AudioBone<TSTATE>::initAudio( 
+template<typename TSTATE>
+inline void AudioBone<TSTATE>::initAudio(
 	std::string devicename,
 	double audioRate, int audioBlockSize,
 	int audioInputs, int audioOutputs
@@ -130,16 +133,12 @@ inline void AudioBone<TSTATE>::initAudio(
 	initAudio(audioRate, audioBlockSize);
 }
 
-//template<typename TSTATE>	  	
+//template<typename TSTATE>
 //inline void AudioBone<TSTATE>::AudioCB(gam::AudioIOData& io){
 //	AudioApp& app = io.user<AudioApp>();
 //	io.frame(0);
 //	app.onSound(io);
-//}        
+//}
 
 
 #endif
-
-
-
-
