@@ -205,6 +205,7 @@ struct Knot{
 
 };
 
+namespace hs{
 ///Named Boolean Parameters of Knot
 template<> template<> void Param<bool>::specify(Knot& k){
   mData = {
@@ -224,10 +225,10 @@ template<> template<> void Param<float>::specify(Knot& k){
     {"Q",&k.mState.Q,1,10}
   };
 }
+}
+struct ControlApp : hs::Simulator<Knot> {
 
-struct ControlApp : Simulator<Knot> {
-
-  ControlApp(const char * ip) : Simulator<Knot>(ip) {}
+  ControlApp(const char * ip) : hs::Simulator<Knot>(ip) {}
 
   FMSynth * fm;
   WindSound * ws;

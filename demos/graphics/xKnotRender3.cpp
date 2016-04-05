@@ -1,6 +1,11 @@
 /// the knot
 
-#include "vsr/vsr_app.h"
+
+#include "space/vsr_cga3D_op.h"               //<-- conformal 3D types and basic operations
+
+#include "draw/vsr_cga3D_draw.h"              //<-- fixed pipeline draw routines
+#include "draw/vsr_cga3D_render.h"            //<-- programmable pipeline draw routines
+
 #include "hsRender.hpp"
 #include "../demos/data/xKnotData3.hpp"
 

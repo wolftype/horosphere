@@ -209,8 +209,9 @@ struct Knot{
 
 };
 
+namespace hs {
 ///Named Boolean Parameters of Knot
-template<> template<> void hs::Param<bool>::specify(Knot& k){
+template<> template<> void Param<bool>::specify(Knot& k){
   mData = {
     {"bDrawFibers",&k.mState.bDrawFibers},
     {"bDrawTube",&k.mState.bDrawTube},
@@ -227,6 +228,7 @@ template<> template<> void hs::Param<float>::specify(Knot& k){
     {"P",&k.mState.P,1,10},
     {"Q",&k.mState.Q,1,10}
   };
+}
 }
 
 

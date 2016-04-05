@@ -53,7 +53,8 @@ endif()
 #message("LINK_DIRECTORIES" ${LD})
 
 if(${BUILDING_FOR_ALLOSPHERE})
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __allosphere__")
+  message( "ALLO BUILD")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_LINUX -D __allosphere__")
 else()
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_OSX") #hack due to trouble with al_OpenGL.hpp 
 endif()
