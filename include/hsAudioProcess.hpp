@@ -62,7 +62,7 @@ struct AudioProcess : public gam::Process<gam::AudioIOData> {
 };
 
 
-//////////----------PROCESSES ---------------/////////////
+//------------------------------------------------------------------------------
 
 struct FMSynth : public AudioProcess {
 
@@ -83,7 +83,7 @@ struct FMSynth : public AudioProcess {
 
   FMSynth()  {
 
-		mMix = .1;
+		mMix = .03;
 
 		#ifdef __allosphere__
 		channel = 47;
@@ -128,6 +128,9 @@ void AudioParam::specify(FMSynth& fm){
 
 };
 
+
+//------------------------------------------------------------------------------
+
 struct WindSound : public AudioProcess {
 
   NoisePink<> noise;
@@ -165,6 +168,9 @@ void AudioParam::specify(WindSound& ws){
     {"/freq", &ws.freq, 200,800 }
   };
 };
+
+//------------------------------------------------------------------------------
+
 
 struct Harmonics : public AudioProcess {
 
@@ -230,6 +236,9 @@ void AudioParam::specify( Harmonics& hs){
     {"cdelay",&hs.cdelay,0,1}
   };
 }
+
+//------------------------------------------------------------------------------
+
 
 /*
 struct WindSound : public AudioProcess {

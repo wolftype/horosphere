@@ -56,26 +56,26 @@ namespace hs {
 
     virtual void onMessage(al::osc::Message& m){
         auto ap = m.addressPattern();
-        cout << ap << endl;
+        //cout << ap << endl;
         if (ap == "/euler"){
             float x,y,z;
             m >> x; m >> y; m >> z;
-            cout << x << " " << y << " " << z << endl;
+        //    cout << x << " " << y << " " << z << endl;
         }
         if (ap == "/pitch"){
             float x;
             m >> x;
-            cout << x << endl;
+        //    cout << x << endl;
         }
         if (ap == "/yaw"){
             float x;
             m >> x;
-            cout << x << endl;
+        //    cout << x << endl;
         }
         if (ap == "/roll"){
             float x;
             m >> x;
-            cout << x << endl;
+        //    cout << x << endl;
         }
         mParam.onMessage(m);
     }

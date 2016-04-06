@@ -83,8 +83,6 @@ struct Knot{
   }
 
 
-
-
   /*-----------------------------------------------------------------------------
    *  Update Local Data (called on all Apps)
    *-----------------------------------------------------------------------------*/
@@ -117,9 +115,33 @@ struct Knot{
       float pt = TWOPI * (float)i/num;
       for (int j=0; j<res;++j){
         gfx::Vec4f tv( (1+sin(pt))/2.0,.2,(1+cos(pt))/2.0,.5);
-        tube[i + j * num ].Col.set(c*s.energy_scale*tv[0], tv[1], tv[2] + ( (1-c) * s.energy_scale ), tv[3]);
+
+        tube[i + j * num ].Col.set(c, 0, 1-c, .5);
+        //Col.set(c*s.energy_scale*tv[0], tv[1], tv[2] + ( (1-c) * s.energy_scale ), tv[3]);
       }
     }
+
+    //Writhe meshes
+   for (int k = 0; k < s.numcables/2.; ++k){
+
+       wm.push_back( gfx::Mesh(GL::LL) );
+       wm.push_back( gfx::Mesh(GL::LL) );
+
+       for(int i = 0; i < num; ++i){
+
+         double c = tk.energies[i] * s.energy_scale;
+         double t = (float)i/num;
+
+         if (s.bUseEnergies) t *= tk.energies[i] * s.energy_scale;
+
+         Par tp = Round::pair( tk.cir[i], t * TWOPI * s.writhe);
+         Pnt pa = Round::split( tp, true );
+         Pnt pb = Round::split( tp, false );
+
+         wm[k].add(  pa );
+         wm[k+1].add( pb );
+      }
+   }
 
   }
 
@@ -175,12 +197,11 @@ struct Knot{
     if (s.bDrawTube)
     tube.drawElementsColor();
 
-    //
-    //    if (s.bDrawWrithe) {
-    //      for(auto& i : wm ){
-    //        i.drawVertices();
-    //      }
-    //    }
+    if (s.bDrawWrithe) {
+      for(auto& i : wm ){
+        i.drawVertices();
+      }
+    }
 
   }
 
@@ -189,17 +210,49 @@ struct Knot{
       auto ap = m.addressPattern();
       float tmp;
       if (ap=="/bAutoMode") {
-        m >> tmp;
-        s.bAutoMode = tmp;
+        float t;
+        m >> t;
+        s.bAutoMode = (bool)t;
       } else if (ap == "/bFlow") {
-        m >> tmp;
-        s.bFlow = tmp;
+        float t;
+        m >> t;
+        s.bFlow = (bool)t;
+      } else if (ap == "/bDrawFibers") {
+        float t;
+        m >> t;
+        s.bDrawFibers = (bool)t;
+      } else if (ap == "/bDrawTube") {
+        float t;
+        m >> t;
+        s.bDrawTube = (bool)t;
+      } else if (ap == "/bDrawWrithe") {
+        float t;
+        m >> t;
+        s.bDrawWrithe = (bool)t;
       } else if (ap == "/P") {
         m >> tmp;
         s.P = tmp;
       } else if (ap == "/Q") {
         m >> tmp;
         s.Q = tmp;
+      } else if (ap == "/theta") {
+        m >> tmp;
+        s.theta = tmp;
+      } else if (ap == "/phi") {
+        m >> tmp;
+        s.theta = tmp;
+      } else if (ap == "/bUseEnergies"){
+        float t;
+        m >> t;
+        s.bUseEnergies = (bool)t;
+      } else if (ap == "/energy_scale"){
+        float t;
+        m >> t;
+        s.energy_scale = t;
+      } else if (ap == "/writhe"){
+        float t;
+        m >> t;
+        s.writhe = t;
       }
   }
 
@@ -215,7 +268,8 @@ template<> template<> void Param<bool>::specify(Knot& k){
     {"bDrawVec",&k.mState.bDrawVec},
     {"bDrawPnt",&k.mState.bDrawPnt},
     {"bDrawWrithe",&k.mState.bDrawWrithe},
-    {"bFlow",&k.mState.bFlow}
+    {"bFlow",&k.mState.bFlow},
+    {"bUseEnergies", &k.mState.bUseEnergies}
   };
 }
 
@@ -224,7 +278,9 @@ template<> template<> void Param<float>::specify(Knot& k){
     {"P",&k.mState.P,1,10},
     {"Q",&k.mState.Q,1,10},
     {"theta",&k.mState.theta,1,10},
-    {"phi",&k.mState.phi,1,10}
+    {"phi",&k.mState.phi,1,10},
+    {"energy_scale", &k.mState.energy_scale,0,100},
+    {"writhe", &k.mState.writhe,1,100}
   };
 }
 }
@@ -283,8 +339,8 @@ struct ControlApp : hs::Simulator<Knot> {
 
     auto ttheta = kd.bAutoMode ? fabs((Op::pj(kd.vec, Biv::xz) <= cga::Vec::x)[0]) : kd.theta;
     auto tphi = kd.bAutoMode ? fabs((Op::pj(kd.vec, Biv::yz) <= cga::Vec::z)[0]) : kd.theta;
-    fm->c1 = 400 + std::fabs(ttheta) * 40;
-    fm->c2 = 400 + std::fabs(tphi) * 40;
+    fm->c1 = 40 + std::fabs(ttheta) * 40;
+    fm->c2 = 40 + std::fabs(tphi) * 40;
   }
 
 };
