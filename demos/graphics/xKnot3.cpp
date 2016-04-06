@@ -75,6 +75,8 @@ struct Knot{
     s.bDrawWrithe = true;
     s.bFlow = true;
     s.bAutoMode = true;
+    s.bDrawTube = true;
+    s.bUseEnergies = true;
 
     s.energy_scale = 20;
 

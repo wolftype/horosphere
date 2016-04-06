@@ -20,6 +20,9 @@ for i
     esac
 done
 
+
+
 cd ~/code/pablo/interface.js/server/ &&
 node interface.simpleserver.js --serverPort 1066 --oscOutPort 8082 --interfaceDirectory $INTERFACE_DIRECTORY &
 cd ~/code/pablo/horosphere/ && ./build/bin/$TARGET $2
+echo run '/alloshare/pablo/xKnot3 -r'
