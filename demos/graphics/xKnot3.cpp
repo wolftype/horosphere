@@ -110,7 +110,7 @@ struct Knot{
 
     //Tube Color by Energy
     for (int i = 0; i<num;++i){
-      float c = tk.energies[i];
+      float c = tk.energies[i] * s.energy_scale;
       c = CLAMP(c,0,1);
       float pt = TWOPI * (float)i/num;
       for (int j=0; j<res;++j){
@@ -129,12 +129,12 @@ struct Knot{
 
        for(int i = 0; i < num; ++i){
 
-         double c = tk.energies[i] * s.energy_scale;
+        // double c = tk.energies[i] * s.energy_scale;
          double t = (float)i/num;
 
          if (s.bUseEnergies) t *= tk.energies[i] * s.energy_scale;
 
-         Par tp = Round::pair( tk.cir[i], t * TWOPI * s.writhe);
+         Par tp = Round::pair( tk.cir[i].dilate( Round::loc(tk.cir[i]), 1.2 ), t * TWOPI * s.writhe);
          Pnt pa = Round::split( tp, true );
          Pnt pb = Round::split( tp, false );
 
