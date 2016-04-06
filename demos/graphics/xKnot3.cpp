@@ -132,7 +132,7 @@ struct Knot{
         // double c = tk.energies[i] * s.energy_scale;
          double t = (float)i/num;
 
-         if (s.bUseEnergies) t *= tk.energies[i] * s.energy_scale;
+  //       if (s.bUseEnergies) t *= tk.energies[i] * s.energy_scale;
 
          Par tp = Round::pair( tk.cir[i].dilate( Round::loc(tk.cir[i]), 1.2 ), t * TWOPI * s.writhe);
          Pnt pa = Round::split( tp, true );

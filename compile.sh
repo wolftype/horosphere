@@ -22,12 +22,16 @@ CUDALEGACY=1
 MAKE_VERBOSE=1
 RUN_TARGET=0
 RUN_CMAKE=0
+DEPLOY_TO_ALLOSHARE=0
 
 for i
   do
     case $i in
     -a | --allosphere)
       BUILDING_FOR_ALLOSPHERE=1
+    ;;
+    -d | --deploy)
+      DEPLOY_TO_ALLOSHARE=1
     ;;
     -q | --quiet)
       MAKE_VERBOSE=0
@@ -53,6 +57,10 @@ if [ $RUN_CMAKE = 1 ]; then
 fi
 
 make VERBOSE=$MAKE_VERBOSE CPPFLAGS=-DCTL_MAKER  
+if [ $DEPLOY_TO_ALLOSHARE = 1 ]; then
+  cp bin/$TARGET /alloshare/pablo/
+fi
+
 if [ $RUN_TARGET = 1 ]; then
   ./bin/$TARGET
 fi
