@@ -22,6 +22,7 @@ namespace hs {
         
         mUser.bind();
         taker.start();                        // non-blocking
+        al::OmniStereoGraphicsRenderer::omni().resolution(2048);
         al::OmniStereoGraphicsRenderer::start();  // blocks
       }
 
