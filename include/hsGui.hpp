@@ -7,6 +7,7 @@
 
 #include "alloGLV/al_ControlGLV.hpp"
 #include "gfx/util/glv_gui.h"
+#include "hsData.hpp"
 
 
 namespace hs{
@@ -96,17 +97,53 @@ namespace hs{
   	  // 	}
       // }
 
-      template<class ParameterType, class T, class GUI>
+      template<class PTYPE, class T, class GUI>
       void bind(T& t, GUI& gui){
-        ParameterType io;
+        PTYPE io;
         io.create(t);
         for (auto& i : io.data() ){
+         // stringstream ss; ss << t.mName << "/" << i.name;
+        //  mVarMap[name.str(), 
           gui(*(i.ptr),i.name, i.min, i.max);
+        }
+      }
+
+      template<class PTYPE, class T, class GUI>
+      void safeBind(T& t, GUI& gui){
+        PTYPE io;
+        io.create(t);
+        for (auto& i : io.data() ){
+          gui(i.val,i.name, i.min, i.max);
         }
       }
 
     };
 
+
+    template<class PTYPE>
+    struct Glui {
+      
+      template<class T, class GUI>  
+      static void Bind (T& t, GUI& gui){
+        PTYPE io;
+        io.create(t);
+        for (auto& i : io.data() ){
+          gui(*(i.ptr),i.name, i.min, i.max);
+        }
+      }
+    };
+
+    template<>
+    struct Glui< Param<bool>> {   
+      template<class T, class GUI>  
+      static void Bind (T& t, GUI& gui){
+        Param<bool> io;
+        io.create(t);
+        for (auto& i : io.data() ){
+          gui(*(i.ptr),i.name);
+        }
+      }
+    };
 
 
 //

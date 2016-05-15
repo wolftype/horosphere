@@ -29,6 +29,7 @@
 #include "Gamma/Oscillator.h"
 #include "Gamma/Envelope.h"
 #include "Gamma/Filter.h"
+#include "Gamma/DFT.h"
 
 
 // using namespace al;
@@ -42,15 +43,12 @@ namespace hs {
 
 struct AudioProcess : public gam::Process<gam::AudioIOData> {
 
-  /// Master Mix of Process
-  static float mMasterMix;
-	float mMix = 0;
-
-  string mName = "AudioProcess";
-
 	AudioProcess() {}
+//	AudioProcess(const AudioProcess& a) {}
 
   float mix() { return mMix * mMasterMix; }
+	
+  virtual void onProcess(gam::AudioIOData& io) override {}
 
 	//Spatial Mix
 	#ifdef __allosphere__
@@ -58,6 +56,11 @@ struct AudioProcess : public gam::Process<gam::AudioIOData> {
   #else
     DesktopMix src;
 	#endif
+
+  /// Master Mix of Process
+  static float mMasterMix;
+	float mMix = 0;
+  string mName = "AudioProcess";
 
 };
 
@@ -234,6 +237,267 @@ void AudioParam::specify( Harmonics& hs){
     {"cfbck",&hs.cfbck,-1,1},
     {"cffd",&hs.cffd,-1,1},
     {"cdelay",&hs.cdelay,0,1}
+  };
+}
+
+
+/// Modded From L. Putnam's Gamma Library how-to pdf
+struct Echo : public AudioProcess{
+ 
+  Echo() {
+    init();
+  }
+
+  void init(){
+    delayMax = .2;
+    delay = .323;
+    ffd = 0;
+    fbk = .8; 
+    mName = "Echo";  
+
+  }
+    
+  void onProcess(AudioIOData& io){ 
+   
+    echo.set(delay,ffd,fbk);
+    echo.maxDelay(delayMax);
+    
+    while(io()){
+        
+        float2 s = float2(io.out(0), io.out(1));
+        s = echo(s)*0.5;
+        io.out(0) += s[0];
+        io.out(1) += s[1];
+    } 
+  }
+  
+  Comb<float2> echo;
+  float delayMax;
+  float delay;
+  float ffd;
+  float fbk;
+   
+};
+
+template<>
+void AudioParam::specify( Echo& ap){
+
+  mData = {
+    {"delayMax",&ap.delayMax,.001,10},
+    {"delay",&ap.delay,0,10},
+    {"ffd",&ap.ffd,0,10},
+    {"fbk",&ap.fbk,0,1}
+  };
+
+}
+
+
+/// Modded From L. Putnam's Gamma Library how-to pdf
+struct Voice : public AudioProcess {
+
+  Voice(){
+    init();
+  }
+
+  void init(){
+    freq=690;
+    phase = 0;
+    mod = .5;
+    attack = .2;
+    decay = .6;
+    //env.loop(true);
+    mName = "Voice";
+  }
+
+  void onProcess(AudioIOData& io){ 
+    osc.set(freq,phase,mod);
+    env.attack(attack);
+    env.decay(decay);
+
+    while(io()){
+      float s = osc.tri() * env() * .1;
+      io.out(0) += s;
+      io.out(1) += s;
+    }
+  }
+
+  LFO<> osc; ///< oscillator  
+  AD<> env;  ///< Envelope
+  float freq;
+  float phase;
+  float mod;
+  float attack;
+  float decay;
+
+};
+
+template<>
+void AudioParam::specify( Voice& ap){
+  mData = {
+    //LFO
+    {"freq",&ap.freq,40,2200},
+    {"phase",&ap.phase,40,1200},
+    {"mod",&ap.mod,0,10},
+    //ENV
+    {"attack",&ap.attack,0,1},
+    {"decay",&ap.decay,0,1}
+  };
+}
+
+/// Multiple Voices
+struct Chord : AudioProcess {
+  
+  vector<LFO<>> note;
+  AD<> env;  ///< Envelope
+  
+  /// set with base freq and steps above
+  template<class ... T>
+  void set(float freq, T ... num){
+    note = { LFO<>(f(freq,(int)num)) ... };
+  }
+
+  virtual void onProcess(AudioIOData& io){
+
+    env.attack(attack);
+    env.decay(decay);
+
+    while(io()){
+      float te = env();
+      for (auto& i : note){
+        float s = i.tri() * te * .1;
+        io.out(0) += s;
+        io.out(1) += s;
+      }
+    }
+  }
+  
+  float f( float base, int halfsteps) { return base * pow(root,halfsteps); }
+  float root = 1.059463094359293; //pow(2, 1.f/12);
+  float freq;
+  float attack;
+  float decay;
+};
+
+/// Take Noise and pick out select bands
+struct SpectralNoise : AudioProcess {
+  
+	STFT stft;		// Short-time Fourier transform
+	NoisePink<> src;
+
+  float prebin[512]; /// store magnitude before messing with it
+  float postbin[512]; /// store magnitude after messing with it
+  float phasebin[512]; /// store magnitude after messing with it
+
+  vector<int> scale; /// bias towards these
+
+	SpectralNoise()
+	: stft(
+		2048,		// Window size
+		2048/4,		// Hop size; number of samples between transforms
+		0,			// Pad size; number of zero-valued samples appended to window
+		HANN,		// Window type: BARTLETT, BLACKMAN, BLACKMAN_HARRIS,
+					//		HAMMING, HANN, WELCH, NYQUIST, or RECTANGLE
+		COMPLEX		// Format of frequency samples:
+					//		COMPLEX, MAG_PHASE, or MAG_FREQ
+	)
+	{
+    
+    freq = 440;  
+
+  }
+
+  void onProcess(AudioIOData& io){ 
+    
+   // src.freq(freq);
+    scale.clear();
+    int n = base;
+    for (int i = 0; i < 5; ++i){
+     scale.push_back(n);
+     n = n * 2;
+   }
+    
+    while(io()){
+
+      float s = src();
+  		// Input next sample for analysis
+  		// When this returns true, then we have a new spectral frame
+      if (stft(s)){
+  //      
+  //				// Loop through all the bins
+  				for(unsigned k=0; k<stft.numBins(); ++k){
+  //
+  //          prebin[k] = stft.bin(k).mag();
+  //          phasebin[k] = stft.bin(k).phase();
+  //
+  				  	// Band Pass
+              if (k > max || k < min ) stft.bin(k) = 0;
+              // Noise Floor threshold
+              if (stft.bin(k).mag() < thresh) stft.bin(k) = 0;
+  //
+  //          postbin[k] = stft.bin(k).mag();
+  				}
+      }
+
+      // bias
+      for(unsigned k=0; k<scale.size(); ++k){
+        stft.bin(k) *= 2;
+      }
+  
+      // Get next resynthesized sample
+  		s = stft();
+  		
+  		io.out(0) += s;
+  		io.out(1) += s;
+
+    }
+  }
+
+
+  float freq;
+  float max;
+  float min;
+  float thresh;
+  float base;
+
+  
+};
+
+template<>
+void AudioParam::specify( SpectralNoise& ap){
+  mData = {
+    //LFO
+    {"freq",&ap.freq,40,1200},
+    {"max", &ap.max,0,512},
+    {"min", &ap.min,0,512},
+    {"thresh",&ap.thresh,0,1},
+    {"base", &ap.base, 0,16}
+  };
+}
+
+/// Get Maximum Amplitude, if above threshold set trigger
+struct MagnitudeReader : AudioProcess {
+  
+  virtual void onProcess(AudioIOData& io) {
+    max = 0;
+    bTrigger = false;
+    while(io()){
+      float tmp = io.out(0);
+      if (tmp > max) max = tmp;
+    }
+    if (max > thresh) bTrigger = true;
+    
+  }
+
+  bool bTrigger;
+  float max;
+  float thresh;   /// threshold for spitting out mag
+};
+
+template<>
+void AudioParam::specify( MagnitudeReader& ap){
+  mData = {
+    //LFO
+    {"thresh",&ap.thresh,0,1}
   };
 }
 

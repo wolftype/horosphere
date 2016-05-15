@@ -9,6 +9,7 @@
  var a = new Interface.Panel({
 		useRelativeSizesAndPositions: true,
 });
+
 var orientation = new Interface.Orientation({
   onvaluechange : function(_pitch, _roll, _yaw, _heading) {
     pitch.setValue(_pitch);
@@ -16,6 +17,7 @@ var orientation = new Interface.Orientation({
     yaw.setValue(_yaw);
   }
 }).start();
+
 var pitch = new Interface.Slider({
   name: 'pitch',
   label: 'pitch',

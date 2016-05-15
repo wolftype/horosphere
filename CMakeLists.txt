@@ -33,7 +33,8 @@ include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/)
 include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/gfx/)
 include_directories(${PROJECT_SOURCE_DIR}/../Gamma/)
 include_directories(${PROJECT_SOURCE_DIR}/../cuttlebone/)
-
+include_directories(${PROJECT_SOURCE_DIR}/../ohio/include)
+include_directories(${PROJECT_SOURCE_DIR}/../hana/include)
 
 
 #library search directories

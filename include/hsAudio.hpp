@@ -32,6 +32,10 @@ namespace hs{
 
 struct Audio {
 
+  using IODATA = gam::AudioIOData;
+  using Process = gam::Process<gam::AudioIOData>;
+  using ProcessNode = gam::ProcessNode;
+
   bool bMute;
   float mMasterVolume;
 
@@ -41,7 +45,7 @@ struct Audio {
   void start(){
 
     #ifdef __allosphere__
-		initAudio("ECHO X6", 44100, 256, 0, 60);
+		initAudio("ECHO X6", 44100, 256, 0, 60); ///< @todo Audio Inputs in AlloSphere ??
     #else
     cout << "DESKTOP AUDIO" << endl;
 		initAudio(44100, 256);

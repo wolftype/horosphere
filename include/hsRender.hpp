@@ -5,20 +5,22 @@
 
 #include "Cuttlebone/Cuttlebone.hpp"
 #include "alloutil/al_OmniStereoGraphicsRenderer.hpp"
-#include "horo_vsr.hpp"
+#include "hsVsr.hpp"
 
 namespace hs {
 
   template<class T>
   struct RenderApp : al::OmniStereoGraphicsRenderer {
 
-      cuttlebone::Taker<typename T::State> taker;
-      T mParam;
+      cuttlebone::Taker<typename UserData<T>::State> taker;
+      UserData<T> mUser;
 
       /*-----------------------------------------------------------------------------
        *  Start
        *-----------------------------------------------------------------------------*/
       virtual void start() {
+        
+        mUser.bind();
         taker.start();                        // non-blocking
         al::OmniStereoGraphicsRenderer::start();  // blocks
       }
@@ -28,7 +30,7 @@ namespace hs {
        *-----------------------------------------------------------------------------*/
       virtual bool onFrame(){
         auto b = al::OmniStereoGraphicsRenderer::onFrame();
-        int popCount = taker.get(mParam.mState);
+        int popCount = taker.get(mUser.mState);
         return b;
       }
 
@@ -36,13 +38,13 @@ namespace hs {
        *  Draw Loop Called Multiple Times Per Frame
        *-----------------------------------------------------------------------------*/
        virtual void onDraw(al::Graphics& g){
-         auto& s = mParam.mState.mScene;
+         auto& s = mUser.mState.mSceneData;
          //MODEL pose to axis angle
          glPushMatrix();
            gfx::Vec4<> tr = s.model.quat().axan();
            glRotatef ( tr[3], tr[0], tr[1], tr[2]  );
 
-           mParam.onDraw();
+           mUser.onDraw();
 
         glPopMatrix();
        }
@@ -51,11 +53,11 @@ namespace hs {
         *  Physics Called Once per Frame (do something with state)
         *-----------------------------------------------------------------------------*/
        virtual void onAnimate(al_sec dt){
-          auto& s = mParam.mState.mScene;
-          //cout << s.time << endl;
+          auto& s = mUser.mState.mSceneData;
+
           pose = gfx2al::pose( s.camera ); //conversion to al world
 
-          mParam.updateLocal();
+          mUser.updateLocal();
 
        }
 
