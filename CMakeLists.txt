@@ -53,6 +53,12 @@ endif()
 #get_directory_property(LD LINK_DIRECTORIES)
 #message("LINK_DIRECTORIES" ${LD})
 
+if(${DEBUGMODE})
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+else()
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+endif()
+
 if(${BUILDING_FOR_ALLOSPHERE})
   message( "ALLO BUILD")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_LINUX -D __allosphere__")

@@ -24,6 +24,7 @@
 #include "draw/vsr_draw.h" 
 #include "form/vsr_group.h"
 #include "form/vsr_knot.h"
+#include "form/vsr_graph.h"
 
 namespace vsr { namespace cga {
 
@@ -66,10 +67,60 @@ struct Diatom : public Frame {
   Frame& motif() {
     return mMotif;
   };
+
+
+  vector<Vertex> sphereMesh(int w, int h){
   
-  vector< Pair > build() const {
-    return mPointGroup.apply( motif().tx() );
-  };
+    vector<Vertex> v;
+  
+    for (int i = 0;i<w;++i){
+      for (int j=0;j<h;++j){
+        auto tu = (float)i/w * TWOPI;
+        auto tv = -PIOVERTWO + (float)j/h * PI;
+        auto rot = Gen::rot(tu,tv);    
+        v.push_back(  Vec3f( Vec::x.spin(rot) ) );         
+      }
+    }
+  
+    return v;
+  } 
+
+  
+   void build() {
+     
+     int w = 20; int h = 20;
+     /// Make symmetry
+     mResult = mPointGroup.apply( motif().tx() );
+     /// Calc mesh
+     mMesh = sphereMesh(w,h);
+  //   
+     for (auto& i : mMesh){
+      auto p1 = Construct::point( i.Pos[0], i.Pos[1], i.Pos[2] );
+      Pair tpar;
+      for (auto& j : mResult){
+        float t = Round::sqd( p1, Round::location(j) );
+        tpar += j * t;
+      }
+      p1 = Round::location( p1.spin( Gen::bst( tpar * -.5 * mForce) ) );
+      i.Pos = Vec3f( p1[0], p1[1], p1[2] );
+     }
+ 
+  //   /// Set neighbors
+      mGraph.UV(w,h, mMesh, true);//.vertex());
+ 
+     /// Calc Normals
+     for (auto& i : mGraph.node()){
+    
+       auto va = i->data().Pos;
+       auto vb = i->edge -> a().Pos;
+       auto vc = i->edge -> next -> a().Pos;
+       Vec3f normal =(vb-va).cross(vc-va).unit() ;
+    
+       i->data().Norm = normal;
+     }
+
+  }
+
 
   int mP=5;
   int mQ=3;
@@ -77,6 +128,11 @@ struct Diatom : public Frame {
   gfx::Vec4f mColor = gfx::Vec4f(1,1,1,1);
   PointGroup3D<cga::Vec> mPointGroup;
   Frame mMotif;
+  vector<Pair> mResult;
+  vector<Vertex> mMesh;
+  HEGraph<Vertex> mGraph;
+  float mForce = .1;
+
 
 };
 
@@ -135,13 +191,22 @@ struct Particles {
 struct Crystal {
 
   
-  //template<class T>
-  vector<Point>& apply(){
-
-    auto pointgroup = sg.apply( generateMotif() );
-    mPoint = sg.hang( pointgroup, mNumX, mNumY, mNumZ);
+  // either apply to incoming motif or generate one from scratch
+  vector<Point>& apply( const vector<Point>& pointgroup = vector<Point>(0)){
+    if (pointgroup.empty()){
+      mPoint = sg.hang( sg.apply( generateMotif() ), mNumX, mNumY, mNumZ);
+    } else {
+      mPoint = sg.hang( pointgroup, mNumX, mNumY, mNumZ);
+    }
     return mPoint;
   }
+
+  
+  template<class T> 
+  vector<T> apply(const vector<T>& input){
+    return sg.hang( input, mNumX, mNumY, mNumZ);
+  }
+
 
   vector<Point> generateMotif(){
     vector<Point> pnt;
@@ -188,7 +253,7 @@ struct Crystal {
    int mNumX = 1;
    int mNumY = 1;
    int mNumZ = 1;
-   int mMode = 0;
+   int mMode = 0; ///< POINTS, DIAMOND, or CUBE
    float mWidth = .1;
    int mStride;
 
@@ -206,10 +271,31 @@ struct Crystal {
 namespace gfx {
 /// Draw Diatom in Immediate Mode
 template<> void Renderable< vsr::cga::Diatom > :: DrawImmediate(const vsr::cga::Diatom& d) {
-  for (auto& i : d.build() ){
+  for (auto& i : d.mResult ){
     render::begin( d.mColor[0], d.mColor[1], d.mColor[2], d.mColor[3] );
     render::draw( i);
   }
+  
+   glBegin(GL_TRIANGLES);
+   int iter =0;
+   bool bChecker = false;
+   for (auto& i : d.mGraph.face()){
+        iter++;
+        float t = (float)iter/d.mGraph.face().size(); 
+        auto& a = i->a();
+        auto& b = i->b();
+        auto& c = i->c(); 
+        glColor3f(bChecker,bChecker,bChecker);
+        GL::normal( a.Norm[0], a.Norm[1],a.Norm[2]);//.begin() );
+        GL::vertex( a.Pos[0], a.Pos[1], a.Pos[2] );
+        GL::normal( b.Norm[0], b.Norm[1], b.Norm[2] );
+        GL::vertex( b.Pos[0], b.Pos[1], b.Pos[2] );
+        GL::normal( c.Norm[0], c.Norm[1], c.Norm[2] );
+        GL::vertex( c.Pos[0], c.Pos[1], c.Pos[2] );
+        if (!(iter&1)) bChecker = !bChecker;
+   }
+   glEnd();
+
 };
 
 template<> void Renderable< vsr::cga::Crystal > ::DrawImmediate(const vsr::cga::Crystal& s){
@@ -313,18 +399,6 @@ template<> void Renderable< vsr::cga::Crystal > ::DrawImmediate(const vsr::cga::
 
 } //gfx::
 
-namespace hs {
 
-template<> void pulse(vsr::cga::Diatom& d){
-  printf(" diatom pulsing....\n");
-  d.mMotif.db() = vsr::cga::Biv( Rand::Num() * .2, Rand::Num() *.2, Rand::Num() *.2 );
-}
-
-template<> void grow(vsr::cga::Diatom& d, float amt){
-  printf(" diatom growing...\n");
-  d.mMotif.dx() = d.x() * amt;
-}
-
-}
 
 #endif   /* ----- #ifndef hsObjects_INC  ----- */

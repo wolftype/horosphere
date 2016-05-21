@@ -43,12 +43,14 @@
 #include "ohio.hpp"
 
 #include "vsr/draw/vsr_cyclide_draw.h"
+#include "vsr/form/vsr_shapes.h"
 
 
 using namespace hs;
 using namespace vsr;
 using namespace vsr::cga;
 
+#define NUMPARTICLES 1024
 
 /*-----------------------------------------------------------------------------
  *  DATA
@@ -60,7 +62,7 @@ struct User : UserBase {
   struct Data  {
     
     //Knot
-    float f = 0.0;
+    float orbit_speed = 0.001;
     float p = 5;
     float q = 3;
     float scale = 1;
@@ -71,15 +73,23 @@ struct User : UserBase {
     float cp = 3;
     float cq = 3;
     float bravaisType = 7;
+    float diatom_force = .1;
     bool pbar, qbar, pqbar;
     float numX, numY, numZ;
     float crystalMotifMode;
     float cScale = .01;
+    float xratio = 1;
+    float yratio = 1;
+    float zratio = 1;
     
     //Frame that Controls knot
     Frame knotFrame;
     // Knot Frame that orbits
     Frame frame = Frame(10,0,0);
+    // offset along y of knot orbit
+    float yoffset = 0.5;
+    // Crystal Frame
+    Frame crystalFrame = Frame(2,0,0);
     // Tangent to Fiber A at frame
     Pair tangentA;
     // Tangent to Fiber B at frame
@@ -95,15 +105,27 @@ struct User : UserBase {
     Frame motif;
 
 
-    // Particles in motion
-    gfx::Vec3f particles[1000];
+    // Particles in motion to be tied to Spectral Noise
+   // struct Trace { vector<Point> particles = vector<Point>(5); };
+   Point particles[NUMPARTICLES];
+   float magbin[NUMPARTICLES];
+   float phasebin[NUMPARTICLES];
+
+   float mNumTrace = 5;
+   float amp = 2;
 
     // use camera
-    bool bUseCam;
+    bool bUseCam =false;
 
     // Draw booleans
     bool bDrawKnot = false;
     bool bDrawCrystal = true;
+    bool bDrawParticles = false;
+    bool bDrawDiatom = false;
+    bool bDrawTube = false;
+    bool bDrawFibers = false;
+    bool bDrawTangent = false;
+    bool bReset = false;
 
     
   } * mData;
@@ -124,15 +146,22 @@ struct User : UserBase {
   //Graphics 
   Diatom diatom;
   TorusKnot tk;
+  gfx::Mesh tube;
+
  // CircularNet net;
   Crystal crystal;
-
+  bool bCrystalHit = false;
+  
   Pair mTangent;
+  vector<Point> trace;
+  Point mParticles[NUMPARTICLES];
   
   //Audio Processes
   FMSynth * fm;
   Echo * echo;
-  Voice * voice;
+  SpectralInfo * spectralInfo;
+  Voice * voiceA;
+  Voice * voiceB;
   SpectralNoise * spectralNoise;
   MagnitudeReader * magReader;
 
@@ -145,7 +174,22 @@ struct User : UserBase {
   virtual void updateAudio() ;
   virtual void onMessage(al::osc::Message& m) ;
 
-  void setBehavior(int idx);
+  bool setBehavior(int idx);
+  void reset();
+};
+
+void User::reset(){
+  auto& s = *mData;
+  
+  Field<Point> field(8,8,16,1);
+  
+  for (int i=0;i<field.num();++i){
+    s.particles[i] = field.grid(i).translate( Rand::Num(), Rand::Num(), Rand::Num() );
+    s.particles[i][3] = s.ecc;
+  }
+
+  s.motif = Frame(); 
+
 };
 
 /// Move Camera to Target over n seconds
@@ -186,7 +230,7 @@ void look(User& user, const cga::Vec& target, float sec){
     return f > .9999; 
   }; 
 
-  auto sigfun = ohio::map_(sec, go_func);
+  auto sigfun = ohio::over_(sec, go_func);
   auto e1 = ohio::every_(1.f/fps, sigfun);
 
   b.pollrateFinish = 1.f/fps;
@@ -201,10 +245,11 @@ void look(User& user, const cga::Vec& target, float sec){
 namespace hs {
 
 
-  template<> void behave(User& user){
+  template<> void behave(User& user, int idx){
     //one move over 1 second =  
-    look(user, cga::Vec(0,1,0), 3 );
-    move(user, cga::Vec(2,0,0), 3 );
+    //look(user, cga::Vec(0,1,0), 3 );
+    //move(user, cga::Vec(2,0,0), 3 );
+    user.setBehavior(idx);
 
   }
 
@@ -228,27 +273,33 @@ namespace hs {
     processA = &sim.audio.mScheduler.add<Audio::ProcessNode>();//processA);  
     
     magReader = &sim.addAudioProcess<MagnitudeReader>(*processA);
+    spectralInfo = &sim.addAudioProcess<SpectralInfo>(*processA);
     echo = &sim.addAudioProcess<Echo>(*processA);
-//    spectralNoise = &sim.addAudioProcess<SpectralNoise>(*processA);
-    voice = &sim.addAudioProcess<Voice>(*processA); 
+    spectralNoise = &sim.addAudioProcess<SpectralNoise>(*processA);
+    voiceA = &sim.addAudioProcess<Voice>(*processA); 
+    voiceB = &sim.addAudioProcess<Voice>(*processA); 
 
       
     ///2. Start Polling for Command Line Input Events
     ///               callback func      pollrate     event stream
     ohio::callback2_( hs::userCB(*this), .5 )( ohio::listener_( ohio::stdin_ ) );
 
+    /// Initialize all variables
+    reset();
+    
     ///3. Schedule Events and spawn time-based listener  
     setBehavior(1);
    // setBehavior(1);
       
   }
 
-  inline void User::setBehavior(int idx){
+  inline bool User::setBehavior(int idx){
 
    auto& s = *mData;
     
    auto& b1 = behavior("pulse");
-   auto& b2 = behavior("hit");
+   //auto& b2 = behavior("hit");
+  // auto& b3 = behavior("crystalHit");
 
    //Grow Diatom Diamter
    auto grow = [this](auto&& t){
@@ -269,10 +320,15 @@ namespace hs {
    };
    
    //Make a Sound
-   auto beep = [this](auto&& setfreq){ //also set location?
+   auto beep = [this](auto&& setfreq, bool b){ //also set location?
      return [=](auto&& t){
-       voice->freq = 120 + 1140 * setfreq();
-       voice->env.reset();
+       if (b){
+        voiceA->freq = 120 + 1140 * setfreq();
+        voiceA->env.reset();
+       } else {
+        voiceB->freq = 120 + 1140 * setfreq();
+        voiceB->env.reset();
+       }
        return true;
      };
    };  
@@ -284,12 +340,12 @@ namespace hs {
         auto vec1 =(-Round::direction( A ? mData->tangentA : mData->tangentB ).copy<cga::Vec>().unit());
         auto vec2 = -mData->frame.vec().unit();
         auto biv = vec1^vec2;//cga::Vec(Round::carrier( tk.HF.fiberA() ).dual()).unit() ;
-        mData -> knotFrame.db() = biv * .03 + Biv( Rand::Num() * .005, Rand::Num() *.005, Rand::Num() *.005 );
+        mData -> knotFrame.db() = biv * .003 + Biv( Rand::Num() * .005, Rand::Num() *.005, Rand::Num() *.005 );
         return true;
       };
    };
 
-   auto bCross = [this](bool A ){
+   auto bCross = [this](bool A ) {
      return[=](){
       return (mData->frame.pos() <= Round::carrier( A ? tk.HF.fiberA() : tk.HF.fiberB()).dual() )[0] > 0;
      };
@@ -301,10 +357,23 @@ namespace hs {
       return t/PI;
      };
    };
-   
+
+  auto genRandomNumber = [](float beg, float range ){ 
+    return[=](){ return  beg + Rand::Num() * range; }; 
+  };
+
+  auto makeFreqFromCrystal = [genRandomNumber,this]( bool b){
+    return [genRandomNumber,this,b](){ return genRandomNumber( .2 + (b ? 1.0/mData->cp : 1.0/mData->cq), .2)(); };
+  };
+
+  //auto  
+
+  
+   /// Launch Behaviors 
    switch(idx){
      case 0:
      {
+       s.bDrawDiatom = true;
        auto e1 = ohio::tag2_( ohio::triggerval_(magReader->bTrigger), grow );
        auto e2 = ohio::tag2_( ohio::triggerval_(magReader->bTrigger), pulse );
        auto e3 = ohio::tag2_( ohio::triggerval_(!magReader->bTrigger), shrink );
@@ -313,26 +382,49 @@ namespace hs {
      }
      case 1:
      {
-       auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true) ) ); 
-       auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false) ) ); 
-       b2.launch( e1, e2 );
+       s.bDrawKnot = true;
+       auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
+       auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
+       b1.launch( e1, e2 );
        break;
      }
      case 2:
      {
-       auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true) ), nudgeFiber(true)) );
-       auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false) ), nudgeFiber(false)) );
-      // auto e2 = ohio::tag2_( ohio::trigger_( bCrossA),  nudgeFiber );
-     //  auto e2 = ohio::tag2_( ohio::trigger_( bCrossA),  nudgeFiber );
-     //  auto e2 = ohio::tag2_( ohio::trigger_( bCrossA), nudgeFiber );
-
-       b2.launch( e1,e2 ); 
+       s.bDrawKnot = true; 
+       auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
+       auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
+       b1.launch( e1,e2 ); 
+       break;
      }
+     case 3:
+     {
+       s.bDrawCrystal = true;
+       s.q =0; s.cScale = .1; 
+       voiceA -> attack = 0.001; voiceB -> attack = 0.001;        
+       voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::PULSE;
+       s.crystalMotifMode = 2;
+
+       auto e1 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(true), true ) ); 
+       auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
+ 
+       b1.launch( e1, e2 );
+       break;
+     }
+     case 4:
+     {
+        s.bDrawParticles = true; s.amp = 1000;
+        auto e1 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->max = 1000 * t; return true; } ));
+        auto e2 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->thresh = .01 * t; return true; }));
+        auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 300 * t; return true; } ));
+        b1.launch( e1, e2, e3 );//.until( [this](){ }; );
+        break;
+     }
+       
    }
+
+   return true;
     
-
   }
-
 
 
 /*-----------------------------------------------------------------------------
@@ -341,33 +433,59 @@ namespace hs {
   /// Render to Screen (called six times)
   inline void User::onDraw()  {
     auto& s = *mData;
+    glPointSize(5);
+    glEnable(GL_BLEND);
 
-  //  Draw(diatom);
-
-   // Draw(mCamera); 
+    if (s.bDrawDiatom){
+      Draw(diatom);
+    }
     
     //Draw Knot
     if (s.bDrawKnot){
-      Draw( tk.HF.fiberA());  
-      Draw( tk.HF.fiberB()); 
-      Draw( mTangent, 1,0,0 );
-  
-      glPointSize(5);
-      for (auto& i : tk.pnt ){
-        Draw(i,0,1,1);
+      if (s.bDrawFibers){
+        Draw( tk.HF.fiberA());  
+        Draw( tk.HF.fiberB()); 
       }
-
-      for (auto& i : tk.cir ){
-        Draw(i,0,1,0);
+      if (s.bDrawTangent){
+        Draw( mTangent, 1,0,0 );
+      }
+      if (s.bDrawTube){
+        tube.drawElementsColor();
+      } else {
+        for (auto& i : tk.pnt ){
+          Draw(i,0,1,1);
+        } 
+        for (auto& i : tk.cir ){
+          Draw(i,0,1,0);
+        }
       }
     }
 
-    
-    //Draw Crystal Group
-    
+    if (s.bDrawParticles){
+      glBegin(GL_POINTS);
+      int iter =0;
+      for (int i=0; i<NUMPARTICLES;++i){
+        iter++; float t = (float)iter/NUMPARTICLES;
+       // Draw(  mParticles[i],t,fabs(s.phasebin[i]),1-t, fabs(s.magbin[i]) * s.amp);
+        glColor4f( t,fabs(s.phasebin[i]), 1-t, fabs(s.magbin[i]) * s.amp);
+        glVertex3f( mParticles[i][0], mParticles[i][1],mParticles[i][2]);
+      }
+      iter =0;
+      for (int i=0; i<NUMPARTICLES;++i){
+        for (int j =0; j<s.mNumTrace;++j){
+         float t = (float)iter/trace.size();        
+        // Draw( trace[iter],.6*t,fabs(s.phasebin[i]),.6 *(1-t), fabs(s.magbin[i]) * s.amp);
+         glColor4f( .6*t, fabs(s.phasebin[i]), .6 *(1-t), fabs(s.magbin[i]) * s.amp);
+         glVertex3f( trace[iter][0], trace[iter][1],trace[iter][2]);
+         iter++;
+        }
+      }
+      glEnd();
+    }
+
+    //Draw Crystal Group  
     if (s.bDrawCrystal){
       Draw( crystal );
-     // for (auto& i : crystal.sg.hang( crystal.sg.apply( s.frame.pos() ), 1, 1, 1 ) ) Draw(i); 
     }
   }
 
@@ -379,23 +497,52 @@ namespace hs {
   inline void User::updateLocal()  {
     auto& s = *mData;
 
-    //knot data
+    // set knot data
     tk.set(s.p,s.q);
-    s.knotFrame.scale( s.scale );
+    s.knotFrame.scale( s.scale );   
     tk.HF.vec() = s.knotFrame.y();
     tk.HF.cir() = s.knotFrame.cxz();
-    auto tp = s.frame.pos(); tp[3] = s.ecc;
-    tk.apply( tp, s.num, s.bNormalize);
-
     
-    mTangent = Pair(-Round::direction( tk.cir[0] ).dual().copy<Tnv>()).translate( s.frame.pos() );
+    // apply to frame position
+    auto tp = s.frame.pos(); tp[3] = s.ecc;
+
+    if (s.bDrawKnot){ 
+      tk.apply( tp, s.num, s.bNormalize);
+      // create tube
+      tube.clear(); 
+      tube = Shape::Skin( tk.cir, tk.cir.size(), true, 20 );
+      // determine tangent at location in orbit 
+      mTangent = Pair(-Round::direction( tk.cir[0] ).dual().copy<Tnv>()).translate( s.frame.pos() );
+    }
+    
+    //Flow trace
+    if (s.bDrawParticles){
+       trace = vector<Point>( (int)s.mNumTrace * NUMPARTICLES);
+       auto bst = tk.dbst( (int)(1.0/s.orbit_speed) );
+       for (int i =0; i<NUMPARTICLES; i++){
+         trace[i*s.mNumTrace] = s.particles[i].spin(bst);
+         for (int j=1;j<(int)s.mNumTrace;++j){
+          int idx = i*(int)s.mNumTrace +j;
+          trace[idx] = trace[idx-1].spin(bst);
+          trace[idx-1] = Round::loc(trace[idx-1]);
+         }
+         int last_idx = i*(int)s.mNumTrace+(int)s.mNumTrace-1;
+         trace[last_idx] = Round::loc(trace[last_idx]);
+         mParticles[i] = Round::loc(s.particles[i]); //normalize
+       };
+    }
 
     //diatom data
-    diatom.motif() = s.motif;
-
-
-    //crystal spacegroup data
-     cga::Vec ratioVec(1,1,1);//s.xratio, s.yratio, s.zratio); 
+    if (s.bDrawDiatom){
+      diatom.motif() = s.motif;
+      diatom.set(s.cp, s.cq);
+      diatom.mForce = s.diatom_force;
+      diatom.build();
+    }
+    
+    if (s.bDrawCrystal){
+     //crystal spacegroup data
+     cga::Vec ratioVec(s.xratio, s.yratio, s.zratio); 
      
      // bravais type and lattice type settings -- lattice set to primitive
      SpaceGroup3D<cga::Vec>::Lattice lattice = {(int)s.bravaisType, 1};//(int)s.latticeType};
@@ -403,12 +550,13 @@ namespace hs {
      SpaceGroup3D<cga::Vec>::Screw screw;// = { (int)s.screwAB, (int)s.screwBC, (int)s.screwAC, (int)s.screwAB_trs, (int)s.screwBC_trs };
     
      crystal.sg.set( s.cp, s.cq, s.pbar, s.qbar, s.pqbar, lattice, ratioVec, glide, screw);
-     crystal.mFrame = s.frame;
+     crystal.mFrame = s.crystalFrame;
      crystal.mFrame.scale( s.cScale );
      crystal.mNumX = s.numX; crystal.mNumY = s.numY; crystal.mNumZ = s.numZ;
      crystal.mMode = s.crystalMotifMode;
      crystal.apply();
     
+    }
 
 
   }
@@ -417,17 +565,38 @@ namespace hs {
   inline void User::updateGlobal()  {
     
     auto& s = *mData;
+
+    if (s.bReset) { reset(); s.bReset = false; }
     
 
-    // Move frame around knot orbit
-    auto par = tk.dpar( (int)s.f + 1);
+    // Move frame around knot orbit (maybe look up mTangent instead?)
+    auto par = tk.dpar( (int)(1.0/s.orbit_speed) );
     auto bst = Gen::bst(par); 
-    s.frame.boost(bst);
+    auto tp = s.frame.pos(); tp[3] = s.ecc;
+    auto p1 = tp.spin(bst);
+    auto p2 = p1.spin(bst);
+    p1 = Round::loc(p1); p2 = Round::loc(p2); //renormalize 
+    s.frame.pos() = p1;  s.frame.orient( p2 );
 
-    //Tangent at frame in direction along orbit
-    s.tangentA = Round::renormalize( Tangent::at( s.frame.pos() ^ tk.HF.fiberA().dual() , s.frame.pos() ) );
-    s.tangentB = Round::renormalize( Tangent::at( s.frame.pos() ^ tk.HF.fiberB().dual() , s.frame.pos() ) );
+    // Move Crystal Frame around knot orbit
+    tp = s.crystalFrame.pos(); tp[3]= s.ecc;
+    p1 = tp.spin(bst);
+    p2 = p1.spin(bst);
+    p1 = Round::loc(p1); p2 = Round::loc(p2); //renormalize 
+    s.crystalFrame.pos() = p1;  s.crystalFrame.relOrient( p2, .5 );
 
+  
+    for (int i=0;i<NUMPARTICLES;++i){
+
+        s.phasebin[i] = spectralInfo -> phasebin[i];
+        s.magbin[i] = spectralInfo -> magbin[i];
+        if ( fabs(s.magbin[i]) * s.amp  > .5) s.particles[i] = s.particles[i].spin ( bst );
+
+    }
+
+    // (UNUSED) Tangent at frame in direction along orbit
+    //s.tangentA = Round::renormalize( Tangent::at( s.frame.pos() ^ tk.HF.fiberA().dual() , s.frame.pos() ) );
+    //s.tangentB = Round::renormalize( Tangent::at( s.frame.pos() ^ tk.HF.fiberB().dual() , s.frame.pos() ) );
 
     //Knot step();
     s.knotFrame.step();
@@ -435,11 +604,30 @@ namespace hs {
     //Diatom motif
     s.motif.step();
 
+    //auto crystalHit = [this](){
+    bCrystalHit = false;
+    for (int i = 0; i<crystal.mPoint.size(); i++){//=crystal.mStride){
+      auto& p1 = crystal.mPoint[i];
+      auto dot1 = p1 <= Round::dls( crystal.mFrame.pos(), crystal.mFrame.scale() + .1 );//crystal.mFrame.bound();// Round::distance(p1,p2) ;
+      auto dot2 = p1 <= Round::dls( crystal.mFrame.pos(), crystal.mFrame.scale() + .2 );
+      if (dot2[0] > 0 && dot1[0] < 0 ) { //is inside outer bound but outside inner bound
+         bCrystalHit = true;
+         break;
+      }
+    }
+    
+
     //Virtual Camera
+    mCamera = s.frame.moveY( s.yoffset );
     mCamera.step();
 
-    // use virtual camera?
-    if (s.bUseCam) mApp->scene.camera.set( mCamera.pos(), mCamera.quat() ); 
+    // use virtual camera riding along know? if so do not draw tangent arrow
+    if (s.bUseCam) {
+      s.bDrawTangent = false;
+      mApp->scene.camera.set( mCamera.pos(), mCamera.quat() ); 
+    }
+
+
 
     
   }
@@ -460,12 +648,15 @@ void Param<float>::specify(User::Data& k){
   //---------label, dataPtr, min,max
   mData = {   
     //Knot
-    {"f", &(k.f),0,1000},
+    {"orbit_speed", &(k.orbit_speed),.0001,100},
     {"p", &(k.p),0,10},
     {"q", &(k.q),0,10},
     {"scale", &(k.scale),1,10},
     {"num",&(k.num),0,1000},
     {"ecc",&(k.ecc),-10,10},
+    {"numTrace",&(k.mNumTrace),1,100},
+    {"yoffset",&k.yoffset,0,10},
+    {"amp",&(k.amp),-1000,1000},
     
     //Diatom ...
 
@@ -473,11 +664,15 @@ void Param<float>::specify(User::Data& k){
     {"cp",&(k.cp),2,6},
     {"cq",&(k.cq),2,6},
     {"bravais",&(k.bravaisType),0,7},
+    {"diatom_force",&(k.diatom_force),0,7},
     {"numX",&(k.numX),1,20},
     {"numY",&(k.numY),1,20},
     {"numZ",&(k.numZ),1,20},
     {"cMode",&(k.crystalMotifMode),0,10},
-    {"cScale",&(k.cScale),0,10}
+    {"cScale",&(k.cScale),0,10},
+    {"xratio",&(k.xratio),0,100},
+    {"yratio",&(k.yratio),0,100},
+    {"zratio",&(k.zratio),0,100}
   };
 }
 
@@ -491,7 +686,17 @@ void Param<bool>::specify(User::Data& k){
     //Crystal
     {"pbar",&(k.pbar)},
     {"qbar",&(k.qbar)},
-    {"pqbar",&(k.pqbar)}
+    {"pqbar",&(k.pqbar)},
+
+    //stuff
+    {"bReset",&(k.bReset)},
+    {"bDrawDiatom",&(k.bDrawDiatom)},
+    {"bDrawKnot",&(k.bDrawKnot)},
+    {"bDrawTube",&(k.bDrawTube)},
+    {"bDrawFibers",&k.bDrawFibers},
+    {"bDrawTangent",&k.bDrawTangent},    
+    {"bDrawParticles",&(k.bDrawParticles)},
+    {"bDrawCrystal",&(k.bDrawCrystal)}
   };
 }
 

@@ -52,7 +52,11 @@ namespace hs {
         if (s=="pulse") pulse( udata );
         if (s=="grow")  grow( udata, .01 );
         if (s=="move")  move( udata );
-        if (s=="behave")  behave( udata );
+        if (s=="0")  behave( udata, 0 );
+        if (s=="1") behave( udata, 1 );
+        if (s=="2") behave( udata, 2 );
+        if (s=="3") behave( udata, 3 );
+        if (s=="4") behave( udata, 4 );
 
         return true;
       
@@ -74,7 +78,7 @@ namespace hs {
     printf("no specification for MOVE on this type\n");
   }
   template<class T>
-  inline void behave(T& udata){
+  inline void behave(T& udata, int idx){
     printf("no specification for BEHAVE on this type\n");
   }
 }

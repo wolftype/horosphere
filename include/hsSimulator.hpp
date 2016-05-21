@@ -64,12 +64,9 @@ namespace hs {
       bindGLV();
       mUser.onSetup(this);
     
-      //glui.bind<Param<float>>( mUser.mState.mData, gui);
-      //glui.bind<Param<bool>>( mUser.mState.mData, gui);    
       Glui<Param<float>>::Bind( mUser.mState.mData, gui); 
       Glui<Param<bool>>::Bind( mUser.mState.mData, gui); 
       Glui<Param<float>>::Bind( mUser, gui); 
-     // Glui<Param<bool>>::Bind( mUser, gui); 
     }
 
     virtual void start() override {

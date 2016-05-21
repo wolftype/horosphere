@@ -306,6 +306,7 @@ struct Voice : public AudioProcess {
     attack = .2;
     decay = .6;
     //env.loop(true);
+    loop = false;
     mName = "Voice";
   }
 
@@ -313,21 +314,39 @@ struct Voice : public AudioProcess {
     osc.set(freq,phase,mod);
     env.attack(attack);
     env.decay(decay);
+    env.loop((int)loop);
 
     while(io()){
-      float s = osc.tri() * env() * .1;
+      float s = val() * env() * .1;
+
       io.out(0) += s;
       io.out(1) += s;
     }
   }
 
+  float val() { 
+    switch((int)mode) {
+      case 0: return osc.tri();
+      case 1: return osc.sqr();
+      case 2: return osc.cos();
+      case 3: return osc.pulse();
+      default: return osc.even3();
+    }
+  }
+
+  enum {
+    TRI =0, SQR=1, COS=2, PULSE=3, SIN=4
+  };
+
   LFO<> osc; ///< oscillator  
   AD<> env;  ///< Envelope
+  float mode = 0;
   float freq;
   float phase;
   float mod;
   float attack;
   float decay;
+  float loop;
 
 };
 
@@ -338,9 +357,11 @@ void AudioParam::specify( Voice& ap){
     {"freq",&ap.freq,40,2200},
     {"phase",&ap.phase,40,1200},
     {"mod",&ap.mod,0,10},
+    {"mode",&ap.mode,0,5},
     //ENV
     {"attack",&ap.attack,0,1},
-    {"decay",&ap.decay,0,1}
+    {"decay",&ap.decay,0,1},
+    {"loop",&ap.loop,0,1}
   };
 }
 
@@ -378,15 +399,55 @@ struct Chord : AudioProcess {
   float decay;
 };
 
+/// Extract info
+struct SpectralInfo : AudioProcess {
+
+	STFT stft;		// Short-time Fourier transform
+  
+  float * magbin; /// store magnitude after messing with it
+  float * phasebin; /// store phase after messing with it
+
+	SpectralInfo()
+	: stft(
+		2048,		// Window size
+		2048/4,		// Hop size; number of samples between transforms
+		0,			// Pad size; number of zero-valued samples appended to window
+		HANN,		// Window type: BARTLETT, BLACKMAN, BLACKMAN_HARRIS,
+					//		HAMMING, HANN, WELCH, NYQUIST, or RECTANGLE
+		COMPLEX		// Format of frequency samples:
+					//		COMPLEX, MAG_PHASE, or MAG_FREQ
+	)
+	{
+
+    mName = "SpectralInfo";
+    magbin = new float[1025];//stft.numBins()];
+    phasebin = new float[1025];//stft.numBins()];
+  }
+
+  void onProcess(AudioIOData& io){
+    while(io()){
+      float s = io.out(0);//, io.out(1));
+      if (stft(s)){
+        for (int k=0;k<stft.numBins();++k){
+          magbin[k] = stft.bin(k).mag();
+          phasebin[k] = stft.bin(k).phase();
+        }
+      } 
+    }
+  }
+};
+
 /// Take Noise and pick out select bands
 struct SpectralNoise : AudioProcess {
   
 	STFT stft;		// Short-time Fourier transform
 	NoisePink<> src;
 
-  float prebin[512]; /// store magnitude before messing with it
-  float postbin[512]; /// store magnitude after messing with it
-  float phasebin[512]; /// store magnitude after messing with it
+  
+  float * magbin; /// store magnitude after messing with it
+  float * phasebin; /// store phase after messing with it
+  float * premagbin; /// store phase after messing with it
+  float * prephasebin; /// store phase after messing with it
 
   vector<int> scale; /// bias towards these
 
@@ -404,6 +465,12 @@ struct SpectralNoise : AudioProcess {
     
     freq = 440;  
 
+    mName = "SpectralNoise";
+    magbin = new float[1025];//stft.numBins()];
+    phasebin = new float[1025];//stft.numBins()];
+    premagbin = new float[1025];//stft.numBins()];
+    prephasebin = new float[1025];//stft.numBins()];
+
   }
 
   void onProcess(AudioIOData& io){ 
@@ -415,7 +482,7 @@ struct SpectralNoise : AudioProcess {
      scale.push_back(n);
      n = n * 2;
    }
-    
+   // cout << stft.numBins() << endl;
     while(io()){
 
       float s = src();
@@ -426,8 +493,8 @@ struct SpectralNoise : AudioProcess {
   //				// Loop through all the bins
   				for(unsigned k=0; k<stft.numBins(); ++k){
   //
-  //          prebin[k] = stft.bin(k).mag();
-  //          phasebin[k] = stft.bin(k).phase();
+              prephasebin[k] = stft.bin(k).phase();
+              premagbin[k] = stft.bin(k).mag();
   //
   				  	// Band Pass
               if (k > max || k < min ) stft.bin(k) = 0;
@@ -440,8 +507,14 @@ struct SpectralNoise : AudioProcess {
 
       // bias
       for(unsigned k=0; k<scale.size(); ++k){
-        stft.bin(k) *= 2;
+      //  stft.bin(k) *= 2;
       }
+
+      for(unsigned k=0; k<stft.numBins(); ++k){
+        magbin[k] = stft.bin(k).mag();
+        phasebin[k] = stft.bin(k).phase();
+      }
+      
   
       // Get next resynthesized sample
   		s = stft();
@@ -467,8 +540,8 @@ void AudioParam::specify( SpectralNoise& ap){
   mData = {
     //LFO
     {"freq",&ap.freq,40,1200},
-    {"max", &ap.max,0,512},
-    {"min", &ap.min,0,512},
+    {"max", &ap.max,0,1024},
+    {"min", &ap.min,0,1024},
     {"thresh",&ap.thresh,0,1},
     {"base", &ap.base, 0,16}
   };
@@ -476,6 +549,10 @@ void AudioParam::specify( SpectralNoise& ap){
 
 /// Get Maximum Amplitude, if above threshold set trigger
 struct MagnitudeReader : AudioProcess {
+
+  MagnitudeReader(){
+    mName = "mag";
+  }
   
   virtual void onProcess(AudioIOData& io) {
     max = 0;

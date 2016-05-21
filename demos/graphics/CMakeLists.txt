@@ -15,9 +15,9 @@ if(USE_CLANG)
   message("using clang compiler")
   SET(CMAKE_CXX_COMPILER "clang++")
   SET(CMAKE_C_COMPILER "clang")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++ -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast " )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++ -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast " )
 else()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14  -O3 -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14  -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
 endif()
 
 #get rid of glut warnings
@@ -30,9 +30,10 @@ add_executable(${target} ${SRC} )
 target_link_libraries(${target} vsr vsrGfx gfx GLV Gamma allocore alloutil alloGLV ${ALLOCORE_LINK_LIBRARIES} ${ALLOUTIL_LINK_LIBRARIES} ${ALLOCORE_LINK_LIBRARIES} )
 if(APPLE)
   set_target_properties(${target} PROPERTIES
-  LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+  LINK_FLAGS "-image_base 100000000")
 endif()
 
+#-pagezero_size 10000
 
 #  file(GLOB DEMOS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 #  foreach(demo ${DEMOS})
