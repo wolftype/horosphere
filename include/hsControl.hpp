@@ -46,17 +46,17 @@ namespace hs {
   auto userCB = []( auto&& udata ){
     
     return [&](const std::string& s ){ // value returned from event
-    
+        int val;  stringstream os;  os << s; os >> val;
         printf("COMMMAND: %s\n", s.c_str() );
-
-        if (s=="pulse") pulse( udata );
-        if (s=="grow")  grow( udata, .01 );
-        if (s=="move")  move( udata );
-        if (s=="0")  behave( udata, 0 );
-        if (s=="1") behave( udata, 1 );
-        if (s=="2") behave( udata, 2 );
-        if (s=="3") behave( udata, 3 );
-        if (s=="4") behave( udata, 4 );
+        behave(udata, val);
+        //if (s=="pulse") pulse( udata );
+        //if (s=="grow")  grow( udata, .01 );
+        //if (s=="move")  move( udata );
+        //if (s=="0")  behave( udata, 0 );
+        //if (s=="1") behave( udata, 1 );
+        //if (s=="2") behave( udata, 2 );
+        //if (s=="3") behave( udata, 3 );
+        //if (s=="4") behave( udata, 4 );
 
         return true;
       

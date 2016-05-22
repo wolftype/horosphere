@@ -1,31 +1,19 @@
 /// the knot
 #include "hsSimulator.hpp"
 #include "hsRender.hpp"
+#include "hsMacro.hpp"
+
 #include "vsr/form/vsr_knot.h"
 #include "vsr/form/vsr_shapes.h"
 
 using namespace hs;
 using namespace vsr;
 using namespace vsr::cga;
-/*-----------------------------------------------------------------------------
- *  DATA
- *-----------------------------------------------------------------------------*/
- struct BasicState{
 
-   float time;
-
-   gfx::Pose model;
-   gfx::Pose camera;
-
-   cga::Point mouse;
-
- };
-
-struct Knot{
+struct Knot : UserBase {
 
   //Global Parameters to pass around
-  struct State  {
-    BasicState mScene;
+  struct Data  {
 
     //Orbit Parameters
     float P, Q;                             //<-- Knot Ratio
@@ -50,7 +38,7 @@ struct Knot{
     cga::Vec vec;                              //<-- Hopf Vec
     cga::Point pnt = Construct::point(3,0,0);  //<-- Point Along Orbit
 
-  } mState;
+  } * mData;
 
   //PQ Function
   TorusKnot tk;
@@ -61,8 +49,21 @@ struct Knot{
 
   vector<gfx::Mesh> wm;     // Some number of writhe Meshes;
 
-  void setup(){
-    State& s = mState;
+
+  // Audio
+  FMSynth * fm;
+  WindSound * ws;
+  Harmonics * hs;
+
+
+  void onSetup(void * tsim){
+    auto& s = *mData;
+    auto& sim = simulator(this, tsim);
+
+    fm = &sim.addAudioProcess<FMSynth>();
+    ws = &sim.addAudioProcess<WindSound>();
+    hs = &sim.addAudioProcess<Harmonics>();
+    
 
     //Defaults
     s.P = 3; s.Q = 2;
@@ -89,7 +90,7 @@ struct Knot{
    *  Update Local Data (called on all Apps)
    *-----------------------------------------------------------------------------*/
   void updateLocal(){
-    State& s = mState;
+    auto& s = *mData;
 
     //Knot Settings
     tk.HF.vec() = s.vec;
@@ -98,7 +99,8 @@ struct Knot{
     tk.amt = s.vel;
 
     //Knot Calculation
-    s.energy = tk.calc0(s.pnt);
+    tk.calc0(s.pnt);
+    s.energy = tk.energy(0,100);
 
     //Mesh Data
     tm.clear();
@@ -152,7 +154,7 @@ struct Knot{
    *  Update Global State (called from Control App)
    *-----------------------------------------------------------------------------*/
   void updateGlobal(){
-    State& s = mState;
+    auto& s = *mData;
 
     /// Orbit of Point
     if(s.bFlow) s.pnt = Round::loc( s.pnt.spin( tk.bst() ) );
@@ -181,7 +183,7 @@ struct Knot{
    *  Draw State (called from All Apps)
    *-----------------------------------------------------------------------------*/
   void onDraw(){
-    State& s = mState;
+    auto& s = *mData;
 
     glPointSize(10);
 
@@ -208,7 +210,7 @@ struct Knot{
   }
 
   void onMessage(al::osc::Message& m){
-      State& s = mState;
+      auto& s = *mData;
       auto ap = m.addressPattern();
       float tmp;
       if (ap=="/bAutoMode") {
@@ -258,77 +260,10 @@ struct Knot{
       }
   }
 
-};
-
-namespace hs{
-///Named Boolean Parameters of Knot
-template<> template<> void Param<bool>::specify(Knot& k){
-  mData = {
-    {"bDrawFibers",&k.mState.bDrawFibers},
-    {"bDrawTube",&k.mState.bDrawTube},
-    {"bAutoMode",&k.mState.bAutoMode},
-    {"bDrawVec",&k.mState.bDrawVec},
-    {"bDrawPnt",&k.mState.bDrawPnt},
-    {"bDrawWrithe",&k.mState.bDrawWrithe},
-    {"bFlow",&k.mState.bFlow},
-    {"bUseEnergies", &k.mState.bUseEnergies}
-  };
-}
-
-template<> template<> void Param<float>::specify(Knot& k){
-  mData = {
-    {"P",&k.mState.P,1,10},
-    {"Q",&k.mState.Q,1,10},
-    {"theta",&k.mState.theta,1,10},
-    {"phi",&k.mState.phi,1,10},
-    {"energy_scale", &k.mState.energy_scale,0,100},
-    {"writhe", &k.mState.writhe,1,100}
-  };
-}
-}
-struct ControlApp : hs::Simulator<Knot> {
-
-  ControlApp(const char * ip) : hs::Simulator<Knot>(ip) {}
-
-  FMSynth * fm;
-  WindSound * ws;
-  Harmonics * hs;
-
-  virtual void setup() override {
-    bindGLV();
-
-    auto& tfm = audio.mScheduler.add<FMSynth>();
-    auto& tws = audio.mScheduler.add<WindSound>();
-    auto& ths = audio.mScheduler.add<Harmonics>();
-
-    glui.bind<AudioParam>(tfm,gui);
-    glui.bind<AudioParam>(tws,gui);
-    glui.bind<AudioParam>(ths,gui);
-
-    glui.bind<Param<bool>>(mParam,gui);
-    glui.bind<Param<float>>(mParam,gui);
-
-    fm = &tfm; ws = &tws; hs = &ths;
-  }
-
-  /// Here is where we can tie Audio Parameters to Global State
-  virtual void onAnimate() override {
-    auto &s = this->mParam.mState.mScene;
-    s.time += .01;
-    s.mouse = mouse;
-    s.camera = (gfx::Pose)scene.camera;
-    s.model = scene.model;
-
-    mParam.updateLocal();
-    mParam.updateGlobal();
-
-    updateAudio();
-  }
-
   void updateAudio(){
-    auto &kd = this->mParam.mState;
-
-    auto diameter = Round::size( mParam.tk.cir[0], true );
+    auto& kd = *mData;
+    
+    auto diameter = Round::size( tk.cir[0], true );
     ws->freq = 330. + ( 110. * ( 10 * diameter ) );
     ws->width = 10 + ( 8000. * diameter );
 
@@ -347,25 +282,32 @@ struct ControlApp : hs::Simulator<Knot> {
 
 };
 
-
-int main(int argc, char * argv[]) {
-  if (argc > 1) {
-    if (!strncmp(argv[1],"-n",2)){
-      printf("Network Broadcast\n");
-      ControlApp app("192.168.10.255");
-      app.start();
-    } else if (!strncmp(argv[1],"-l",2)){
-      printf("%s \t", argv[1] );
-      printf("Local Broadcast\n");
-      ControlApp app("127.0.0.1");
-      app.start();
-    } else if (!strncmp(argv[1],"-r",2)){
-      RenderApp<Knot> app;
-      app.start();
-    }
-  } else {
-    printf("please feed an argument:\n-n for network\n-l for local\n-r for render\n");
-  }
-
-   return 0;
+namespace hs{
+///Named Boolean Parameters of Knot
+template<> template<> void Param<bool>::specify(Knot::Data& k){
+  mData = {
+    {"bDrawFibers",&k.bDrawFibers},
+    {"bDrawTube",&k.bDrawTube},
+    {"bAutoMode",&k.bAutoMode},
+    {"bDrawVec",&k.bDrawVec},
+    {"bDrawPnt",&k.bDrawPnt},
+    {"bDrawWrithe",&k.bDrawWrithe},
+    {"bFlow",&k.bFlow},
+    {"bUseEnergies", &k.bUseEnergies}
+  };
 }
+
+template<> template<> void Param<float>::specify(Knot::Data& k){
+  mData = {
+    {"P",&k.P,1,10},
+    {"Q",&k.Q,1,10},
+    {"theta",&k.theta,1,10},
+    {"phi",&k.phi,1,10},
+    {"energy_scale", &k.energy_scale,0,100},
+    {"writhe", &k.writhe,1,100}
+  };
+}
+}
+
+///MACRO
+RUN(Knot);

@@ -62,7 +62,8 @@ struct User : UserBase {
   struct Data  {
     
     //Knot
-    float orbit_speed = 0.001;
+    float frame_orbit_speed = 0.001;
+    float particle_orbit_speed = .001;
     float p = 5;
     float q = 3;
     float scale = 1;
@@ -77,10 +78,13 @@ struct User : UserBase {
     bool pbar, qbar, pqbar;
     float numX, numY, numZ;
     float crystalMotifMode;
-    float cScale = .01;
+    float cScale = 0;
     float xratio = 1;
     float yratio = 1;
     float zratio = 1;
+
+    float linewidth =1;
+    float pointsize =5;
     
     //Frame that Controls knot
     Frame knotFrame;
@@ -382,41 +386,87 @@ namespace hs {
      }
      case 1:
      {
-       s.bDrawKnot = true;
+       voiceA -> attack = 0.001; voiceB -> attack = 0.001;   
+       voiceA -> decay = 0.001; voiceB -> decay = 0.001;       
+       voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::PULSE;       
+       s.bDrawCrystal=false;
+       s.bDrawKnot = true; 
+       s.bDrawParticles = false;
+       s.bUseCam = true; 
+       mCamera.pos() = PAO;
+       s.scale = 5;
+       
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
-       b1.launch( e1, e2 );
+       auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .0001 + t * .5; return true;} ) );
+       auto e4 = ohio::every_(.1, ohio::over_(60, [this](float t ){ voiceA -> attack = .0001 + t * .01; return true;} ) );
+       auto e5 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->p = t * 3; return true;} ) );
+     
+       b1.launch( e1, e2, e3, e4, e5 );
        break;
      }
      case 2:
      {
+       voiceA -> attack = 0.011; voiceB -> attack = 0.011;   
+       voiceA -> decay = 0.011; voiceB -> decay = 0.011; 
+       echo -> delayMax = .0001;      
+       voiceA -> mode = Voice::PULSE; voiceB -> mode = 5;
+       s.bDrawCrystal=false;
        s.bDrawKnot = true; 
+       s.bDrawParticles = false;
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
-       b1.launch( e1,e2 ); 
+       auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .0001 + t * .5; return true;} ) );
+
+       b1.launch( e1, e2, e3 ); 
        break;
      }
-     case 3:
-     {
+     case 3:  /// Crystal Symmetries
+     {     
+       //Settings
+       s.bDrawDiatom = false;
+       s.bDrawKnot = false;
        s.bDrawCrystal = true;
        s.q =0; s.cScale = .1; 
        voiceA -> attack = 0.001; voiceB -> attack = 0.001;        
-       voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::PULSE;
+       voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::TRI;
        s.crystalMotifMode = 2;
+       s.crystalFrame.scale() = .01;
+       s.bUseCam = true; 
+       mCamera.pos() = PAO;
 
+       //Behaviors
        auto e1 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(true), true ) ); 
        auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
- 
-       b1.launch( e1, e2 );
+       auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> q = t * 2; return true; } ) );
+       auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .03; return true; } ) );
+       auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .03; return true; } ) );
+       auto e5 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> frame_orbit_speed = .0001 + .006 * t; return true; } ) );
+       auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
+       auto e7 = ohio::after_(30, [this](auto&& t){ mData -> numX = 2; mData -> numY = 2; mData -> numZ = 2;return true; } ); 
+       auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 3; mData -> numY = 3; mData -> numZ = 3;return true; } );
+       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale = .1 * ( Rand::Boolean() ? -1 : 1); return true; } );
+
+       b1.launch( e1, e2, e3, e4, e45, e5, e6, e7, e8, e9 );
        break;
      }
      case 4:
      {
+        echo -> delayMax = .01;  
         s.bDrawParticles = true; s.amp = 1000;
         auto e1 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->max = 1000 * t; return true; } ));
         auto e2 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->thresh = .01 * t; return true; }));
         auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 300 * t; return true; } ));
-        b1.launch( e1, e2, e3 );//.until( [this](){ }; );
+        b1.launch( e1, e2, e3 );//.over(10);//.until( [this](){ }; );
+        break;
+     }
+     case 5: //Inside Tube
+     {
+        s.bUseCam = true; 
+        auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->frame.moveY( mData->yoffset ); return true; });
+        //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
+
+        b1.launch(e1);
         break;
      }
        
@@ -433,8 +483,7 @@ namespace hs {
   /// Render to Screen (called six times)
   inline void User::onDraw()  {
     auto& s = *mData;
-    glPointSize(5);
-    glEnable(GL_BLEND);
+
 
     if (s.bDrawDiatom){
       Draw(diatom);
@@ -442,6 +491,7 @@ namespace hs {
     
     //Draw Knot
     if (s.bDrawKnot){
+
       if (s.bDrawFibers){
         Draw( tk.HF.fiberA());  
         Draw( tk.HF.fiberB()); 
@@ -455,8 +505,14 @@ namespace hs {
         for (auto& i : tk.pnt ){
           Draw(i,0,1,1);
         } 
-        for (auto& i : tk.cir ){
-          Draw(i,0,1,0);
+        for (int i=0;i<tk.cir.size()-1;++i ){
+          float t = (float)i/tk.cir.size();
+          Draw(tk.cir[i],0,1,t);
+         for (int j=0;j<3;++j){
+           float tt = (float)j/3;
+           Draw( Round::point( tk.cir[i], tt*PI ), tt , 0, 1-tt );
+         }
+
         }
       }
     }
@@ -508,9 +564,10 @@ namespace hs {
 
     if (s.bDrawKnot){ 
       tk.apply( tp, s.num, s.bNormalize);
+     // tk.calc0( tp );
       // create tube
       tube.clear(); 
-      tube = Shape::Skin( tk.cir, tk.cir.size(), true, 20 );
+      tube = Shape::Skin( tk.cir, tk.cir.size(), true, 5 );
       // determine tangent at location in orbit 
       mTangent = Pair(-Round::direction( tk.cir[0] ).dual().copy<Tnv>()).translate( s.frame.pos() );
     }
@@ -518,7 +575,7 @@ namespace hs {
     //Flow trace
     if (s.bDrawParticles){
        trace = vector<Point>( (int)s.mNumTrace * NUMPARTICLES);
-       auto bst = tk.dbst( (int)(1.0/s.orbit_speed) );
+       auto bst = tk.dbst( (int)(1.0/s.particle_orbit_speed) );
        for (int i =0; i<NUMPARTICLES; i++){
          trace[i*s.mNumTrace] = s.particles[i].spin(bst);
          for (int j=1;j<(int)s.mNumTrace;++j){
@@ -551,11 +608,16 @@ namespace hs {
     
      crystal.sg.set( s.cp, s.cq, s.pbar, s.qbar, s.pqbar, lattice, ratioVec, glide, screw);
      crystal.mFrame = s.crystalFrame;
-     crystal.mFrame.scale( s.cScale );
+     //crystal.mFrame.scale( s.cScale );
      crystal.mNumX = s.numX; crystal.mNumY = s.numY; crystal.mNumZ = s.numZ;
      crystal.mMode = s.crystalMotifMode;
      crystal.apply();
-    
+  
+      //Per Frame Settings
+     glPointSize(5);
+     glEnable(GL_BLEND);
+     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+     glLineWidth(s.linewidth);    
     }
 
 
@@ -570,7 +632,7 @@ namespace hs {
     
 
     // Move frame around knot orbit (maybe look up mTangent instead?)
-    auto par = tk.dpar( (int)(1.0/s.orbit_speed) );
+    auto par = tk.dpar( (int)(10.0/(s.frame_orbit_speed)) );
     auto bst = Gen::bst(par); 
     auto tp = s.frame.pos(); tp[3] = s.ecc;
     auto p1 = tp.spin(bst);
@@ -604,6 +666,11 @@ namespace hs {
     //Diatom motif
     s.motif.step();
 
+    //Crystal Frame
+    s.cScale *= .9;
+    s.crystalFrame.scale() = .001 + s.cScale;
+    s.crystalFrame.step();
+
     //auto crystalHit = [this](){
     bCrystalHit = false;
     for (int i = 0; i<crystal.mPoint.size(); i++){//=crystal.mStride){
@@ -618,8 +685,8 @@ namespace hs {
     
 
     //Virtual Camera
-    mCamera = s.frame.moveY( s.yoffset );
     mCamera.step();
+    mCamera = s.frame.moveY( s.yoffset );
 
     // use virtual camera riding along know? if so do not draw tangent arrow
     if (s.bUseCam) {
@@ -648,7 +715,8 @@ void Param<float>::specify(User::Data& k){
   //---------label, dataPtr, min,max
   mData = {   
     //Knot
-    {"orbit_speed", &(k.orbit_speed),.0001,100},
+    {"frame_orbit_speed", &(k.frame_orbit_speed),.0001,100},
+    {"particle_orbit_speed", &(k.particle_orbit_speed),.0001,100},
     {"p", &(k.p),0,10},
     {"q", &(k.q),0,10},
     {"scale", &(k.scale),1,10},
@@ -669,10 +737,12 @@ void Param<float>::specify(User::Data& k){
     {"numY",&(k.numY),1,20},
     {"numZ",&(k.numZ),1,20},
     {"cMode",&(k.crystalMotifMode),0,10},
-    {"cScale",&(k.cScale),0,10},
+    {"cScale",&(k.cScale),-10,10},
     {"xratio",&(k.xratio),0,100},
     {"yratio",&(k.yratio),0,100},
-    {"zratio",&(k.zratio),0,100}
+    {"zratio",&(k.zratio),0,100},
+    {"linewidth",&k.linewidth,1,30},
+    {"pointsize",&k.pointsize,1,30}
   };
 }
 
