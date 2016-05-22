@@ -34,7 +34,7 @@ include_directories(${PROJECT_SOURCE_DIR}/../versor/ext/gfx/gfx/)
 include_directories(${PROJECT_SOURCE_DIR}/../Gamma/)
 include_directories(${PROJECT_SOURCE_DIR}/../cuttlebone/)
 include_directories(${PROJECT_SOURCE_DIR}/../ohio/include)
-include_directories(${PROJECT_SOURCE_DIR}/../hana/include)
+include_directories(${PROJECT_SOURCE_DIR}/../ohio/ext/hana/include)
 
 
 #library search directories
@@ -59,10 +59,28 @@ else()
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
 
+#COMPILER
 if(${BUILDING_FOR_ALLOSPHERE})
   message( "ALLO BUILD")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_LINUX -D __allosphere__")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D __allosphere__")
+if(${BUILDING_FOR_LINUX})
+  message( "LINUX (GR01) BUILD")
+  # SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/../clang+llvm-3.8.0-x86_64-apple-darwin/bin/clang++)
 else()
+  message( "OSX BUILD")
+  SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/../clang+llvm-3.8.0-x86_64-apple-darwin/bin/clang++)
+endif()
+else()
+  message( "PABLO'S LAPTOP OSX BUILD")
+  SET(CMAKE_CXX_COMPILER clang++)
+endif()
+
+#COMPILER FLAGS
+if(${BUILDING_FOR_LINUX})
+  message( "LINUX BUILD")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_LINUX ")
+else()
+  message( "OSX BUILD")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D AL_OSX") #hack due to trouble with al_OpenGL.hpp 
 endif()
 
