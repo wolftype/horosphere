@@ -40,11 +40,12 @@
 #include "hsControl.hpp"
 #include "hsObjects.hpp"
 
-#include "ohio.hpp"
-
 #include "vsr/draw/vsr_cyclide_draw.h"
 #include "vsr/form/vsr_shapes.h"
 
+#ifndef __lubuntu__
+#include "ohio.hpp"
+#endif
 
 using namespace hs;
 using namespace vsr;
@@ -134,13 +135,15 @@ struct User : UserBase {
     
   } * mData;
 
+  #ifndef __lubuntu__
   /// Behaviors
   map< std::string, ohio::behavior > mBehavior;
-  
   /// Get behavior by name if it exists, create if it does not;
   ohio::behavior& behavior(const std::string& s) { 
     return mBehavior.emplace(s,ohio::behavior()).first -> second; 
-  }  
+  }
+  #endif 
+  
   // Camera Frame
   Frame mCamera= Frame(0,0,5);
 
@@ -177,8 +180,9 @@ struct User : UserBase {
   virtual void updateGlobal() ;
   virtual void updateAudio() ;
   virtual void onMessage(al::osc::Message& m) ;
-
   bool setBehavior(int idx);
+
+
   void reset();
 };
 
@@ -196,51 +200,51 @@ void User::reset(){
 
 };
 
-/// Move Camera to Target over n seconds
-void move(User& user, const cga::Vec& target, float sec){
-  
-  float fps = 60.f;
-
-  auto& b = user.behavior("move");
-
-  auto vec  = target - user.mCamera.vec();
-  auto dvec = vec.unit() * (vec.norm()/ (sec*fps));
-  
-  auto e1 = ohio::every_(1.f/fps, [&,dvec](float t){  user.mCamera.dx() = dvec; return true;} );
-  auto e2 = [&,target](auto&& t){ return (cga::Vec(user.mCamera.pos()) - target).norm() < .001; }; 
-
-  b.pollrateFinish = 1.f/fps;
-  b.launch(e1).until( e2 );
-}
-
-/// Rotate Camera to Look at Target over n seconds
-void look(User& user, const cga::Vec& target, float sec){
-  
-  auto& b = user.behavior("look");
-
-  float fps = 60.f;
-  int numSteps = sec * fps;
-  //function of amt t [0-1) 
-  auto go_func =[&,numSteps](float t){ 
-    auto amt = 1.0/((1-t)*numSteps);
-    auto biv = user.mCamera.relOrientBiv(target, false);
-    user.mCamera.db() = biv * amt;
-    return true;
-  };
-  
-  auto end_func = [=,&user](auto&& t){ 
-    auto tmp = (target - user.mCamera.vec()).unit(); 
-    float f = ((-user.mCamera.z()) <= tmp)[0];
-    return f > .9999; 
-  }; 
-
-  auto sigfun = ohio::over_(sec, go_func);
-  auto e1 = ohio::every_(1.f/fps, sigfun);
-
-  b.pollrateFinish = 1.f/fps;
-  b.launch(e1).until( end_func );
-  
-}
+///// Move Camera to Target over n seconds
+//void move(User& user, const cga::Vec& target, float sec){
+//  
+//  float fps = 60.f;
+//
+//  auto& b = user.behavior("move");
+//
+//  auto vec  = target - user.mCamera.vec();
+//  auto dvec = vec.unit() * (vec.norm()/ (sec*fps));
+//  
+//  auto e1 = ohio::every_(1.f/fps, [&,dvec](float t){  user.mCamera.dx() = dvec; return true;} );
+//  auto e2 = [&,target](auto&& t){ return (cga::Vec(user.mCamera.pos()) - target).norm() < .001; }; 
+//
+//  b.pollrateFinish = 1.f/fps;
+//  b.launch(e1).until( e2 );
+//}
+//
+///// Rotate Camera to Look at Target over n seconds
+//void look(User& user, const cga::Vec& target, float sec){
+//  
+//  auto& b = user.behavior("look");
+//
+//  float fps = 60.f;
+//  int numSteps = sec * fps;
+//  //function of amt t [0-1) 
+//  auto go_func =[&,numSteps](float t){ 
+//    auto amt = 1.0/((1-t)*numSteps);
+//    auto biv = user.mCamera.relOrientBiv(target, false);
+//    user.mCamera.db() = biv * amt;
+//    return true;
+//  };
+//  
+//  auto end_func = [=,&user](auto&& t){ 
+//    auto tmp = (target - user.mCamera.vec()).unit(); 
+//    float f = ((-user.mCamera.z()) <= tmp)[0];
+//    return f > .9999; 
+//  }; 
+//
+//  auto sigfun = ohio::over_(sec, go_func);
+//  auto e1 = ohio::every_(1.f/fps, sigfun);
+//
+//  b.pollrateFinish = 1.f/fps;
+//  b.launch(e1).until( end_func );
+//  
+//}
 
 
 /*-----------------------------------------------------------------------------
@@ -250,11 +254,7 @@ namespace hs {
 
 
   template<> void behave(User& user, int idx){
-    //one move over 1 second =  
-    //look(user, cga::Vec(0,1,0), 3 );
-    //move(user, cga::Vec(2,0,0), 3 );
     user.setBehavior(idx);
-
   }
 
   
@@ -298,7 +298,8 @@ namespace hs {
   }
 
   inline bool User::setBehavior(int idx){
-
+   
+   #ifndef __lubuntu__
    auto& s = *mData;
     
    auto& b1 = behavior("pulse");
@@ -471,7 +472,8 @@ namespace hs {
      }
        
    }
-
+   #endif
+   
    return true;
     
   }

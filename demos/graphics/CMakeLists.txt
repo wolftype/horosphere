@@ -13,11 +13,11 @@ endif()
 
 if(USE_CLANG)
   message("using clang compiler")
-  #    SET(CMAKE_CXX_COMPILER "clang++")
+  #   SET(CMAKE_CXX_COMPILER "clang++")
   #   SET(CMAKE_C_COMPILER "clang")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++ -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast " )
 else()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14  -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -ftemplate-depth-1200 -Wno-switch -Wno-int-to-pointer-cast")
 endif()
 
 #get rid of glut warnings
