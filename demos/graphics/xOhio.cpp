@@ -286,18 +286,19 @@ namespace hs {
     voiceB = &sim.addAudioProcess<Voice>(*processA); 
     fmsynth = &sim.addAudioProcess<FMSynth>(*processA);
 
+    /// Initialize all variables
+    reset();
+ 
     #ifndef __lubuntu__  
     ///2. Start Polling for Command Line Input Events
     ohio::AppStartTime = ohio::now();
     ///               callback func      pollrate     event stream
     ohio::callback2_( hs::userCB(*this), .5 )( ohio::listener_( ohio::stdin_ ) );
-    #endif 
 
-    /// Initialize all variables
-    reset();
-    
+   
     ///3. Schedule Events and spawn time-based listener  
     //COMPOSITION
+    
     auto first =  [this](auto&& t) { cout << "hello" << endl; this -> setBehavior(1); return true; };
     auto second = [this](auto&& t) { setBehavior(2); return true; };
     auto third = [this](auto&& t) { setBehavior(3); return true; };
@@ -310,6 +311,7 @@ namespace hs {
     b.launch(e0,e1);
    // setBehavior(1);
       
+    #endif 
   }
 
   inline bool User::setBehavior(int idx){
