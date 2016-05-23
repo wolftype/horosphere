@@ -308,7 +308,7 @@ namespace hs {
     auto e2 = ohio::tag2_( ohio::at_(120,true), third );
 
     auto& b = behavior("composition");
-    b.launch(e0,e1);
+   // b.launch(e0,e1);
    // setBehavior(1);
       
     #endif 
@@ -324,7 +324,7 @@ namespace hs {
   // auto& b3 = behavior("crystalHit");
 
    //Grow Diatom Diamter
-   auto grow = [this](auto&& t){
+auto grow = [this](auto&& t){
      mData -> motif.dx() += cga::Vec::x*magReader->max; 
      return true;
    };
@@ -411,7 +411,8 @@ namespace hs {
        s.bDrawParticles = false;
        s.bUseCam = true; 
        mCamera.pos() = PAO;
-       s.scale = 5;
+       s.scale = 10;
+       s.num = 400;
        s.linewidth = 30; s.pointsize = 30;
        
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
@@ -468,13 +469,14 @@ namespace hs {
      {
         s.bUseCam = true; 
         s.p = 6; s.q = 1;
-        s.frame_orbit_speed = .001;
+        s.frame_orbit_speed = .0001;
         s.num = 400;
         s.bDrawTube = true;
-        s.tube_opacity = .5;
-        s.yoffset = .3;
+        s.tube_opacity = .9;
+        s.yoffset = 3;
+        s.particle_orbit_speed = .00021;
         auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->frame.moveY( mData->yoffset ); return true; });
-        auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = t * 7; return true; }));
+        auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = (int)(t * 7); return true; }));
 
         //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
 
@@ -610,7 +612,7 @@ namespace hs {
 
     // set knot data
     tk.set(s.p,s.q);
-    s.knotFrame.scale( s.scale );   
+
     tk.HF.vec() = s.knotFrame.y();
     tk.HF.cir() = s.knotFrame.cxz();
     
@@ -693,6 +695,7 @@ namespace hs {
     auto p2 = p1.spin(bst);
     p1 = Round::loc(p1); p2 = Round::loc(p2); //renormalize 
     s.frame.pos() = p1;  s.frame.orient( p2 );
+    s.knotFrame.scale( s.scale ); 
 
     // Move Crystal Frame around knot orbit
     tp = s.crystalFrame.pos(); tp[3]= s.ecc;
