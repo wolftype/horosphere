@@ -78,7 +78,7 @@ struct Diatom : public Frame {
         auto tu = (float)i/w * TWOPI;
         auto tv = -PIOVERTWO + (float)j/h * PI;
         auto rot = Gen::rot(tu,tv);    
-        v.push_back(  Vec3f( Vec::x.spin(rot) ) );         
+        v.push_back(  gfx::Vec3f( Vec::x.spin(rot) ) );         
       }
     }
   

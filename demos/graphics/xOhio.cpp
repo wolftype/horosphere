@@ -37,13 +37,13 @@
 #include "hsSimulator.hpp"
 #include "hsRender.hpp"
 #include "hsMacro.hpp"
-#include "hsControl.hpp"
 #include "hsObjects.hpp"
 
 #include "vsr/draw/vsr_cyclide_draw.h"
 #include "vsr/form/vsr_shapes.h"
 
 #ifndef __lubuntu__
+#include "hsControl.hpp"
 #include "ohio.hpp"
 #endif
 
@@ -252,10 +252,11 @@ void User::reset(){
  *-----------------------------------------------------------------------------*/
 namespace hs {
 
-
+  #ifndef __lubuntu__
   template<> void behave(User& user, int idx){
     user.setBehavior(idx);
   }
+  #endif
 
   
 }
@@ -268,7 +269,6 @@ namespace hs {
  *-----------------------------------------------------------------------------*/
   inline void User::onSetup(void * s)  {
 
-    ohio::AppStartTime = ohio::now();
 
     ///0. Get Reference to Simulator
     auto& sim = simulator(this,s);
@@ -283,10 +283,12 @@ namespace hs {
     voiceA = &sim.addAudioProcess<Voice>(*processA); 
     voiceB = &sim.addAudioProcess<Voice>(*processA); 
 
-      
+    #ifndef __lubuntu__  
     ///2. Start Polling for Command Line Input Events
+    ohio::AppStartTime = ohio::now();
     ///               callback func      pollrate     event stream
     ohio::callback2_( hs::userCB(*this), .5 )( ohio::listener_( ohio::stdin_ ) );
+    #endif 
 
     /// Initialize all variables
     reset();
@@ -711,6 +713,7 @@ namespace hs {
 /*-----------------------------------------------------------------------------
  *  GUI PARAMETERS
  *-----------------------------------------------------------------------------*/
+namespace hs{
 /// User Defined GUI Specifications
 template<> template<>
 void Param<float>::specify(User::Data& k){
@@ -771,7 +774,7 @@ void Param<bool>::specify(User::Data& k){
     {"bDrawCrystal",&(k.bDrawCrystal)}
   };
 }
-
+}//hs::
 //template<> template<>
 //void Param<float>::specify(Crystal& k){
 //

@@ -9,15 +9,15 @@ namespace hs {
   if (argc > 1) {\
     if (!strncmp(argv[1],"-n",2)){\
       printf("Network Broadcast\n");\
-      Simulator<X> app("192.168.10.255");\
+      hs::Simulator<X> app("192.168.10.255");\
       app.start();\
     } else if (!strncmp(argv[1],"-l",2)){\
       printf("%s \t", argv[1] );\
       printf("Local Broadcast\n");\
-      Simulator<X> app("127.0.0.1");\
+      hs::Simulator<X> app("127.0.0.1");\
       app.start();\
     } else if (!strncmp(argv[1],"-r",2)){\
-      RenderApp<X> app;\
+      hs::RenderApp<X> app;\
       app.start();\
     }\
   } else {\
