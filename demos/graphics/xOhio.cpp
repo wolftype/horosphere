@@ -64,6 +64,7 @@ struct User : UserBase {
     
     //Knot
     float frame_orbit_speed = 0.001;
+    float frame_orbit_max_speed = .1;
     float particle_orbit_speed = .001;
     float p = 5;
     float q = 3;
@@ -417,7 +418,7 @@ auto grow = [this](auto&& t){
        
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
-       auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->frame_orbit_speed = .0001 + t * .5; return true;} ) );
+       auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->frame_orbit_speed = .0001 + t * mData->frame_orbit_max_speed; return true;} ) );
        auto e4 = ohio::every_(.1, ohio::over_(60, [this](float t ){ voiceA -> attack = .0001 + t * .01; return true;} ) );
        auto e45 = ohio::every_(.1, ohio::over_(60, [this](float t ){  voiceB -> attack = .0001 + t * .01; return true;} ) );
 
@@ -447,7 +448,7 @@ auto grow = [this](auto&& t){
        s.bDrawParticles = false;
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
-       auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .001 + t * .5; return true;} ) );
+       auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .001 + t * frame_orbit_max_speed; return true;} ) );
        auto e4 = ohio::every_( .1, ohio::over_(15, [this](float t){ fmsynth -> mMix = .03 * t; return true; } ));
      //  auto e5 = ohio::tag2_( ohio::trigger_( bCross(true) ),
  //      auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
@@ -490,7 +491,7 @@ auto grow = [this](auto&& t){
        s.bDrawKnot = false;
        s.bDrawCrystal = true;
        s.bDrawParticles = true;
-
+       s.linewidth = 2;
        s.q =0; s.cScale = .1; 
        voiceA -> attack = 0.001; voiceB -> attack = 0.001;        
        voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::TRI;
@@ -506,7 +507,7 @@ auto grow = [this](auto&& t){
        auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> q = t * 2; return true; } ) );
        auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .03; return true; } ) );
        auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .03; return true; } ) );
-       auto e5 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> frame_orbit_speed = .0001 + .006 * t; return true; } ) );
+       auto e5 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> frame_orbit_speed = .0001 + .002 * t; return true; } ) );
        auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
        auto e7 = ohio::after_(30, [this](auto&& t){ mData -> numX = 2; mData -> numY = 2; mData -> numZ = 2;return true; } ); 
        auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 3; mData -> numY = 3; mData -> numZ = 3;return true; } );
@@ -773,6 +774,7 @@ void Param<float>::specify(User::Data& k){
   mData = {   
     //Knot
     {"frame_orbit_speed", &(k.frame_orbit_speed),.0001,100},
+    {"frame_orbit_max_speed", &(k.frame_orbit_max_speed),.0001,100},
     {"particle_orbit_speed", &(k.particle_orbit_speed),.0001,100},
     {"p", &(k.p),0,100},
     {"q", &(k.q),0,100},
