@@ -86,8 +86,6 @@ struct FMSynth : public AudioProcess {
 
   FMSynth()  {
 
-		mMix = .03;
-
 		#ifdef __allosphere__
 		channel = 47;
     #else
@@ -308,6 +306,7 @@ struct Voice : public AudioProcess {
     //env.loop(true);
     loop = false;
     mName = "Voice";
+    mMix = .5;
   }
 
   void onProcess(AudioIOData& io){ 
@@ -315,12 +314,13 @@ struct Voice : public AudioProcess {
     env.attack(attack);
     env.decay(decay);
     env.loop((int)loop);
-
+    src();
     while(io()){
       float s = val() * env() * .1;
 
-      io.out(0) += s;
-      io.out(1) += s;
+		  for (int i = 0; i < src.numChannels(); ++i ){
+		    io.out(i) += s * src[i] * mMix;
+		  }      
     }
   }
 

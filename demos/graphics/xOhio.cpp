@@ -86,6 +86,7 @@ struct User : UserBase {
 
     float linewidth =1;
     float pointsize =5;
+    float tube_opacity = 1;
     
     //Frame that Controls knot
     Frame knotFrame;
@@ -164,7 +165,8 @@ struct User : UserBase {
   Point mParticles[NUMPARTICLES];
   
   //Audio Processes
-  FMSynth * fm;
+  FMSynth * fmsynth;
+  WindSound * wind;
   Echo * echo;
   SpectralInfo * spectralInfo;
   Voice * voiceA;
@@ -282,6 +284,7 @@ namespace hs {
     spectralNoise = &sim.addAudioProcess<SpectralNoise>(*processA);
     voiceA = &sim.addAudioProcess<Voice>(*processA); 
     voiceB = &sim.addAudioProcess<Voice>(*processA); 
+    fmsynth = &sim.addAudioProcess<FMSynth>(*processA);
 
     #ifndef __lubuntu__  
     ///2. Start Polling for Command Line Input Events
@@ -294,7 +297,17 @@ namespace hs {
     reset();
     
     ///3. Schedule Events and spawn time-based listener  
-    setBehavior(1);
+    //COMPOSITION
+    auto first =  [this](auto&& t) { cout << "hello" << endl; this -> setBehavior(1); return true; };
+    auto second = [this](auto&& t) { setBehavior(2); return true; };
+    auto third = [this](auto&& t) { setBehavior(3); return true; };
+
+    auto e0 = ohio::tag2_( ohio::at_(1, true), first );
+    auto e1 = ohio::tag2_( ohio::at_(60,true), second );
+    auto e2 = ohio::tag2_( ohio::at_(120,true), third );
+
+    auto& b = behavior("composition");
+    b.launch(e0,e1);
    // setBehavior(1);
       
   }
@@ -374,7 +387,6 @@ namespace hs {
   };
 
   //auto  
-
   
    /// Launch Behaviors 
    switch(idx){
@@ -387,7 +399,7 @@ namespace hs {
        b1.launch( e1, e2, e3);
        break;
      }
-     case 1:
+     case 1: //knot orbit
      {
        voiceA -> attack = 0.001; voiceB -> attack = 0.001;   
        voiceA -> decay = 0.001; voiceB -> decay = 0.001;       
@@ -398,17 +410,30 @@ namespace hs {
        s.bUseCam = true; 
        mCamera.pos() = PAO;
        s.scale = 5;
+       s.linewidth = 30; s.pointsize = 30;
        
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
-       auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .0001 + t * .5; return true;} ) );
+       auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->frame_orbit_speed = .0001 + t * .5; return true;} ) );
        auto e4 = ohio::every_(.1, ohio::over_(60, [this](float t ){ voiceA -> attack = .0001 + t * .01; return true;} ) );
+       auto e45 = ohio::every_(.1, ohio::over_(60, [this](float t ){  voiceB -> attack = .0001 + t * .01; return true;} ) );
+
        auto e5 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->p = t * 3; return true;} ) );
-     
-       b1.launch( e1, e2, e3, e4, e5 );
+       auto e55 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->q = 5 + t * 30; return true;} ) );
+
+       auto e6 = ohio::every_(.5, [this](auto&& t){ voiceA -> mode = (int)Rand::Num(4); return true; } );
+       auto e65 = ohio::every_(.4, [this](auto&& t){ voiceB -> mode = (int)Rand::Num(4); return true; } );
+
+       auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .001 + t * .30; return true;} ) );
+       auto e8 = ohio::every_(.1, [this](auto&& t){ 
+          auto p = mData -> frame.vec();
+          voiceA -> src.pos = Vec3f( p[0], p[1], p[2] ); 
+          return true;} ); 
+       b1.launch( e1, e2, e3, e4, e45, e5, e55, e6, e65, e7 );
        break;
      }
-     case 2:
+     case 2: //Hopf Fibers Nudge
+
      {
        voiceA -> attack = 0.011; voiceB -> attack = 0.011;   
        voiceA -> decay = 0.011; voiceB -> decay = 0.011; 
@@ -419,23 +444,56 @@ namespace hs {
        s.bDrawParticles = false;
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
-       auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .0001 + t * .5; return true;} ) );
+       auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .001 + t * .5; return true;} ) );
+       auto e4 = ohio::every_( .1, ohio::over_(15, [this](float t){ fmsynth -> mMix = .03 * t; return true; } ));
+     //  auto e5 = ohio::tag2_( ohio::trigger_( bCross(true) ),
+ //      auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
 
-       b1.launch( e1, e2, e3 ); 
+       b1.launch( e1, e2, e3, e4 ); 
        break;
      }
-     case 3:  /// Crystal Symmetries
+     case 3: //Particles     
+     {
+        echo -> delayMax = .7;  
+        s.bDrawParticles = true; s.amp = 1000;
+        auto e1 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->max = 1000 * t; return true; } ));
+        auto e2 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->thresh = .01 * t; return true; }));
+        auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 300 * t; return true; } ));
+        b1.launch( e1, e2, e3 );//.over(10);//.until( [this](){ }; );
+        break;
+     }
+      case 4: //Inside Tube
+     {
+        s.bUseCam = true; 
+        s.p = 6; s.q = 1;
+        s.frame_orbit_speed = .001;
+        s.num = 400;
+        s.bDrawTube = true;
+        s.tube_opacity = .5;
+        s.yoffset = .3;
+        auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->frame.moveY( mData->yoffset ); return true; });
+        auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = t * 7; return true; }));
+
+        //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
+
+        b1.launch(e1, e2);
+        break;
+     }
+     case 5:  /// Crystal Symmetries
      {     
        //Settings
        s.bDrawDiatom = false;
        s.bDrawKnot = false;
        s.bDrawCrystal = true;
+       s.bDrawParticles = true;
+
        s.q =0; s.cScale = .1; 
        voiceA -> attack = 0.001; voiceB -> attack = 0.001;        
        voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::TRI;
        s.crystalMotifMode = 2;
        s.crystalFrame.scale() = .01;
        s.bUseCam = true; 
+       echo -> delayMax = .3;
        mCamera.pos() = PAO;
 
        //Behaviors
@@ -452,25 +510,11 @@ namespace hs {
 
        b1.launch( e1, e2, e3, e4, e45, e5, e6, e7, e8, e9 );
        break;
-     }
-     case 4:
+     }    
+     case 6: //tests
      {
-        echo -> delayMax = .01;  
-        s.bDrawParticles = true; s.amp = 1000;
-        auto e1 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->max = 1000 * t; return true; } ));
-        auto e2 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->thresh = .01 * t; return true; }));
-        auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 300 * t; return true; } ));
-        b1.launch( e1, e2, e3 );//.over(10);//.until( [this](){ }; );
-        break;
-     }
-     case 5: //Inside Tube
-     {
-        s.bUseCam = true; 
-        auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->frame.moveY( mData->yoffset ); return true; });
-        //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
-
-        b1.launch(e1);
-        break;
+       
+       break; 
      }
        
    }
@@ -488,6 +532,11 @@ namespace hs {
   inline void User::onDraw()  {
     auto& s = *mData;
 
+      //Per Frame Settings
+     glPointSize(s.pointsize);
+     glEnable(GL_BLEND);
+     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+     glLineWidth(s.linewidth);   
 
     if (s.bDrawDiatom){
       Draw(diatom);
@@ -571,7 +620,10 @@ namespace hs {
      // tk.calc0( tp );
       // create tube
       tube.clear(); 
-      tube = Shape::Skin( tk.cir, tk.cir.size(), true, 5 );
+      tube = Shape::Skin( tk.cir, tk.cir.size(), false, 5 );
+      for (auto& i : tube.vertex()){
+        i.Col[3] = s.tube_opacity;
+      }
       // determine tangent at location in orbit 
       mTangent = Pair(-Round::direction( tk.cir[0] ).dual().copy<Tnv>()).translate( s.frame.pos() );
     }
@@ -617,11 +669,7 @@ namespace hs {
      crystal.mMode = s.crystalMotifMode;
      crystal.apply();
   
-      //Per Frame Settings
-     glPointSize(5);
-     glEnable(GL_BLEND);
-     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-     glLineWidth(s.linewidth);    
+ 
     }
 
 
@@ -690,7 +738,6 @@ namespace hs {
 
     //Virtual Camera
     mCamera.step();
-    mCamera = s.frame.moveY( s.yoffset );
 
     // use virtual camera riding along know? if so do not draw tangent arrow
     if (s.bUseCam) {
@@ -722,14 +769,15 @@ void Param<float>::specify(User::Data& k){
     //Knot
     {"frame_orbit_speed", &(k.frame_orbit_speed),.0001,100},
     {"particle_orbit_speed", &(k.particle_orbit_speed),.0001,100},
-    {"p", &(k.p),0,10},
-    {"q", &(k.q),0,10},
+    {"p", &(k.p),0,100},
+    {"q", &(k.q),0,100},
     {"scale", &(k.scale),1,10},
     {"num",&(k.num),0,1000},
     {"ecc",&(k.ecc),-10,10},
     {"numTrace",&(k.mNumTrace),1,100},
+    {"tube_opacity",&k.tube_opacity,0,1},
     {"yoffset",&k.yoffset,0,10},
-    {"amp",&(k.amp),-1000,1000},
+    {"amp",&(k.amp),-5000,5000},
     
     //Diatom ...
 
