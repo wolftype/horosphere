@@ -441,7 +441,7 @@ struct SpectralInfo : AudioProcess {
 struct SpectralNoise : AudioProcess {
   
 	STFT stft;		// Short-time Fourier transform
-	NoisePink<> src;
+	NoisePink<> noise;
 
   
   float * magbin; /// store magnitude after messing with it
@@ -462,8 +462,8 @@ struct SpectralNoise : AudioProcess {
 					//		COMPLEX, MAG_PHASE, or MAG_FREQ
 	)
 	{
-    
-    freq = 440;  
+
+    freq = 440;
 
     mName = "SpectralNoise";
     magbin = new float[1025];//stft.numBins()];
@@ -474,7 +474,7 @@ struct SpectralNoise : AudioProcess {
   }
 
   void onProcess(AudioIOData& io){ 
-    
+
    // src.freq(freq);
     scale.clear();
     int n = base;
@@ -482,11 +482,12 @@ struct SpectralNoise : AudioProcess {
      scale.push_back(n);
      n = n * 2;
    }
+    src();
    // cout << stft.numBins() << endl;
     while(io()){
 
-      float s = src();
-  		// Input next sample for analysis
+      float s = noise();
+  // Input next sample for analysis
   		// When this returns true, then we have a new spectral frame
       if (stft(s)){
   //      
@@ -519,8 +520,9 @@ struct SpectralNoise : AudioProcess {
       // Get next resynthesized sample
   		s = stft();
   		
-  		io.out(0) += s;
-  		io.out(1) += s;
+		  for (int i = 0; i < src.numChannels(); ++i ){
+		    io.out(i) += s * src[i] * mMix;
+		  }
 
     }
   }
