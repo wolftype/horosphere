@@ -121,6 +121,7 @@ struct User : UserBase {
    float mNumTrace = 5;
    float amp = 2;
    float eyesep=.3;
+   float near = 0.01;
 
     // use camera
     bool bUseCam =false;
@@ -882,7 +883,8 @@ void Param<float>::specify(User::Data& k){
     {"zratio",&(k.zratio),0,100},
     {"linewidth",&k.linewidth,1,30},
     {"pointsize",&k.pointsize,1,30},
-    {"eyesep",&k.eyesep,0,1}
+    {"eyesep",&k.eyesep,0,100},
+    {"near",&k.near,0,1}
   };
 }
 
