@@ -133,6 +133,7 @@ struct User : UserBase {
     bool bDrawFibers = false;
     bool bDrawTangent = false;
     bool bDrawCircles = false;
+    bool bCloseTube = true;
     bool bReset = false;
 
     
@@ -416,24 +417,28 @@ auto grow = [this](auto&& t){
      case 1: //knot orbit
      {
        reset();
-
+       echo -> delayMax = .4;      
+       echo -> fbk = .95;
        voiceA -> attack = 0.061; voiceB -> attack = 0.041;   
        voiceA -> decay = 0.041; voiceB -> decay = 0.061;       
        voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::PULSE;       
        s.bDrawCrystal=false;
        s.bDrawKnot = true; 
+       s.bDrawTube = true; 
+
        s.bDrawParticles = false;
        s.bUseCam = true; 
        mCamera.pos() = PAO;
        s.scale = 7;
        s.num = 400;
        s.linewidth = 30; s.pointsize = 30;
+       s.frame_orbit_max_speed = 1;
        
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
        auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->frame_orbit_speed = .0001 + t * mData->frame_orbit_max_speed; return true;} ) );
-       auto e4 = ohio::every_(.1, ohio::over_(60, [this](float t ){ voiceA -> attack = .0031 + t * .01; return true;} ) );
-       auto e45 = ohio::every_(.1, ohio::over_(60, [this](float t ){  voiceB -> attack = .0031 + t * .01; return true;} ) );
+       auto e4 = ohio::every_(.1, ohio::over_(60, [this](float t ){ voiceA -> attack = .031 + t * .01; return true;} ) );
+       auto e45 = ohio::every_(.1, ohio::over_(60, [this](float t ){  voiceB -> attack = .031 + t * .01; return true;} ) );
 
        auto e5 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->p = t * 3; return true;} ) );
        auto e55 = ohio::every_(.1, ohio::over_(60, [this](float t ){ mData->q = 5 + t * 30; return true;} ) );
@@ -441,7 +446,7 @@ auto grow = [this](auto&& t){
        auto e6 = ohio::every_(.5, [this](auto&& t){ voiceA -> mode = (int)Rand::Num(4); return true; } );
        auto e65 = ohio::every_(.4, [this](auto&& t){ voiceB -> mode = (int)Rand::Num(4); return true; } );
 
-       auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .001 + t * .30; return true;} ) );
+       auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .101 + t * .70; return true;} ) );
        auto e8 = ohio::every_(.1, [this](auto&& t){ 
           auto p = mData -> frame.vec();
           voiceA -> src.pos = Vec3f( p[0], p[1], p[2] ); 
@@ -452,9 +457,9 @@ auto grow = [this](auto&& t){
      case 2: //Hopf Fibers Nudge
 
      {
-       voiceA -> attack = 0.031; voiceB -> attack = 0.031;   
-       voiceA -> decay = 0.031; voiceB -> decay = 0.031; 
-       echo -> delayMax = .0001;      
+       voiceA -> attack = 0.061; voiceB -> attack = 0.061;   
+       voiceA -> decay = 0.061; voiceB -> decay = 0.061; 
+       echo -> delayMax = .4;      
        voiceA -> mode = Voice::PULSE; voiceB -> mode = 5;
        s.bDrawCrystal=false;
        s.bDrawKnot = true; 
@@ -473,11 +478,18 @@ auto grow = [this](auto&& t){
      {
         s.bUseCam = true; 
         echo -> delayMax = .7;  
-        s.bDrawParticles = true; s.amp = 1000;
+        s.bDrawParticles = true; 
+        s.bDrawTube = true;
+        s.bDrawCircles = true;
+        s.amp = 1000;
         spectralNoise -> mMix = .5;
-        auto e1 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->max = 100 + 1000 * t; return true; } ));
-        auto e2 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->thresh = .01 * t; return true; }));
-        auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 40 + 300 * t; return true; } ));
+        s.pointsize = 5;
+        s.linewidth = 7;
+        s.particle_orbit_speed = .036;
+        s.frame_orbit_speed = .001;
+        auto e1 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->max = 100 + 1000 * t; return true; } ));
+        auto e2 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->thresh = .001 + .01 * t; return true; }));
+        auto e3 = ohio::every_(.1, ohio::over_(40, [this](float t){ spectralNoise->min = 2 + 300 * t; return true; } ));
         auto e4 = ohio::every_(.1, [this](auto&& t){ 
             auto v = mData->frame.vec(); 
             spectralNoise -> src.pos = gfx::Vec3f(v[0],v[1],v[2]);
@@ -488,19 +500,20 @@ auto grow = [this](auto&& t){
       case 4: //Inside Tube
      {
         s.bUseCam = true; 
-        s.p = 6; s.q = 1;
+        //s.tuberes = 10;
+        s.p = 3; s.q = 2;
         s.frame_orbit_speed = .0001;
         s.num = 400;
         s.bDrawTube = true;
         s.tube_opacity = .9;
-        s.yoffset = 3;
+        s.yoffset = 0;
         s.particle_orbit_speed = .00021;
         auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->frame.moveY( mData->yoffset ); return true; });
-        auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = (int)(t * 7); return true; }));
+       // auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = (t * 7); return true; }));
 
         //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
 
-        b1.launch(e1, e2);
+        b1.launch(e1);
         break;
      }
      case 5:  /// Crystal Symmetries
@@ -512,28 +525,36 @@ auto grow = [this](auto&& t){
        s.bDrawParticles = true;
        s.linewidth = 2;
        s.q =0; s.cScale = .1; 
-       voiceA -> attack = 0.001; voiceB -> attack = 0.001;        
-       voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::TRI;
+       voiceA -> attack = 0.003; voiceB -> attack = 0.002;        
+       voiceA -> decay = 0.004; voiceB -> decay = 0.004;        
+       voiceA -> mode = 2; voiceB -> mode = 2;
        s.crystalMotifMode = 2;
        s.crystalFrame.scale() = .01;
        s.bUseCam = true; 
        echo -> delayMax = .3;
+       echo -> fbk = .98;
+       echo -> ffd = .7;
        mCamera.pos() = PAO;
-       s.frame_orbit_max_speed = .002;
+       s.frame_orbit_max_speed = .05;
+       s.numX = s.numY = s.numZ = 3;
+       s.linewidth = 7;
+       spectralNoise -> thresh = .8
+       spectralNoise -> min = 40;
+       spectralNoise -> max = 365;
 
        //Behaviors
        auto e1 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(true), true ) ); 
        auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
        auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t){ mData -> q = t * 2; return true; } ) );
-       auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .03; return true; } ) );
-       auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .03; return true; } ) );
+       auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .003; return true; } ) );
+       auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .003; return true; } ) );
        auto e5 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> frame_orbit_speed = .00001 + mData -> frame_orbit_max_speed * t; return true; } ) );
        auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
-       auto e7 = ohio::after_(30, [this](auto&& t){ mData -> numX = 2; mData -> numY = 2; mData -> numZ = 2;return true; } ); 
-       auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
+     //  auto e7 = ohio::after_(30, [this](auto&& t){ mData -> numX = 2; mData -> numY = 2; mData -> numZ = 2;return true; } ); 
+    //   auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
        auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale = .1 * ( Rand::Boolean() ? -1 : 1); return true; } );
 
-       b1.launch( e1, e2, e3, e4, e45, e5, e6, e7, e8, e9 );
+       b1.launch( e1, e2, e3, e5, e6, e9 ); // e4, e45, 
        break;
      }    
      case 6: //tests
@@ -543,8 +564,9 @@ auto grow = [this](auto&& t){
        auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
        auto e3 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
        auto e4 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
+       auto e5 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale = .1 * ( Rand::Boolean() ? -1 : 1); return true; } );
 
-       b1.launch( e1, e2, e3, e4 );
+       b1.launch( e1, e2, e3, e4, e5 );
        break; 
      }
      case 7: //tests
@@ -652,7 +674,7 @@ auto grow = [this](auto&& t){
     tk.set(s.p,s.q);
 
     tk.HF.vec() = s.knotFrame.y();
-    tk.HF.cir() = s.knotFrame.cxz();
+    //tk.HF.cir() = s.knotFrame.cxz();
     
     // apply to frame position
     auto tp = s.frame.pos(); tp[3] = s.ecc;
@@ -663,7 +685,7 @@ auto grow = [this](auto&& t){
      // tk.calc0( tp );
       // create tube
       tube.clear(); 
-      tube = Shape::Skin( tk.cir, tk.cir.size()-2, false, 5 );
+      tube = Shape::Skin( tk.cir,  s.bCloseTube ? tk.cir.size() : tk.cir.size()-2, s.bCloseTube, 10 );
       for (auto& i : tube.vertex()){
         i.Col[3] = s.tube_opacity;
       }
@@ -727,7 +749,7 @@ auto grow = [this](auto&& t){
     
 
     // Move frame around knot orbit (maybe look up mTangent instead?)
-    auto par = tk.dpar( (int)(10.0/(s.frame_orbit_speed)) );
+    auto par = tk.dpar( (int)(10.0/(s.frame_orbit_speed * s.frame_orbit_max_speed)) );
     auto bst = Gen::bst(par); 
     auto tp = s.frame.pos(); tp[3] = s.ecc;
     auto p1 = tp.spin(bst);
@@ -861,6 +883,7 @@ void Param<bool>::specify(User::Data& k){
     {"bDrawDiatom",&(k.bDrawDiatom)},
     {"bDrawKnot",&(k.bDrawKnot)},
     {"bDrawTube",&(k.bDrawTube)},
+    {"bCloseTube",&(k.bCloseTube)},
     {"bDrawCircles",&(k.bDrawCircles)},
     {"bDrawFibers",&k.bDrawFibers},
     {"bDrawTangent",&k.bDrawTangent},    
