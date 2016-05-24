@@ -32,7 +32,7 @@ namespace hs {
       virtual bool onFrame(){
         auto& s = mUser.mState.mData;
         al::OmniStereoGraphicsRenderer::lens().eyeSep( s.eyesep ).near(s.near);
-       auto b = al::OmniStereoGraphicsRenderer::onFrame();
+        auto b = al::OmniStereoGraphicsRenderer::onFrame();
         int popCount = taker.get(mUser.mState);
         return b;
       }

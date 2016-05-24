@@ -63,6 +63,7 @@ struct User : UserBase {
   struct Data  {
     
     //Knot
+    float camera_orbit_speed = 0.001;
     float frame_orbit_speed = 0.001;
     float frame_orbit_max_speed = .1;
     float particle_orbit_speed = .001;
@@ -93,6 +94,8 @@ struct User : UserBase {
     Frame knotFrame;
     // Knot Frame that orbits
     Frame frame = Frame(10,0,0);
+    // Knot Frame that camera orbits
+    Frame camera_frame = Frame(10,0,0);
     // offset along y of knot orbit
     float yoffset = 0.5;
     // Crystal Frame
@@ -120,7 +123,7 @@ struct User : UserBase {
 
    float mNumTrace = 5;
    float amp = 2;
-   float eyesep=.3;
+   float eyesep=.03;
    float near = 0.01;
 
     // use camera
@@ -205,6 +208,7 @@ void User::reset(){
 
   s.motif = Frame();
   s.frame = Frame(-10,0,0);
+  s.camera_frame = Frame(-10,0,0);
   s.knotFrame = Frame();
 
 };
@@ -457,7 +461,7 @@ auto grow = [this](auto&& t){
        auto e6 = ohio::every_(.5, [this](auto&& t){ voiceA -> mode = (int)Rand::Num(4); return true; } );
        auto e65 = ohio::every_(.4, [this](auto&& t){ voiceB -> mode = (int)Rand::Num(4); return true; } );
 
-     //  auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .101 + t * .70; return true;} ) );
+     //auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .101 + t * .70; return true;} ) );
        auto e8 = ohio::every_(.01, [this](auto&& t){ 
           auto p = mData -> frame.vec();
           voiceA -> src.pos = Vec3f( p[0], p[1], p[2] ); 
@@ -507,6 +511,7 @@ auto grow = [this](auto&& t){
         s.pointsize = 5;
         s.linewidth = 7;
         s.p = 5; s.q =3;
+        s.num = 300;
         s.particle_orbit_speed = .024;
         s.frame_orbit_speed = .001;
         mCamera.orient( cga::Vec(0,1,0) ); 
@@ -522,18 +527,22 @@ auto grow = [this](auto&& t){
      }
       case 4: //Inside Tube // have separate speed for circles and frame
      {
+        reset();
         s.bUseCam = true; 
         s.eyesep = .003;
         s.near = .001;
         s.p = 3; s.q = 2;
-        s.tube_opacity = 0.2;
         s.frame_orbit_speed = .0001;
         s.num = 400;
-        s.bDrawTube = true;
-        s.tube_opacity = .9;
         s.yoffset = 0;
         s.particle_orbit_speed = .00021;
-        auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->frame.moveY( mData->yoffset ); return true; });
+        s.bDrawKnot = true;
+        s.bDrawTube = true;
+        s.bDrawCircles = true;
+        s.tube_opacity = 0.2;
+        s.linewidth = 30;
+       
+        auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->camera_frame.moveY( mData->yoffset ); return true; });
        // auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = (t * 7); return true; }));
 
         //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
@@ -567,19 +576,22 @@ auto grow = [this](auto&& t){
        spectralNoise -> min = 40;
        spectralNoise -> max = 365;
 
-       //Behaviors
+       //Sound Behaviors
        auto e1 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(true), true ) ); 
        auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
-       auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t){ mData -> q = t * 2; return true; } ) );
        auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .003; return true; } ) );
        auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .003; return true; } ) );
+
+       //Knot Behaviors
+       auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t){ mData -> q = t * 2; return true; } ) );
        auto e5 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> frame_orbit_speed = .00001 + mData -> frame_orbit_max_speed * t; return true; } ) );
        auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
-     //  auto e7 = ohio::after_(30, [this](auto&& t){ mData -> numX = 2; mData -> numY = 2; mData -> numZ = 2;return true; } ); 
-    //   auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
+       auto e7 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; return true; } ); 
+       auto e8 = ohio::after_(45, [this](auto&& t){ mData -> pbar=1; mData -> qbar=1; return true; } ); 
+       //auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
        auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale = .1 * ( Rand::Boolean() ? -1 : 1); return true; } );
 
-       b1.launch( e1, e2, e3, e5, e6, e9 ); // e4, e45, 
+       b1.launch( e1, e2, e3, e5, e6, e7, e8, e9 ); // e4, e45, 
        break;
      }    
      case 6: //tests
@@ -788,6 +800,15 @@ auto grow = [this](auto&& t){
     p1 = Round::loc(p1); p2 = Round::loc(p2); //renormalize 
     s.crystalFrame.pos() = p1;  s.crystalFrame.relOrient( p2, .5 );
 
+    // Camera Frame movement
+    par = tk.dpar( (int)(10.0/s.camera_orbit_speed)) ;
+    bst = Gen::bst(par); 
+    tp = s.camera_frame.pos(); tp[3] = s.ecc;
+    p1 = tp.spin(bst);
+    p2 = p1.spin(bst);
+    p1 = Round::loc(p1); p2 = Round::loc(p2); //renormalize 
+    s.camera_frame.pos() = p1;  s.camera_frame.orient( p2 );
+
   
     for (int i=0;i<NUMPARTICLES;++i){
 
@@ -857,6 +878,7 @@ void Param<float>::specify(User::Data& k){
   mData = {   
     //Knot
     {"frame_orbit_speed", &(k.frame_orbit_speed),.0001,100},
+    {"camera_orbit_speed", &(k.camera_orbit_speed),.0001,100},
     {"frame_orbit_max_speed", &(k.frame_orbit_max_speed),.0001,100},
     {"particle_orbit_speed", &(k.particle_orbit_speed),.0001,100},
     {"p", &(k.p),0,100},
