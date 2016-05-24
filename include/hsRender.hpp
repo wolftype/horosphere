@@ -30,7 +30,9 @@ namespace hs {
        *  Get State
        *-----------------------------------------------------------------------------*/
       virtual bool onFrame(){
-        auto b = al::OmniStereoGraphicsRenderer::onFrame();
+        auto& s = mUser.mState.mData;
+        al::OmniStereoGraphicsRenderer::lens().eyeSep( s.eyesep ).near(s.near);
+       auto b = al::OmniStereoGraphicsRenderer::onFrame();
         int popCount = taker.get(mUser.mState);
         return b;
       }
@@ -57,7 +59,6 @@ namespace hs {
           auto& s = mUser.mState.mSceneData;
 
           pose = gfx2al::pose( s.camera ); //conversion to al world
-          al::OmniStereoGraphicsRenderer::lens().eyeSep( s.eyesep );
           mUser.updateLocal();
 
        }
