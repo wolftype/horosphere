@@ -656,7 +656,7 @@ auto grow = [this](auto&& t){
     
     // apply to frame position
     auto tp = s.frame.pos(); tp[3] = s.ecc;
-    cout << tp << endl;
+  //  cout << tp << endl;
 
     if (s.bDrawKnot){ 
       tk.apply( tp, s.num, s.bNormalize);
