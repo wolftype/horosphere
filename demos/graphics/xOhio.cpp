@@ -496,6 +496,7 @@ auto grow = [this](auto&& t){
         reset();
         s.bUseCam = true; 
         echo -> delayMax = 2.7;  
+        s.eyesep = .014;
         echo -> fbk = 0;
         s.bDrawParticles = true; 
         s.bDrawTube = true;
@@ -506,7 +507,7 @@ auto grow = [this](auto&& t){
         s.pointsize = 5;
         s.linewidth = 7;
         s.p = 5; s.q =3;
-        s.particle_orbit_speed = .036;
+        s.particle_orbit_speed = .024;
         s.frame_orbit_speed = .001;
         mCamera.orient( cga::Vec(0,1,0) ); 
         auto e1 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->max = 100 + 1000 * t; return true; } ));
@@ -519,11 +520,13 @@ auto grow = [this](auto&& t){
         b1.launch( e1, e2, e3, e4 );//.over(10);//.until( [this](){ }; );
         break;
      }
-      case 4: //Inside Tube
+      case 4: //Inside Tube // have separate speed for circles and frame
      {
         s.bUseCam = true; 
-        //s.tuberes = 10;
+        s.eyesep = .003;
+        s.near = .001;
         s.p = 3; s.q = 2;
+        s.tube_opacity = 0.2;
         s.frame_orbit_speed = .0001;
         s.num = 400;
         s.bDrawTube = true;
@@ -805,8 +808,8 @@ auto grow = [this](auto&& t){
     s.motif.step();
 
     //Crystal Frame
-    s.cScale *= .9;
-    s.crystalFrame.scale() = .001 + s.cScale;
+    s.cScale *= .4;
+    s.crystalFrame.scale() = .005 + s.cScale;
     s.crystalFrame.step();
 
     //auto crystalHit = [this](){
