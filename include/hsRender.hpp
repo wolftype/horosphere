@@ -57,7 +57,7 @@ namespace hs {
           auto& s = mUser.mState.mSceneData;
 
           pose = gfx2al::pose( s.camera ); //conversion to al world
-
+          al::OmniStereoGraphicsRenderer::lens().eyeSep( s.eyesep );
           mUser.updateLocal();
 
        }

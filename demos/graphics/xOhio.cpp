@@ -120,6 +120,7 @@ struct User : UserBase {
 
    float mNumTrace = 5;
    float amp = 2;
+   float eyesep=.3;
 
     // use camera
     bool bUseCam =false;
@@ -310,15 +311,15 @@ namespace hs {
     ///3. Schedule Events and spawn time-based listener  
     //COMPOSITION
     
-    auto first =  [this](auto&& t) { cout << "hello" << endl; this -> setBehavior(1); return true; };
-    auto second = [this](auto&& t) { setBehavior(2); return true; };
-    auto third = [this](auto&& t) { setBehavior(3); return true; };
+  //  auto first =  [this](auto&& t) { cout << "hello" << endl; this -> setBehavior(1); return true; };
+  //  auto second = [this](auto&& t) { setBehavior(2); return true; };
+  //  auto third = [this](auto&& t) { setBehavior(3); return true; };
 
-    auto e0 = ohio::tag2_( ohio::at_(1, true), first );
-    auto e1 = ohio::tag2_( ohio::at_(60,true), second );
-    auto e2 = ohio::tag2_( ohio::at_(120,true), third );
+  //  auto e0 = ohio::tag2_( ohio::at_(1, true), first );
+  //  auto e1 = ohio::tag2_( ohio::at_(60,true), second );
+  //  auto e2 = ohio::tag2_( ohio::at_(120,true), third );
 
-    auto& b = behavior("composition");
+  //  auto& b = behavior("composition");
    // b.launch(e0,e1);
    // setBehavior(1);
       
@@ -880,7 +881,8 @@ void Param<float>::specify(User::Data& k){
     {"yratio",&(k.yratio),0,100},
     {"zratio",&(k.zratio),0,100},
     {"linewidth",&k.linewidth,1,30},
-    {"pointsize",&k.pointsize,1,30}
+    {"pointsize",&k.pointsize,1,30},
+    {"eyesep",&k.eyesep,0,1}
   };
 }
 

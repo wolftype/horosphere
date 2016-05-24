@@ -50,6 +50,7 @@ struct UserData : T {
     /// Basic Scene Data to share
     struct SceneData{
       float time;
+      float eyesep;
       gfx::Pose model;
       gfx::Pose camera;
       cga::Point mouse;
