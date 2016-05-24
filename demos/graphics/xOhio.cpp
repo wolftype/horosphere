@@ -202,7 +202,8 @@ void User::reset(){
   }
 
   s.motif = Frame();
-  s.frame = Frame(10,0,0);
+  s.frame = Frame(-10,0,0);
+  s.knotFrame = Frame();
 
 };
 
@@ -289,6 +290,12 @@ namespace hs {
     voiceA = &sim.addAudioProcess<Voice>(*processA); 
     voiceB = &sim.addAudioProcess<Voice>(*processA); 
     fmsynth = &sim.addAudioProcess<FMSynth>(*processA);
+    wind = &sim.addAudioProcess<WindSound>(*processA);
+
+   // echo -> active(false);
+   // spectralInfo ->active(false);
+   // magReader ->active(false);
+   // spectralNoise ->active(false);
 
     /// Initialize all variables
     reset();
@@ -356,7 +363,7 @@ auto grow = [this](auto&& t){
      return [=](auto&& t){
        auto idx = (int)(setfreq() * 5);
        if (idx < 0 || idx > 5) idx = 0;
-       cout << hz[idx] << endl;
+       //cout << hz[idx] << endl;
        if (b){
         voiceA->freq = hz[idx];//pentatonic( setfreq() );
         voiceA->env.reset();
@@ -418,7 +425,7 @@ auto grow = [this](auto&& t){
      {
        reset();
        echo -> delayMax = .4;      
-       echo -> fbk = .95;
+       echo -> fbk = .5;
        voiceA -> attack = 0.061; voiceB -> attack = 0.041;   
        voiceA -> decay = 0.041; voiceB -> decay = 0.061;       
        voiceA -> mode = Voice::PULSE; voiceB -> mode = Voice::PULSE;       
@@ -428,11 +435,13 @@ auto grow = [this](auto&& t){
 
        s.bDrawParticles = false;
        s.bUseCam = true; 
+       s.bCloseTube = false;
        mCamera.pos() = PAO;
        s.scale = 7;
        s.num = 400;
        s.linewidth = 30; s.pointsize = 30;
        s.frame_orbit_max_speed = 1;
+       wind -> freq = 600;
        
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ), beep( fCross(true),true ) ); 
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ), beep( fCross(false),false) ); 
@@ -446,12 +455,18 @@ auto grow = [this](auto&& t){
        auto e6 = ohio::every_(.5, [this](auto&& t){ voiceA -> mode = (int)Rand::Num(4); return true; } );
        auto e65 = ohio::every_(.4, [this](auto&& t){ voiceB -> mode = (int)Rand::Num(4); return true; } );
 
-       auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .101 + t * .70; return true;} ) );
-       auto e8 = ohio::every_(.1, [this](auto&& t){ 
+     //  auto e7 = ohio::every_(.1, ohio::over_(60, [this](float t ){ echo->delayMax = .101 + t * .70; return true;} ) );
+       auto e8 = ohio::every_(.01, [this](auto&& t){ 
           auto p = mData -> frame.vec();
           voiceA -> src.pos = Vec3f( p[0], p[1], p[2] ); 
           return true;} ); 
-       b1.launch( e1, e2, e3, e4, e45, e5, e55, e6, e65, e7 );
+
+       auto e9 = ohio::every_(.1,[this](float t ){ 
+           wind -> freq = 100 * Round::sqd( mData -> frame.pos(), PAO );
+           return true;
+       } ) ;
+
+       b1.launch( e1, e2, e3, e4, e45, e5, e55, e6, e65, e8, e9 );
        break;
      }
      case 2: //Hopf Fibers Nudge
@@ -476,20 +491,25 @@ auto grow = [this](auto&& t){
      }
      case 3: //Particles     
      {
+        reset();
         s.bUseCam = true; 
-        echo -> delayMax = .7;  
+        echo -> delayMax = 2.7;  
+        echo -> fbk = 0;
         s.bDrawParticles = true; 
         s.bDrawTube = true;
+        s.tube_opacity = 0;
         s.bDrawCircles = true;
-        s.amp = 1000;
-        spectralNoise -> mMix = .5;
+        s.amp = 5000;
+        spectralNoise -> mMix = .3;
         s.pointsize = 5;
         s.linewidth = 7;
+        s.p = 5; s.q =3;
         s.particle_orbit_speed = .036;
         s.frame_orbit_speed = .001;
+        mCamera.orient( cga::Vec(0,1,0) ); 
         auto e1 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->max = 100 + 1000 * t; return true; } ));
-        auto e2 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->thresh = .001 + .01 * t; return true; }));
-        auto e3 = ohio::every_(.1, ohio::over_(40, [this](float t){ spectralNoise->min = 2 + 300 * t; return true; } ));
+        auto e2 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->thresh = .003 + .005 * t; return true; }));
+        auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 50 + 300 * t; return true; } ));
         auto e4 = ohio::every_(.1, [this](auto&& t){ 
             auto v = mData->frame.vec(); 
             spectralNoise -> src.pos = gfx::Vec3f(v[0],v[1],v[2]);
@@ -532,13 +552,13 @@ auto grow = [this](auto&& t){
        s.crystalFrame.scale() = .01;
        s.bUseCam = true; 
        echo -> delayMax = .3;
-       echo -> fbk = .98;
+       echo -> fbk = .58;
        echo -> ffd = .7;
        mCamera.pos() = PAO;
        s.frame_orbit_max_speed = .05;
        s.numX = s.numY = s.numZ = 3;
        s.linewidth = 7;
-       spectralNoise -> thresh = .8
+       spectralNoise -> thresh = .8;
        spectralNoise -> min = 40;
        spectralNoise -> max = 365;
 
@@ -576,8 +596,9 @@ auto grow = [this](auto&& t){
        auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
        auto e3 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
        auto e4 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
+       auto e5 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale = .1 * ( Rand::Boolean() ? -1 : 1); return true; } );
 
-       b1.launch( e1, e2, e3, e4 );
+       b1.launch( e1, e2, e3, e4, e5 );
        break; 
      }       
    }
@@ -619,9 +640,6 @@ auto grow = [this](auto&& t){
         tube.drawElementsColor();
       }
       if (s.bDrawCircles) {
-        for (auto& i : tk.pnt ){
-          Draw(i,0,1,1);
-        } 
         for (int i=0;i<tk.cir.size()-1;++i ){
           float t = (float)i/tk.cir.size();
           Draw(tk.cir[i],0,1,t);

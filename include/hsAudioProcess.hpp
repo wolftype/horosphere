@@ -150,12 +150,12 @@ struct WindSound : public AudioProcess {
   virtual void onProcess(gam::AudioIOData& io) override {
     reson.width(width);
     reson.freq(freq);
-    src();
+  //  src();
     while (io()) {
       float s = noise();
       s = reson(s);
 		  for (int i = 0; i < src.numChannels(); ++i ){
-		    io.out(i) += s * src[i] * mMix;
+		    io.out(i) += s * mMix;
 		  }
     }
   }
@@ -257,19 +257,27 @@ struct Echo : public AudioProcess{
     
   void onProcess(AudioIOData& io){ 
    
-    echo.set(delay,ffd,fbk);
-    echo.maxDelay(delayMax);
     
     while(io()){
-        
-        float2 s = float2(io.out(0), io.out(1));
-        s = echo(s)*0.5;
-        io.out(0) += s[0];
-        io.out(1) += s[1];
+      echo.set(delay,ffd,fbk);
+      echo.maxDelay(delayMax);
+
+
+   //     float2 s = float2(io.out(0), io.out(1));
+   //     s = echo(s)*0.5;
+   //     io.out(0) += s[0];
+   //     io.out(1) += s[1];
+
+        for (int i = 0; i < src.numChannels(); ++i){
+            float s = io.out(i);
+            s = echo(s)*.5;
+            io.out(i) = dc[i](s);
+        }
     } 
   }
   
-  Comb<float2> echo;
+  Comb<float> echo;
+  BlockDC<float> dc[60];
   float delayMax;
   float delay;
   float ffd;
@@ -310,16 +318,19 @@ struct Voice : public AudioProcess {
   }
 
   void onProcess(AudioIOData& io){ 
-    osc.set(freq,phase,mod);
-    env.attack(attack);
-    env.decay(decay);
+      osc.set(freq,phase,mod);
+      env.attack(attack);
+      env.decay(decay);
     env.loop((int)loop);
-    src();
+  //  src();
     while(io()){
+
+
+
       float s = val() * env() * .1;
 
 		  for (int i = 0; i < src.numChannels(); ++i ){
-		    io.out(i) += s * src[i] * mMix;
+		    io.out(i) += s *  mMix; // src
 		  }      
     }
   }
@@ -443,18 +454,10 @@ struct SpectralNoise : AudioProcess {
 	STFT stft;		// Short-time Fourier transform
 	NoisePink<> noise;
 
-  
-  float * magbin; /// store magnitude after messing with it
-  float * phasebin; /// store phase after messing with it
-  float * premagbin; /// store phase after messing with it
-  float * prephasebin; /// store phase after messing with it
-
-  vector<int> scale; /// bias towards these
-
 	SpectralNoise()
 	: stft(
-		2048,		// Window size
-		2048/4,		// Hop size; number of samples between transforms
+		1024,		// Window size
+		1024/4,		// Hop size; number of samples between transforms
 		0,			// Pad size; number of zero-valued samples appended to window
 		HANN,		// Window type: BARTLETT, BLACKMAN, BLACKMAN_HARRIS,
 					//		HAMMING, HANN, WELCH, NYQUIST, or RECTANGLE
@@ -463,26 +466,13 @@ struct SpectralNoise : AudioProcess {
 	)
 	{
 
-    freq = 440;
 
     mName = "SpectralNoise";
-    magbin = new float[1025];//stft.numBins()];
-    phasebin = new float[1025];//stft.numBins()];
-    premagbin = new float[1025];//stft.numBins()];
-    prephasebin = new float[1025];//stft.numBins()];
 
   }
 
   void onProcess(AudioIOData& io){ 
 
-   // src.freq(freq);
-    scale.clear();
-    int n = base;
-    for (int i = 0; i < 5; ++i){
-     scale.push_back(n);
-     n = n * 2;
-   }
-    src();
    // cout << stft.numBins() << endl;
     while(io()){
 
@@ -494,46 +484,28 @@ struct SpectralNoise : AudioProcess {
   //				// Loop through all the bins
   				for(unsigned k=0; k<stft.numBins(); ++k){
   //
-              prephasebin[k] = stft.bin(k).phase();
-              premagbin[k] = stft.bin(k).mag();
-  //
   				  	// Band Pass
               if (k > max || k < min ) stft.bin(k) = 0;
               // Noise Floor threshold
               if (stft.bin(k).mag() < thresh) stft.bin(k) = 0;
   //
-  //          postbin[k] = stft.bin(k).mag();
   				}
       }
 
-      // bias
-      for(unsigned k=0; k<scale.size(); ++k){
-      //  stft.bin(k) *= 2;
-      }
-
-      for(unsigned k=0; k<stft.numBins(); ++k){
-        magbin[k] = stft.bin(k).mag();
-        phasebin[k] = stft.bin(k).phase();
-      }
-      
-  
       // Get next resynthesized sample
   		s = stft();
   		
 		  for (int i = 0; i < src.numChannels(); ++i ){
-		    io.out(i) += s * src[i] * mMix;
+		    io.out(i) += s * mMix;
 		  }
 
     }
   }
 
 
-  float freq;
   float max;
   float min;
   float thresh;
-  float base;
-
   
 };
 
@@ -541,11 +513,9 @@ template<>
 void AudioParam::specify( SpectralNoise& ap){
   mData = {
     //LFO
-    {"freq",&ap.freq,40,1200},
     {"max", &ap.max,0,1024},
     {"min", &ap.min,0,1024},
     {"thresh",&ap.thresh,0,1},
-    {"base", &ap.base, 0,16}
   };
 }
 
