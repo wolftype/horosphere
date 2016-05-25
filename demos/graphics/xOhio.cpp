@@ -504,7 +504,7 @@ auto grow = [this](auto&& t){
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
        auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .141 + t * mData->frame_orbit_max_speed; return true;} ) );
 
-       
+       b1.stop(); 
        behavior("knot").launch( e1, e2);
        behavior("speed").launch(e3).until( [this](auto&& t){ if (mData->frame_orbit_speed >= .14) return true;  return false;}); 
        break;
