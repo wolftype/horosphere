@@ -553,6 +553,7 @@ auto grow = [this](auto&& t){
      case 5:  /// Crystal Symmetries
      {     
        //Settings
+       s.cp = 3; s.cq = 3;
        s.bDrawDiatom = false;
        s.bDrawKnot = false;
        s.bDrawCrystal = true;
@@ -569,7 +570,7 @@ auto grow = [this](auto&& t){
        echo -> fbk = .58;
        echo -> ffd = .7;
        mCamera.pos() = PAO;
-       s.frame_orbit_max_speed = .05;
+       s.frame_orbit_max_speed = .04;
        s.numX = s.numY = s.numZ = 3;
        s.linewidth = 7;
        spectralNoise -> thresh = .8;
@@ -583,13 +584,13 @@ auto grow = [this](auto&& t){
        auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .003; return true; } ) );
 
        //Knot Behaviors
-       auto e3 = ohio::every_(.1, ohio::over_(60, [this](float t){ mData -> q = t * 2; return true; } ) );
-       auto e5 = ohio::every_(.1, ohio::over_(30, [this](float t){ mData -> frame_orbit_speed = .00001 + mData -> frame_orbit_max_speed * t; return true; } ) );
-       auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
-       auto e7 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; return true; } ); 
-       auto e8 = ohio::after_(45, [this](auto&& t){ mData -> pbar=1; mData -> qbar=1; return true; } ); 
+       auto e3 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = t * 2; return true; } ) );
+       auto e5 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> frame_orbit_speed = .00001 + mData -> frame_orbit_max_speed * t; return true; } ) );
+       auto e6 = ohio::after_(60, [this](auto&& t){ mData -> cp = 4; return true; } );
+       auto e7 = ohio::after_(60, [this](auto&& t){ mData -> crystalMotifMode=1; return true; } ); 
+       auto e8 = ohio::after_(90, [this](auto&& t){ mData -> qbar=1; return true; } ); 
        //auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
-       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale = .1 * ( Rand::Boolean() ? -1 : 1); return true; } );
+       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale += .02; return true; } );
 
        b1.launch( e1, e2, e3, e5, e6, e7, e8, e9 ); // e4, e45, 
        break;
@@ -829,7 +830,7 @@ auto grow = [this](auto&& t){
     s.motif.step();
 
     //Crystal Frame
-    s.cScale *= .4;
+    s.cScale *= .96;
     s.crystalFrame.scale() = .005 + s.cScale;
     s.crystalFrame.step();
 
