@@ -92,8 +92,8 @@ struct FMSynth : public AudioProcess {
 		channel = 0;
 		#endif
 
-    c1 = 440;
-    c2 = 440;
+    c1 = 150;
+    c2 = 60;
     m1 = 20;
     m2 = 21;
     lfreq = 10;
