@@ -536,16 +536,14 @@ auto grow = [this](auto&& t){
        
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
-       
        auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .141 + t * mData->frame_orbit_max_speed; return true;} ) );
-       
        auto e4 = ohio::every_( .01, [this](auto&& t){ fmsynth -> mMix *= .99;  wind -> mMix *= .99; return true; } );
        auto e5 = ohio::every_( .01, [this](float t){ mData -> tube_opacity += .001; return true; } ) ;
        auto e6 = ohio::every_( .01, [this](float t){ mData -> tube_circle_opacity *= .99; return true; } ) ;
 
        //fade out then return
        behavior("knot_orbit").stop();
-       behavior("knot_fadeknot_fade").launch(e4, e5, e6);//.over(10);
+       behavior("knot_fade").launch(e4, e5, e6);//.over(10);
        //camera move
        move(*this, PAO, 10);
        look(*this, cga::Vec(0,0,-1),10);
@@ -672,7 +670,7 @@ auto grow = [this](auto&& t){
 
         /// camera behavior
         behavior("spectral_audio").stop();
-        behavior("crystal").stop();
+       // behavior("crystal").stop(); [note maybe this should be stopped
         behavior("crystal_audio").stop();
 
         /// additional audio behavior
@@ -730,22 +728,30 @@ auto grow = [this](auto&& t){
        auto e5 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> frame_orbit_speed = .001 + mData -> frame_orbit_max_speed * t; return true; } ) );
         
        //Crystal Behavior // really this is "at_"
-       auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
-       auto e7 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; echo -> delayMax = 1.3; return true; } ); 
-       auto e73 = ohio::after_(40, [this](auto&& t){ mData -> crystalMotifMode=2; echo -> delayMax = .9; return true; } ); 
-       //auto e76 = ohio::after_(50, [this](auto&& t){ mData -> crystalMotifMode=1; echo -> delayMax = 1.3; return true; } ); 
-       auto e8 = ohio::after_(45, [this](auto&& t){ mData -> pbar = 1; mData -> qbar=1; return true; } ); 
-       //auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
-       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale += .02; return true; } );
+       auto s1 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
+       auto s2 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; echo -> delayMax = 1.3; return true; } ); 
+       auto s3 = ohio::after_(40, [this](auto&& t){ mData -> crystalMotifMode=2; echo -> delayMax = .9; return true; } ); 
+       auto s4 = ohio::after_(45, [this](auto&& t){ mData -> pbar = 1; mData -> qbar=1; return true; } ); 
 
+       
+       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale += .02; return true; } );
        auto e10 = ohio::every_(1, [this](auto&& t){ Rand::Boolean() ? echo -> delayMax = .9 : echo -> delayMax = 1.3; return true; } );
 
 
 
+
        behavior("crystal_audio").launch(e1, e2);
-       behavior("crystal").launch(e6,e7, e73, e8, e9);
        behavior("knot").launch(e3,e5);
        look(*this, cga::Vec(0,-1,0),60);
+
+       auto s5 = ohio::after_(50,  [this](auto&& t){ setBehavior(3); return true;});
+       auto s6 = ohio::after_(120, [this](auto&& t){ setBehavior(35); return true;});
+       auto s7 = ohio::after_(170, [this](auto&& t){ setBehavior(4); return true;});
+       auto s8 = ohio::after_(260, [this](auto&& t){ setBehavior(2); return true;});
+       auto s9 = ohio::after_(290, [this](auto&& t){ setBehavior(8); return true;});
+       auto s10 = ohio::after_(310,[this](auto&& t){ setBehavior(9); return true;});
+       behavior("schedule").launch(s1,s2,s3,s4,e9,s5,s6,s7,s8,s9,s10);
+
 
        break;
      }    
@@ -775,23 +781,37 @@ auto grow = [this](auto&& t){
      }
      case 8: // speed up, zoom out and fade out
      {
-      s.q = .7;
+     // s.q = .7;
       
       move(*this, cga::Vec(0,0,10), 20 );
 
       auto e1 = ohio::every_(.1, [this](auto&& t){ voiceA -> attack -= .0001; voiceA -> decay -= .0001; voiceB -> attack -=.001; 
           voiceB -> decay -= .0001; return true; } );
-      auto e2 = ohio::every_( .1, [this](auto&& t){ mData -> p += .01;  return true; } );
+      auto e2 = ohio::every_( .1, [this](auto&& t){ mData -> p += .01; mData -> q -= .01; return true; } );
       auto e3 = ohio::every_( .1, [this](auto&& t){ mData -> frame_orbit_speed += .01; return true; } );
-      behavior("knot_fadeknot_fade").launch(e1, e2);
+      behavior("knot_fade").launch(e1, e2);
       behavior("knot_speedup").launch(e3).until( [this](auto&& t){ if (mData->frame_orbit_speed >= .34) return true;  return false;}); 
+
+      break;
+     }
+     case 85:
+     {
+      auto e1 = ohio::every_( .1, [this](auto&& t){ mData -> p -= .05; return true; } );
+      auto e2 = ohio::every_( .1, [this](auto&& t){ mData -> q += .05; return true; } );
+     // auto e3 = ohio::every_(  .01, [this]( auto&& t) { 
+      behavior("knot_fade").launch(e1).until( [this](auto&& t){ if (mData -> p <= 3) return true; return false; } );
+      behavior("knot_fade2").launch(e2).until( [this](auto&& t){ if (mData -> p >= 2) return true; return false; } );
+
 
       break;
      }
      case 9:
      {
-        auto e1 = ohio::every_( .5, [this](auto&& t){ mData -> tube_opacity -= .05; return true; } ); 
-        behavior("knot_fadeknot_fade").launch( e1);
+        auto e1 = ohio::every_( .5, [this](auto&& t){ 
+          voiceA -> mMix *= .8; voiceB -> mMix *= .8;
+          mData -> tube_opacity -= .04; 
+          return true; } ); 
+        behavior("knot_fade").launch( e1);
      }
    }
    #endif // order: 5, 3, 35, 4, 2, 8, 9
