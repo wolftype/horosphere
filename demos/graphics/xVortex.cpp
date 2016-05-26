@@ -339,7 +339,7 @@ namespace hs {
 
   //  auto& b = behavior("composition");
    // b.launch(e0,e1);
-   // setBehavior(1);
+    setBehavior(5);
       
     #endif 
   }
