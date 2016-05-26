@@ -89,6 +89,7 @@ struct User : UserBase {
     float linewidth =1;
     float pointsize =5;
     float tube_opacity = 1;
+    float tube_circle_opacity = 1;
     
     //Frame that Controls knot fibers
     Frame knotFrame;
@@ -214,66 +215,74 @@ void User::reset(){
 
 };
 
-///// Move Camera to Target over n seconds
-//void move(User& user, const cga::Vec& target, float sec){
-//  
-//  float fps = 60.f;
-//
-//  auto& b = user.behavior("move");
-//
-//  auto vec  = target - user.mCamera.vec();
-//  auto dvec = vec.unit() * (vec.norm()/ (sec*fps));
-//  
-//  auto e1 = ohio::every_(1.f/fps, [&,dvec](float t){  user.mCamera.dx() = dvec; return true;} );
-//  auto e2 = [&,target](auto&& t){ return (cga::Vec(user.mCamera.pos()) - target).norm() < .001; }; 
-//
-//  b.pollrateFinish = 1.f/fps;
-//  b.launch(e1).until( e2 );
-//}
-//
-///// Rotate Camera to Look at Target over n seconds
-//void look(User& user, const cga::Vec& target, float sec){
-//  
-//  auto& b = user.behavior("look");
-//
-//  float fps = 60.f;
-//  int numSteps = sec * fps;
-//  //function of amt t [0-1) 
+#ifndef __lubuntu__
+/// Move Camera to Target over n seconds
+void move(User& user, const cga::Vec& target, float sec){
+  
+  float fps = 60.f;
+
+  auto& b = user.behavior("move");
+
+  auto vec  = target - user.mCamera.vec();
+  auto dvec = vec.unit() * (vec.norm()/ (sec*fps));
+  
+  auto e1 = ohio::every_(1.f/fps, [&,dvec](float t){  user.mCamera.dx() = dvec; return true;} );
+  auto e2 = [&,target](auto&& t){ return (cga::Vec(user.mCamera.pos()) - target).norm() < .001; }; 
+
+  b.pollrateFinish = 1.f/fps;
+  b.launch(e1).until( e2 );
+}
+
+/// Rotate Camera to Look at Target over n seconds
+void look(User& user, const cga::Vec& target, float sec){
+  
+  auto& b = user.behavior("look");
+
+  float fps = 60.f;
+  int numSteps = sec * fps;
+  //function of amt t [0-1) 
 //  auto go_func =[&,numSteps](float t){ 
 //    auto amt = 1.0/((1-t)*numSteps);
 //    auto biv = user.mCamera.relOrientBiv(target, false);
 //    user.mCamera.db() = biv * amt;
 //    return true;
 //  };
-//  
-//  auto end_func = [=,&user](auto&& t){ 
-//    auto tmp = (target - user.mCamera.vec()).unit(); 
-//    float f = ((-user.mCamera.z()) <= tmp)[0];
-//    return f > .9999; 
-//  }; 
-//
-//  auto sigfun = ohio::over_(sec, go_func);
-//  auto e1 = ohio::every_(1.f/fps, sigfun);
-//
-//  b.pollrateFinish = 1.f/fps;
-//  b.launch(e1).until( end_func );
-//  
-//}
 
+  auto go_func = [=,&user](auto&& t){ 
+
+    auto rot = Gen::ratio( user.mCamera.z() * -1, target);
+    user.mCamera.db() = Gen::log( rot ) * 1.0/numSteps;
+  
+    return true;
+  };
+
+  
+  auto end_func = [=,&user](auto&& t){ 
+    auto tmp = (target - user.mCamera.vec()).unit(); 
+    float f = ((-user.mCamera.z()) <= tmp)[0];
+    return f > .99; 
+  }; 
+
+  //auto sigfun = ohio::over_(sec, go_func);
+  auto e1 = ohio::every_(1.f/fps, go_func);
+
+  b.pollrateFinish = 1.f/fps;
+  b.launch(e1).until( end_func );
+  
+}
 
 /*-----------------------------------------------------------------------------
  *  REACTIONS to commands
  *-----------------------------------------------------------------------------*/
 namespace hs {
 
-  #ifndef __lubuntu__
   template<> void behave(User& user, int idx){
     user.setBehavior(idx);
   }
-  #endif
 
   
 }
+#endif
 
   
 
@@ -492,28 +501,42 @@ auto grow = [this](auto&& t){
      {
        voiceA -> attack = 0.061; voiceB -> attack = 0.061;   
        voiceA -> decay = 0.061; voiceB -> decay = 0.061; 
-       echo -> delayMax = 7.4; echo -> fbk = .85;
+       echo -> fbk = .85;
        voiceA -> mode = Voice::PULSE; voiceB -> mode = 5;
        s.bDrawCrystal=false;
        s.bDrawKnot = true; 
+       s.bCloseTube = false; 
        s.bDrawParticles = false;
        s.eyesep = .025;
        s.frame_orbit_max_speed = 1;
        mData->frame_orbit_speed = .141;
+       
        auto e1 = ohio::tag2_( ohio::trigger_( bCross(true) ),  hana::split_( beep( fCross(true), true ), nudgeFiber(true)) );
        auto e2 = ohio::tag2_( ohio::trigger_( bCross(false) ),  hana::split_( beep( fCross(false),false ), nudgeFiber(false)) );
+       
        auto e3 = ohio::every_( .1, ohio::over_(30, [this](float t ){ mData->frame_orbit_speed = .141 + t * mData->frame_orbit_max_speed; return true;} ) );
+       
+       auto e4 = ohio::every_( .01, [this](auto&& t){ fmsynth -> mMix *= .99;  return true; } );
+       auto e5 = ohio::every_( .01, [this](float t){ mData -> tube_opacity += .001; return true; } ) ;
+       auto e6 = ohio::every_( .01, [this](float t){ mData -> tube_circle_opacity *= .99; return true; } ) ;
 
-       b1.stop(); 
+       //fade out then return
+       behavior("knot_orbit").stop();
+       behavior("knot_fadeknot_fade").launch(e4, e5, e6);//.over(10);
+       //camera move
+       move(*this, PAO, 10);
+       look(*this, cga::Vec(0,0,-1),10);
+               
        behavior("knot").launch( e1, e2);
-       behavior("speed").launch(e3).until( [this](auto&& t){ if (mData->frame_orbit_speed >= .14) return true;  return false;}); 
+       behavior("knot_speedup").launch(e3).until( [this](auto&& t){ if (mData->frame_orbit_speed >= .14) return true;  return false;}); 
        break;
      }
-     case 3: //Particles      //note: keep buzzy niceness going
+     case 3: //Particles      //note:  easy ease
      {
+        //Preset
         reset();
         s.bUseCam = true; 
-        echo -> delayMax = 2.7;  
+        echo -> delayMax = 5.7;  
         s.eyesep = .014;
         echo -> fbk = 0;
         s.bDrawParticles = true; 
@@ -532,6 +555,9 @@ auto grow = [this](auto&& t){
         s.mNumTrace = 100;
         s.frame_orbit_speed = .012;
         mCamera.orient( cga::Vec(0,1,0) ); 
+
+     
+        // Behaviors
         auto e1 = ohio::every_(.1, ohio::over_(20, [this](float t){ spectralNoise->max = 100 + 1000 * t; return true; } ));
         auto e2 = ohio::every_(.1, ohio::over_(10, [this](float t){ spectralNoise->thresh = .003 + .005 * t; return true; }));
         auto e3 = ohio::every_(.1, ohio::over_(30, [this](float t){ spectralNoise->min = 50 + 300 * t; return true; } ));
@@ -539,19 +565,17 @@ auto grow = [this](auto&& t){
             auto v = mData->frame.vec(); 
             spectralNoise -> src.pos = gfx::Vec3f(v[0],v[1],v[2]);
             return true; } );
-        behavior("audio").launch( e1, e2, e3, e4 );//.over(10);//.until( [this](){ }; );
+     
+        behavior("spectral_audio").launch( e1, e2, e3, e4 );//.over(10);//.until( [this](){ }; );
 
-        auto pup = ohio::every_(.01, [this](auto&& t){ mData -> p += .001; return true; } );
-        auto qup = ohio::every_(.01, [this](auto&& t){ mData -> q += .001; return true; } );
-       // behavior("knot").launch(pup).until( [this](auto&& t){ if (mData -> p >= 5) return true; return false; } );
+        auto qup = ohio::every_(.01, hana::compose( [this](auto&& t){ mData -> q = t*3.1; return true; }, ohio::osc_( 1.0 / 200), ohio::reset_() ) );
         behavior("knot").launch(qup).until( [this](auto&& t){ if (mData -> q >= 3) return true; return false; } );
 
         break;
      }
-      case 4: //Inside Tube //use circles to generate audio sound
+      case 4: //Inside Tube //use tube width for resonancy of wind
      {
         reset();
-        behavior("audio").stop();
         s.bUseCam = true; 
         s.eyesep = .003;
         s.near = .001;
@@ -569,6 +593,7 @@ auto grow = [this](auto&& t){
         s.linewidth = 30;
         s.ecc = 1;
         s.pointsize = 1;
+        spectralNoise -> mMix = .01;
        
      
         auto camera_cross = [this](){ 
@@ -582,14 +607,16 @@ auto grow = [this](auto&& t){
         auto randFreq = [](){ return Rand::Num(); };
         auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->camera_frame.moveY( mData->yoffset );  fmsynth->mMix *=.9; return true; });
         auto e2 = ohio::tag2_( ohio::trigger_( camera_cross ), boop() );
-     
-            // auto e2 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = (t * 7); return true; }));
 
-        //.relTwist( mData->frame.moveY( mData->yoffset ), .2 ); return true; } );
+        /// camera behavior
+        behavior("spectral_audio").stop();
+        behavior("crystal").stop();
+        behavior("crystal_audio").stop();
 
-        b1.launch(e1, e2);
+        /// additional audio behavior
+        behavior("knot_orbit").launch(e1,e2);
         
-        
+        // slowly increase opacity of tube to .2
         auto opac = ohio::every_(.1, ohio::over_(30, [this](float t){ mData->tube_opacity = .3 * t; return true; } ));
         behavior("knot").launch(opac).until( [this](auto&& t){ return mData->tube_opacity > .2 ? true : false; } );
         
@@ -626,22 +653,36 @@ auto grow = [this](auto&& t){
        //Sound Behaviors
        auto e1 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(true), true ) ); 
        auto e2 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), beep( makeFreqFromCrystal(false), false ) ); 
-       auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .003; return true; } ) );
-       auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .003; return true; } ) );
+       
+     //  auto e4 = ohio::every_(.1, ohio::over_(5, [this](float t){ voiceA -> attack = .001 + (1-t) * .003; return true; } ) );
+     //  auto e45 = ohio::every_(.1, ohio::over_(35, [this](float t){ voiceB -> attack = .001 + (1-t) * .003; return true; } ) );
 
        //Knot Behaviors
        auto e3 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> q = t * 2; return true; } ) );
        auto e5 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> frame_orbit_speed = .00001 + mData -> frame_orbit_max_speed * t; return true; } ) );
         
-       //Crystal Behavior
+       //Crystal Behavior // really this is "at_"
        auto e6 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
        auto e7 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; echo -> delayMax = 2; return true; } ); 
        auto e8 = ohio::after_(45, [this](auto&& t){ mData -> pbar = 1; mData -> qbar=1; return true; } ); 
        //auto e8 = ohio::after_(60, [this](auto&& t){ mData -> numX = 4; mData -> numY = 4; mData -> numZ = 4;return true; } );
        auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale += .02; return true; } );
 
-       b1.launch( e1, e2, e6, e7, e8, e9 ); // e4, e45, 
+
+       //windsound
+       auto e10 = ohio::every_(.1, [this](auto&& t){ 
+         float tmp = 0;
+         if (!tk.cir.empty()) tmp = fabs( Round::size( tk.cir[0] ) );
+         wind -> width = 200 + 100 * (tmp); 
+         wind -> freq = 100 + 300 * 1.0/(tmp*10);
+         return true; } );
+
+       behavior("windsound").launch(e10);
+       behavior("crystal_audio").launch(e1, e2);
+       behavior("crystal").launch(e6,e7,e8, e9);
        behavior("knot").launch(e3,e5);
+       look(*this, cga::Vec(0,-1,0),60);
+
        break;
      }    
      case 6: //tests
@@ -667,7 +708,26 @@ auto grow = [this](auto&& t){
 
        b1.launch( e1, e2, e3, e4, e5 );
        break; 
-     }       
+     }
+     case 8: // speed up, zoom out and fade out
+     {
+      
+      move(*this, cga::Vec(0,0,5), 10 );
+
+      auto e1 = ohio::every_( .5, [this](auto&& t){ mData -> tube_opacity -= .001; return true; } ); 
+      auto e2 = ohio::every_( .5, [this](auto&& t){ mData -> tube_opacity -= .001; return true; } ); 
+      auto e3 = ohio::every_( .5, [this](auto&& t){ mData -> p += .001; return true; } );
+      behavior("knot_fade").launch( e1, e2);
+      behavior("knot_p").launch( e2 );
+      behavior("knot_speedup").launch(e3).until( [this](auto&& t){ if (mData->frame_orbit_speed >= .34) return true;  return false;}); 
+
+      break;
+     }
+     case 9:
+     {
+        auto test = ohio::after_(5, [](auto&& t){ cout << "hello" << endl; return true; } );
+        behavior("test").launch(test);
+     }
    }
    #endif
    
@@ -709,7 +769,7 @@ auto grow = [this](auto&& t){
       if (s.bDrawCircles) {
         for (int i=0;i<tk.cir.size()-1;++i ){
           float t = (float)i/tk.cir.size();
-          Draw(tk.cir[i],0,1,t);
+          Draw(tk.cir[i],0,1,t, s.tube_circle_opacity);
          for (int j=0;j<3;++j){
            float tt = (float)j/3;
            Draw( Round::point( tk.cir[i], tt*PI ), tt , 0, 1-tt );
@@ -870,10 +930,6 @@ auto grow = [this](auto&& t){
 
     }
 
-    // (UNUSED) Tangent at frame in direction along orbit
-    //s.tangentA = Round::renormalize( Tangent::at( s.frame.pos() ^ tk.HF.fiberA().dual() , s.frame.pos() ) );
-    //s.tangentB = Round::renormalize( Tangent::at( s.frame.pos() ^ tk.HF.fiberB().dual() , s.frame.pos() ) );
-
     //Knot step();
     s.knotFrame.step();
 
@@ -897,8 +953,7 @@ auto grow = [this](auto&& t){
       }
     }
     
-
-    //Virtual Camera
+   // mCamera.relOrient( cga::Vec(0,-1,0), .001, true);
     mCamera.step();
 
     // use virtual camera riding along know? if so do not draw tangent arrow
@@ -906,9 +961,6 @@ auto grow = [this](auto&& t){
       s.bDrawTangent = false;
       mApp->scene.camera.set( mCamera.pos(), mCamera.quat() ); 
     }
-
-
-
     
   }
   

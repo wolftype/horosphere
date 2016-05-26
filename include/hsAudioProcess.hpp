@@ -140,7 +140,7 @@ struct WindSound : public AudioProcess {
   float width, freq;
 
 	WindSound(){
-    mMix = .1;
+    mMix = .06;
     width = 100;
     freq = 10;
     mName = "WindSound";
@@ -165,8 +165,8 @@ struct WindSound : public AudioProcess {
 template<>
 void AudioParam::specify(WindSound& ws){
   mData = {
-    {"/width", &ws.width, 0,800 },
-    {"/freq", &ws.freq, 200,800 }
+    {"/width", &ws.width, 0,600 },
+    {"/freq", &ws.freq, 100,800 }
   };
 };
 
