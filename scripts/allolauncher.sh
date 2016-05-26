@@ -2,7 +2,7 @@
 
 ## ALLOLAUNCHER CONTENT SCRIPT feed in name of demo and -n or -r for sim or render
 
-#export DISPLAY=:0
+export DISPLAY=:0
 
 FOLDER=0
 
@@ -13,7 +13,7 @@ for i
       FOLDER=/alloshare/pablo/demos/
     ;;
     -n)
-      FOLDER=/Users/sphere/code/pablo/horosphere/current
+      FOLDER=/Users/sphere/code/pablo/current
     ;;
     -l)
       FOLDER=/Users/wolftype/code/horosphere/build/bin/
