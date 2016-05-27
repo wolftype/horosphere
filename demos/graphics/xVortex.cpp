@@ -1137,7 +1137,9 @@ void Param<bool>::specify(User::Data& k){
     {"bDrawFibers",&k.bDrawFibers},
     {"bDrawTangent",&k.bDrawTangent},    
     {"bDrawParticles",&(k.bDrawParticles)},
-    {"bDrawCrystal",&(k.bDrawCrystal)}
+    {"bDrawCrystal",&(k.bDrawCrystal)},
+    {"bUseKnotForCrystal",&(k.bUseKnotForCrystal)}
+
   };
 }
 }//hs::
