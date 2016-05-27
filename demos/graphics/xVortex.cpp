@@ -397,7 +397,7 @@ auto grow = [this](auto&& t){
 
    //Make a Sound
    auto beep2 = [this](auto&& setfreq, bool b){ //also set location?
-     double hz[6] = { scl::freq("b-1"), scl::freq("d-2"), scl::freq("e-1"), scl::freq("g-2"), scl::freq("a-1"), scl::freq("b-2") };
+     double hz[6] = { scl::freq("b-1"), scl::freq("d-1"), scl::freq("e-1"), scl::freq("g-1"), scl::freq("a-1"), scl::freq("b-2") };
      return [=](auto&& t){
        auto idx = (int)(setfreq() * 5);
        if (idx < 0 || idx > 5) idx = 0;
@@ -527,7 +527,7 @@ auto grow = [this](auto&& t){
        voiceA -> attack = 0.061; voiceB -> attack = 0.061;   
        voiceA -> decay = 0.061; voiceB -> decay = 0.061; 
        echo -> fbk = .75;
-       echo -> delayMax = 4.3;
+       echo -> delayMax = 6;
        echo -> ffd = .8;
        voiceA -> mode = Voice::PULSE; voiceB -> mode = 5;
        s.bDrawCrystal=false;
@@ -689,6 +689,10 @@ auto grow = [this](auto&& t){
         auto opac2 = ohio::every_(.1, ohio::over_(10, [this](float t){ mData->tube_circle_opacity = 2 * t; return true; } ));
         behavior("knot2").launch(opac2).until( [this](auto&& t){ return mData->tube_circle_opacity >= 1 ? true : false; } );
 
+        
+      //  auto cspeed = ohio::every_(.1, ohio::over_(50, [this](float t){ mData->camera_orbit_speed = .001 + .003 * t; return true; } ));
+      //  behavior("camera_speed").launch(cspeed).until( [this](auto&& t){ return mData->camera_orbit_speed >= .003 ? true : false; } );
+
 
 ///     slowly up delayMax to 1.3
 //        echo -> delayMax = 1.3;
@@ -738,13 +742,13 @@ auto grow = [this](auto&& t){
        auto e5 = ohio::every_(.1, ohio::over_(120, [this](float t){ mData -> frame_orbit_speed = .001 + mData -> frame_orbit_max_speed * t; return true; } ) );
         
        //Crystal Behavior // really this is "at_"
-       auto s1 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; return true; } );
-       auto s2 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; echo -> delayMax = 1.3; return true; } ); 
+       auto s1 = ohio::after_(10, [this](auto&& t){ mData -> cp = 4; mData -> qbar=1;  return true; } );
+       auto s2 = ohio::after_(30, [this](auto&& t){ mData -> crystalMotifMode=1; mData -> qbar=0; echo -> delayMax = 1.3; return true; } ); 
        auto s3 = ohio::after_(40, [this](auto&& t){ mData -> crystalMotifMode=2; echo -> delayMax = .9; return true; } ); 
-       auto s4 = ohio::after_(45, [this](auto&& t){ mData -> pbar = 1; mData -> qbar=1; return true; } ); 
+       auto s4 = ohio::after_(45, [this](auto&& t){ mData -> pbar = 1;  mData -> qbar=1; return true; } ); 
 
        
-       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale += .02; return true; } );
+       auto e9 = ohio::tag2_( ohio::triggerval_( bCrystalHit ), [this](auto&& t){ mData -> cScale += .01; return true; } );
        auto e10 = ohio::every_(1, [this](auto&& t){ Rand::Boolean() ? echo -> delayMax = .9 : echo -> delayMax = 1.3; return true; } );
 
 
@@ -822,6 +826,12 @@ auto grow = [this](auto&& t){
           mData -> tube_opacity -= .04; 
           return true; } ); 
         behavior("knot_fade").launch( e1);
+        break;
+     }
+     case 10:
+     {
+      
+      break;
      }
    }
    #endif // order: 5, 3, 35, 4, 2, 8, 9
@@ -1036,7 +1046,7 @@ auto grow = [this](auto&& t){
 
     //Crystal Frame
     s.cScale *= .96;
-    s.crystalFrame.scale() = .005 + s.cScale;
+    s.crystalFrame.scale() = .01 + s.cScale;
     s.crystalFrame.step();
 
     //auto crystalHit = [this](){
