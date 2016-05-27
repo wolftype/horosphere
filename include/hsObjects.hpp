@@ -192,11 +192,11 @@ struct Crystal {
 
   
   // either apply to incoming motif or generate one from scratch
-  vector<Point>& apply( const vector<Point>& pointgroup = vector<Point>(0)){
-    if (pointgroup.empty()){
+  vector<Point>& apply( const vector<Point>& motif = vector<Point>(0)){
+    if (motif.empty()){
       mPoint = sg.hang( sg.apply( generateMotif() ), mNumX, mNumY, mNumZ);
     } else {
-      mPoint = sg.hang( pointgroup, mNumX, mNumY, mNumZ);
+      mPoint = sg.hang( sg.apply( motif ), mNumX, mNumY, mNumZ);
     }
     return mPoint;
   }

@@ -141,6 +141,7 @@ struct User : UserBase {
     bool bDrawCircles = false;
     bool bCloseTube = true;
     bool bReset = false;
+    bool bUseKnotForCrystal = false;
 
     
   } * mData;
@@ -462,11 +463,14 @@ auto grow = [this](auto&& t){
    switch(idx){
      case 0:
      {
-       s.bDrawDiatom = true;
-       auto e1 = ohio::tag2_( ohio::triggerval_(magReader->bTrigger), grow );
-       auto e2 = ohio::tag2_( ohio::triggerval_(magReader->bTrigger), pulse );
-       auto e3 = ohio::tag2_( ohio::triggerval_(!magReader->bTrigger), shrink );
-       b1.launch( e1, e2, e3);
+     //  s.bDrawDiatom = true;
+     //  auto e1 = ohio::tag2_( ohio::triggerval_(magReader->bTrigger), grow );
+     //  auto e2 = ohio::tag2_( ohio::triggerval_(magReader->bTrigger), pulse );
+     //  auto e3 = ohio::tag2_( ohio::triggerval_(!magReader->bTrigger), shrink );
+     //  b1.launch( e1, e2, e3);
+     //
+       // STOP SCHEDULER
+       behavior("schedule").stop();
        break;
      }
      case 1: //knot orbit
@@ -648,6 +652,7 @@ auto grow = [this](auto&& t){
         s.bDrawCircles = true;
         s.bDrawCrystal = s.bDrawParticles=false;
         s.tube_opacity = 0.;
+        s.tube_circle_opacity = 0.;
         s.linewidth = 30;
         s.ecc = 1;
         s.pointsize = 1;
@@ -969,7 +974,10 @@ auto grow = [this](auto&& t){
      //crystal.mFrame.scale( s.cScale );
      crystal.mNumX = s.numX; crystal.mNumY = s.numY; crystal.mNumZ = s.numZ;
      crystal.mMode = s.crystalMotifMode;
-     crystal.apply();
+     
+     if (s.bUseKnotForCrystal) crystal.apply( tk.pnt );
+     else crystal.apply();
+
   
  
     }
