@@ -667,6 +667,7 @@ auto grow = [this](auto&& t){
         auto randFreq = [](){ return Rand::Num(); };
         auto e1 = ohio::every_(.1, [this](auto&& t){ mCamera =  mData->camera_frame.moveY( mData->yoffset );  fmsynth->mMix *=.9; return true; });
         auto e2 = ohio::tag2_( ohio::trigger_( camera_cross ), boop() );
+        
 
         /// camera behavior
         behavior("spectral_audio").stop();
@@ -679,6 +680,10 @@ auto grow = [this](auto&& t){
         // slowly increase opacity of tube to .2
         auto opac = ohio::every_(.1, ohio::over_(30, [this](float t){ mData->tube_opacity = .3 * t; return true; } ));
         behavior("knot").launch(opac).until( [this](auto&& t){ return mData->tube_opacity > .2 ? true : false; } );
+
+        auto opac2 = ohio::every_(.1, ohio::over_(10, [this](float t){ mData->tube_circle_opacity = 2 * t; return true; } ));
+        behavior("knot2").launch(opac2).until( [this](auto&& t){ return mData->tube_circle_opacity >= 1 ? true : false; } );
+
 
 ///     slowly up delayMax to 1.3
 //        echo -> delayMax = 1.3;
@@ -747,9 +752,9 @@ auto grow = [this](auto&& t){
        auto s5 = ohio::after_(50,  [this](auto&& t){ setBehavior(3); return true;});
        auto s6 = ohio::after_(120, [this](auto&& t){ setBehavior(35); return true;});
        auto s7 = ohio::after_(170, [this](auto&& t){ setBehavior(4); return true;});
-       auto s8 = ohio::after_(260, [this](auto&& t){ setBehavior(2); return true;});
-       auto s9 = ohio::after_(290, [this](auto&& t){ setBehavior(8); return true;});
-       auto s10 = ohio::after_(310,[this](auto&& t){ setBehavior(9); return true;});
+       auto s8 = ohio::after_(240, [this](auto&& t){ setBehavior(2); return true;});
+       auto s9 = ohio::after_(270, [this](auto&& t){ setBehavior(8); return true;});
+       auto s10 = ohio::after_(290,[this](auto&& t){ setBehavior(9); return true;});
        behavior("schedule").launch(s1,s2,s3,s4,e9,s5,s6,s7,s8,s9,s10);
 
 
