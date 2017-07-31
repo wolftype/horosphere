@@ -45,7 +45,7 @@ struct Audio {
   void start(){
 
     #ifdef __allosphere__
-		initAudio("ECHO X6", 44100, 256, 0, 60); ///< @todo Audio Inputs in AlloSphere ??
+		initAudio("ECHO X5", 44100, 512, 0, 60); ///< @todo Audio Inputs in AlloSphere ??
     #else
     cout << "DESKTOP AUDIO" << endl;
 		initAudio(44100, 256);
